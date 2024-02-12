@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+{% load static %}
+{% load widget_tweaks %}
+{% load account socialaccount %}
+
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    
+    <title>Combio</title>
+    
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    
+    <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">    
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+</head>
+
+<body class="bg-success bg-gradient">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10 col-lg-12 col-md-9">
+                <div class="card o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+                        <div class="row">
+                            <div class="col-lg-6 d-none d-lg-block" style="text-align: center;  padding-top: 110px;" >
+                                
+                                <img src={% static 'images/COMBIO.png' %} width="400" height="120">
+                         
+                            </div>
+                                
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <div class="text-left mb-5">
+                                        <h1 class="h4 text-gray-900 mb-1">Seja bem-vindo!</h1>
+
+                                        <p>Faça login para continuar</p>
+                                    </div>
+
+                                    {% if form.errors %}
+                                        <div class="alert alert-dismissible alert-warning" role="alert">
+                                            E-mail ou senha incorretos
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                    {% endif %}
+
+
+
+        
+
+                                        {% get_providers as socialaccount_providers %}
+
+                                        {% if socialaccount_providers %}
+                                                                                                                    
+                                        <div class="socialaccount_ballot">
+                                        
+                                          <ul class="btn btn-success btn-block ">
+                                              {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+                                          </ul>
+                                        
+                                          <div class="login-or"></div>
+                                        
+                                        </div>
+                                        
+                                      
+                                            
+                                        {% endif %}
+
+                                        
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+    
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+</body>
+</html>

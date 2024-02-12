@@ -1,0 +1,20 @@
+{% extends 'menu/index.html'%}
+{% block content %}
+<div class="row">
+    <div class="col-1">   
+         <form method="GET" action={% url 'dashboard_ti' %}>
+         {{ form.as_p}}
+         <button>Submit</button>
+
+         </form>
+    </div>
+    <div class="col-10">
+        <!-- Div para renderizar o gráfico -->
+        {{ div|safe }}
+    </div>
+</div>
+<!-- Script para inicializar o gráfico -->
+
+    {{ script|safe }}
+
+    {% endblock content %}

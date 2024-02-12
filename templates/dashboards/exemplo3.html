@@ -1,0 +1,50 @@
+{% extends 'menu/index.html'%}
+{% block content %}
+
+<html>
+<head>
+    <title>Exemplo de Gráficos com Bokeh no Django</title>
+
+</head>
+<body>
+    <h1>Exemplo de Gráficos com Bokeh no Django</h1>
+
+    <h2>Bar Chart</h2>
+    {{ div1|safe }}
+    {{ script1|safe }}
+
+    <h2>Bar Chart Nested</h2>
+    {{ div2|safe }}
+    {{ script2|safe }}
+
+    <h2>Bar Chart Stacking and Grouping</h2>
+    {{ div3|safe }}
+    {{ script3|safe }}
+
+    <h2>Line Chart</h2>
+    {{ div4|safe }}
+    {{ script4|safe }}
+
+    <h2>Multiple Lines</h2>
+    {{ div5|safe }}
+    {{ script5|safe }}
+
+    <h2>Stacked Lines</h2>
+    {{ div6|safe }}
+    {{ script6|safe }}
+
+    <h2>Combining with Markers</h2>
+    {{ div7|safe }}
+    {{ script7|safe }}
+
+    <h2>Scatter Markers</h2>
+    {{ div8|safe }}
+    {{ script8|safe }}
+
+    <script>
+        Bokeh.set_log_level("info");
+        Bokeh.embed.embed_items(Bokeh.embed.item_specs);
+    </script>
+</body>
+</html>
+    {% endblock content %}

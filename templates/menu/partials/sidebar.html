@@ -1,0 +1,32 @@
+{% load static %}
+<div class="iq-sidebar">
+    <div class="iq-navbar-logo d-flex justify-content-between">
+       <a href="{% url "index" %}" class="header-logo">
+          <img src="{% static 'images/logo.png'  %}" class="" alt="">
+          <span></span>
+       </a>
+
+    </div>
+    <div id="sidebar-scrollbar">
+       <nav class="iq-sidebar-menu">
+          <ul id="iq-sidebar-toggle" class="iq-menu collapse show">
+            {% for group in request.grupos_com_permissao %} 
+                <li  {% if activegroup == group.codigo %} class="active" {% endif %}>
+                <a href="#{{group.NomeGrupo}}" class="iq-waves-effect collapsed" data-toggle="collapse" {% if activegroup == group.codigo %} aria-expanded="true" {% else %} aria-expanded="false" {% endif %} > <span class="ripple rippleEffect"></span><i class="{{ group.icon_grupo }} iq-arrow-left"></i><span>{{ group.NomeGrupo }}</span><i class="ri-arrow-right-s-line iq-arrow-right"></i></a>
+                <ul id="{{group.NomeGrupo}}" {% if activegroup == group.codigo %} class="iq-submenu collapse show"  {% else %} class="iq-submenu collapse" {% endif %} data-parent="#iq-sidebar-toggle">
+                  {% for menu in request.itens_com_permissao %} 
+                            {% if menu.grupo_id.id == group.id  %}
+                  <li {% if request.activemenu == menu.codigo %} class="active" {% endif %}><a href="{% url menu.url %}"><i class="{{ menu.icon_item}}"></i>{{menu.Item}}</a></li>
+                  {% endif %}
+                 
+                  {% endfor %}
+                </ul>
+             </li>
+          
+            {% endfor %}
+                    
+          </ul>
+       </nav>
+       <div class="p-3"></div>
+    </div>
+ </div>

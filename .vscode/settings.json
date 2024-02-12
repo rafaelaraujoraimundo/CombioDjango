@@ -1,0 +1,9 @@
+{
+    "abl.checkProgressBinary": false,
+    "abl.warnConfigFile": false,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none",
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+}

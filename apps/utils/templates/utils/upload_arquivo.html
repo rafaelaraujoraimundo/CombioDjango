@@ -1,0 +1,56 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+      <div class="col-sm-4">
+        <h1>Upload de Arquivo</h1>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.arquivo_original }}
+        <button type="submit">Enviar</button>
+    </form> 
+      </div>
+      <div class="col-sm-8">
+        {% if arquivo %}
+        <hr>
+        <h2>Informações do Arquivo:</h2>
+        <p><strong>Arquivo Original:</strong> {{ arquivo.arquivo_original.name }}</p>
+        <p><strong>Data de Processamento:</strong> {{ arquivo.data_processamento }}</p>
+        <p><strong>Arquivo Finalizado:</strong> <a href="{{ arquivo.arquivo_final.url }}">{{ arquivo.arquivo_final.name }}</a></p>
+        <p><strong>Usuário:</strong> {{ arquivo.usuario }}</p>
+    {% endif %}
+      </div>
+     
+    </div>
+  </div>
+   
+  <div class="container">
+    <div class="row">
+    <div class="table-responsive">
+        <table id="datatable" class="table table-striped table-bordered">
+           <thead>
+              <tr>
+                 <th>Arquivo Original</th>
+                 <th>Data de Processamento</th>
+                 <th>Usuário</th>
+                 <th>Arquivo Finalizado</th>
+              </tr>
+           </thead>
+           <tbody>
+              
+                {% for item in arquivos %}
+                <tr>
+                 <td><a href="{{ item.arquivo_original.url }}">{{ item.arquivo_original.name }}</a> </td>
+                 <td>{{ item.data_processamento }}</td>
+                 <td><a href="{{ item.arquivo_final.url }}">{{ item.arquivo_final.name }}</a> </td>
+                 <td>{{item.usuario}}</td>
+                </tr>
+                 {% endfor %}
+             
+              
+           </tbody>
+        </div>
+    </div>    
+{% endblock %}

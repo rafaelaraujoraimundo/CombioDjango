@@ -1,0 +1,14 @@
+{% extends 'menu/index.html'%}
+{% block content %}
+{% load static %}
+
+<script src={% static "js/charts.js" %}></script>
+<script src="{% static 'chartkick/chartkick.js' %}"></script>
+
+<div class="container">
+  <div class="row">
+    <h1>Gráfico de Barras Aninhados</h1>
+    {{ nested_chart }}
+
+  </div></div>
+        {% endblock content %}

@@ -1,0 +1,10 @@
+{% extends 'menu/index.html'%}
+{% block content %}
+<div>
+    <h1>Tabela 1</h1>
+    {{ table1_html|safe }}
+
+    <h1>Tabela 2</h1>
+    <div id="table2">{{ table2_html|safe }}</div>
+</div>
+    {% endblock content %}

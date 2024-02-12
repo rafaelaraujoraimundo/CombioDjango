@@ -1,0 +1,19 @@
+{% extends 'menu/index.html'%}
+{% block content %}
+<div class="container">
+  <div class="row">
+    <h1>Gráfico de Barras Aninhados</h1>
+    {{ nested_chart|safe }}
+
+    <h1>Gráfico de Barras Agrupados</h1>
+    {{ grouped_chart|safe }}
+
+    <h1>Gráfico de Barras Empilhados</h1>
+    {{ stacked_chart|safe }}
+
+    <h1>Gráfico de Barras Aninhados e Agrupados</h1>
+    {{ nested_grouped_chart|safe }}
+  </div>
+
+</div>
+    {% endblock content %}

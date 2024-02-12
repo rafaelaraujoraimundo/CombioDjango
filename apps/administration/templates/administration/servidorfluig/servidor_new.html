@@ -1,0 +1,61 @@
+{% extends "menu/index.html" %}  <!-- Substitua base_generic.html pelo seu template base -->
+
+{% block content %}
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+        <!-- Campo Servidor -->
+        <div class="form-group">
+            <label for="{{ form.servidor.id_for_label }}">Servidor</label>
+            <input type="text" class="form-control {% if form.servidor.errors %}is-invalid{% endif %}" id="{{ form.servidor.id_for_label }}" name="{{ form.servidor.name }}" value="{{ form.servidor.value|default_if_none:'' }}">
+            {% for error in form.servidor.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campo Nome do Servidor -->
+        <div class="form-group">
+            <label for="{{ form.nome_servidor.id_for_label }}">Nome do Servidor</label>
+            <input type="text" class="form-control {% if form.nome_servidor.errors %}is-invalid{% endif %}" id="{{ form.nome_servidor.id_for_label }}" name="{{ form.nome_servidor.name }}" value="{{ form.nome_servidor.value|default_if_none:'' }}">
+            {% for error in form.nome_servidor.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campos Client Key, Consumer Secret, Access Token, Access Secret -->
+        <div class="form-group">
+            <label for="{{ form.client_key.id_for_label }}">Client Key</label>
+            <input type="text" class="form-control {% if form.client_key.errors %}is-invalid{% endif %}" id="{{ form.client_key.id_for_label }}" name="{{ form.client_key.name }}" value="{{ form.client_key.value|default_if_none:'' }}">
+            {% for error in form.client_key.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.consumer_secret.id_for_label }}">Consumer Secret</label>
+            <input type="text" class="form-control {% if form.consumer_secret.errors %}is-invalid{% endif %}" id="{{ form.consumer_secret.id_for_label }}" name="{{ form.consumer_secret.name }}" value="{{ form.consumer_secret.value|default_if_none:'' }}">
+            {% for error in form.consumer_secret.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.access_token.id_for_label }}">Access Token</label>
+            <input type="text" class="form-control {% if form.access_token.errors %}is-invalid{% endif %}" id="{{ form.access_token.id_for_label }}" name="{{ form.access_token.name }}" value="{{ form.access_token.value|default_if_none:'' }}">
+            {% for error in form.access_token.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.access_secret.id_for_label }}">Access Secret</label>
+            <input type="text" class="form-control {% if form.access_secret.errors %}is-invalid{% endif %}" id="{{ form.access_secret.id_for_label }}" name="{{ form.access_secret.name }}" value="{{ form.access_secret.value|default_if_none:'' }}">
+            {% for error in form.access_secret.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+    </form>
+</div>
+{% endblock %}
