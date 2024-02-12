@@ -1,0 +1,95 @@
+{% extends 'menu/index.html' %}
+
+{% block content %}
+<style>
+  .no-hover-link {
+    color: white; /* Ou qualquer cor que corresponda ao seu texto normal */
+    text-decoration: none; /* Remove o sublinhado */
+  }
+  .no-hover-link:hover {
+    color: white; /* Mantém a cor igual, mesmo ao passar o mouse */
+   
+  }
+</style>
+<div class="container-fluid">
+
+    <form method="post">
+      {% csrf_token %}
+      <p class="h2">Deseja excluir o Servidor selecionado? </p>
+      <div class="row">
+        <div class="col">
+      <div class="form-group">
+        <label for="{{ form.servidor.id_for_label }}">Servidor</label>
+        <input type="text" class="form-control {% if form.servidor.errors %}is-invalid{% endif %}" id="{{ form.servidor.id_for_label }}" name="{{ form.servidor.name }}" value="{{ form.servidor.value }}" readonly>
+        {% for error in form.servidor.errors %}
+          <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col">
+      <div class="form-group">
+        <label for="{{ form.nome_servidor.id_for_label }}">Nome do Servidor</label>
+        <input type="text" class="form-control {% if form.nome_servidor.errors %}is-invalid{% endif %}" id="{{ form.nome_servidor.id_for_label }}" name="{{ form.nome_servidor.name }}" value="{{ form.nome_servidor.value }}" readonly>
+        {% for error in form.nome_servidor.errors %}
+          <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+     </div>
+      <!-- Repita o padrão acima para os outros campos: client_key, consumer_secret, access_token, access_secret -->
+      <div class="row">
+        <div class="col">
+      <div class="form-group">
+        <label for="{{ form.client_key.id_for_label }}">Client Key</label>
+        <input type="text" class="form-control {% if form.client_key.errors %}is-invalid{% endif %}" id="{{ form.client_key.id_for_label }}" name="{{ form.client_key.name }}" value="{{ form.client_key.value }}" readonly>
+        {% for error in form.client_key.errors %}
+          <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col">
+      <!-- Continuar para consumer_secret, access_token, access_secret com o mesmo padrão -->
+      <div class="form-group">
+        <label for="{{ form.consumer_secret.id_for_label }}">Consumer Secret</label>
+        <input type="text" class="form-control {% if form.consumer_secret.errors %}is-invalid{% endif %}" id="{{ form.consumer_secret.id_for_label }}" name="{{ form.consumer_secret.name }}" value="{{ form.consumer_secret.value }}" readonly>
+        {% for error in form.consumer_secret.errors %}
+          <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="form-group">
+        <label for="{{ form.access_token.id_for_label }}">Access Token</label>
+        <input type="text" class="form-control {% if form.access_token.errors %}is-invalid{% endif %}" id="{{ form.access_token.id_for_label }}" name="{{ form.access_token.name }}" value="{{ form.access_token.value }}" readonly>
+        {% for error in form.access_token.errors %}
+          <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+      <div class="col">
+      <div class="form-group">
+        <label for="{{ form.access_secret.id_for_label }}">Access Secret</label>
+        <input type="text" class="form-control {% if form.access_secret.errors %}is-invalid{% endif %}" id="{{ form.access_secret.id_for_label }}" name="{{ form.access_secret.name }}" value="{{ form.access_secret.value }}" readonly>
+        {% for error in form.access_secret.errors %}
+          <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    </div>
+  
+   <div class="ml-6 mt-8">
+      <button type="submit" class="btn btn-danger ml-6 mt-8">Excluir</button>
+      <div class="btn btn-primary"><a class="no-hover-link" href="{% url 'administration_servidorfluig_list' %}">Cancelar</a> </div>
+      
+    </div>
+    <div class="ml-6 mt-8">
+    
+  </div>
+
+    </form>
+  
+</div>
+{% endblock %}
+

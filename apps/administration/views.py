@@ -99,7 +99,25 @@ def servidorfluig_create(request):
         if form.is_valid():
             form.save()
             return redirect('administration_servidorfluig_list')
+        else:
+            context['form'] = form
     else:
         form = ServidorFluigForm()
         context['form'] = form
     return render(request, 'administration/servidorfluig/servidor_new.html', context)
+
+
+def servidorfluig_delete(request, servidor_id):
+    activegroup = 'administration'
+    title = 'Exclusão de Servidores Fluig'
+    context = {'activegroup': activegroup,
+               'title' : title}
+    servidorfluig = get_object_or_404(ServidorFluig, pk=servidor_id)
+    if request.method == "POST":
+        servidorfluig.delete()
+        messages.success(request, f'"{servidorfluig.servidor}" foi excluído com sucesso.')
+        return redirect('administration_servidorfluig_list')
+    else:
+        form = ServidorFluigForm(instance=servidorfluig)
+        context['form'] = form
+    return render(request, 'administration/servidorfluig/servidor_delete.html', context)
