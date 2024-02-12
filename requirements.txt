@@ -1,5 +1,5 @@
 annotated-types==0.6.0
-asgiref==3.6.0
+asgiref==3.7.2
 asttokens==2.4.1
 attrs==23.2.0
 bokeh==3.3.3
@@ -16,7 +16,7 @@ cryptography==40.0.2
 debugpy==1.8.0
 decorator==5.1.1
 defusedxml==0.7.1
-Django==4.2.9
+Django==5.0.2
 django-admin-volt==1.0.10
 django-allauth==0.54.0
 django-chartjs==2.3.0
