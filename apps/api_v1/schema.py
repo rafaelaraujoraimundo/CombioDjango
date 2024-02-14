@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from ninja import ModelSchema
+from administration.models import ServidorFluig
 
 # Create your models here.
 class UserSchema(BaseModel):
@@ -11,3 +13,12 @@ class UserSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ServidorFluigSchema(ModelSchema):
+    class Config:
+        model = ServidorFluig
+        model_fields = ['servidor', 'nome_servidor', 'client_key', 'consumer_secret', 'access_token', 'access_secret']
+
+
+ 

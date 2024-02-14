@@ -7,8 +7,8 @@ urlpatterns = [
     path('userList/', user_list, name="administration_users"),
     path('useredit/<int:user_id>/',user_edit , name='user_edit'),
 
-    path('servidorlist/', servidorfluig_list, name="administration_servidorfluig_list"),
-    path('servidorlist/<int:servidor_id>/',servidorfluig_edit , name='administration_servidorfluig_edit'),
+    path('servidorfluig/', servidorfluig_list, name="administration_servidorfluig_list"),
+    path('servidorfluig/<int:servidor_id>/',servidorfluig_edit , name='administration_servidorfluig_edit'),
     path('servidorDelete/<int:servidor_id>/',servidorfluig_delete , name='administration_servidorfluig_delete'),
     path('servidorfluig/new/', servidorfluig_create, name='administration_servidorfluig_create'),
 ]
