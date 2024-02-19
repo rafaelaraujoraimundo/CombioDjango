@@ -1,0 +1,73 @@
+{% extends "menu/index.html" %}  <!-- Substitua base_generic.html pelo seu template base -->
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+        <!-- Campo Codigo -->
+        <div class="form-group">
+            <label for="{{ form.codigo.id_for_label }}">Codigo</label>
+            <input type="text" class="form-control {% if form.codigo.errors %}is-invalid{% endif %}" id="{{ form.codigo.id_for_label }}" name="{{ form.codigo.name }}" value="{{ form.codigo.value|default_if_none:'' }}">
+            {% for error in form.codigo.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campo Item -->
+        <div class="form-group">
+            <label for="{{ form.Item.id_for_label }}">Item</label>
+            <input type="text" class="form-control {% if form.Item.errors %}is-invalid{% endif %}" id="{{ form.Item.id_for_label }}" name="{{ form.Item.name }}" value="{{ form.Item.value|default_if_none:'' }}">
+            {% for error in form.Item.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campos Grupo -->
+        <div class="form-group">
+            <label for="{{ form.grupo_id.id_for_label }}">Grupo ID</label>
+            <select class="form-control {% if form.grupo_id.errors %}is-invalid{% endif %}" id="{{ form.grupo_id.id_for_label }}" name="{{ form.grupo_id.name }}">
+                <option value="">---------</option>
+                {% for grupo in form.grupo_id.field.queryset %}
+                    <option value="{{ grupo.pk }}" {% if form.grupo_id.value == grupo.pk %}selected{% endif %}>{{ grupo.NomeGrupo }}</option>
+                {% endfor %}
+            </select>
+            {% for error in form.grupo_id.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.icon_item.id_for_label }}">Iconé do Item</label>
+            <input type="text" class="form-control {% if form.icon_item.errors %}is-invalid{% endif %}" id="{{ form.icon_item.id_for_label }}" name="{{ form.icon_item.name }}" value="{{ form.icon_item.value|default_if_none:'' }}">
+            {% for error in form.icon_item.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.url.id_for_label }}">url</label>
+            <input type="text" class="form-control {% if form.url.errors %}is-invalid{% endif %}" id="{{ form.url.id_for_label }}" name="{{ form.url.name }}" value="{{ form.url.value|default_if_none:'' }}">
+            {% for error in form.url.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.permission.id_for_label }}">Permission</label>
+            <select name="{{ form.permission.name }}" id="{{ form.permission.id_for_label }}" class="form-control {% if form.permission.errors %}is-invalid{% endif %}">
+                <option value="">{{ form.permission.field.empty_label }}</option>
+                {% for permission in form.permission.field.queryset %}
+                    <option value="{{ permission.pk }}" {% if form.permission.value == permission.pk %}selected{% endif %}>{{ permission.name }}</option>
+                {% endfor %}
+            </select>
+            {% for error in form.permission.errors %}
+                <div class="invalid-feedback">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+    </form>
+</div>
+{% endblock %}

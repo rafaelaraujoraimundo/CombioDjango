@@ -8,7 +8,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.forms import CheckboxSelectMultiple
+from django.views.generic import ListView
+from django.views.generic.edit import CreateView
 from .forms import ServidorFluigForm
+from menu.models import ItensMenu
+from django.urls import reverse_lazy
+from .forms import ItensMenuForm
 
 
 def user_list(request):
@@ -121,3 +126,48 @@ def servidorfluig_delete(request, servidor_id):
         form = ServidorFluigForm(instance=servidorfluig)
         context['form'] = form
     return render(request, 'administration/servidorfluig/servidor_delete.html', context)
+
+        
+class ItensMenuList(ListView):
+    model = ItensMenu
+    queryset = ItensMenu.objects.all()
+    template_name = 'administration/itensmenu/itensmenu_list.html'
+
+
+    def get_context_data(self, **kwargs):
+        # Primeiro, pegue o contexto existente da classe base
+        context = super(ItensMenuList, self).get_context_data(**kwargs)
+        # Agora, adicione suas variáveis de contexto
+        context['activegroup'] = 'administration'
+        context['title'] = 'Itens de Menu Principal'
+        # Retorne o contexto atualizado
+        return context
+    
+
+
+class ItensMenuCreate(CreateView):
+    model = ItensMenu
+    #fields = ['codigo', 'Item', 'grupo_id', 'icon_item', 'url', 'permission']
+    form_class = ItensMenuForm
+    template_name = 'administration/itensmenu/itensmenu_form.html'
+    success_url = reverse_lazy('administration_itensmenu_list')
+
+    def get_context_data(self, **kwargs):
+        # Primeiro, pegue o contexto existente da classe base
+        context = super(ItensMenuCreate, self).get_context_data(**kwargs)
+        # Agora, adicione suas variáveis de contexto
+        context['activegroup'] = 'administration'
+        context['title'] = 'inclusão de Item de Menu'
+        # Retorne o contexto atualizado
+        return context
+     
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            # Este é o lugar para adicionar qualquer lógica antes de salvar o formulário
+            # Por exemplo, manipular os dados do formulário antes de salvar
+            return self.form_valid(form)
+        else:
+            # Este é o lugar para adicionar qualquer lógica quando o formulário não é válido
+            # Por exemplo, adicionar mensagens de erro personalizadas, logging, etc.
+            return self.form_invalid(form)

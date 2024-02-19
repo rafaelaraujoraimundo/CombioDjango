@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import Group, Permission
 from django.forms.widgets import CheckboxSelectMultiple
 from .models import User, ServidorFluig
+from menu.models import ItensMenu
 from django import forms
 
 
@@ -62,3 +63,17 @@ class ServidorFluigForm(forms.ModelForm):
     class Meta:
         model = ServidorFluig
         fields = ['servidor', 'nome_servidor', 'client_key', 'consumer_secret', 'access_token', 'access_secret']
+
+
+
+class ItensMenuForm(forms.ModelForm):
+
+    permission = forms.ModelChoiceField(
+        queryset=Permission.objects.filter(codename__icontains='combio'),
+        required=False,
+        label="Permission",
+        empty_label="Select Permission"  # Opção para valor vazio, caso não seja obrigatório
+    )
+    class Meta:
+        model = ItensMenu
+        fields = ['codigo', 'Item', 'grupo_id', 'icon_item', 'url', 'permission']

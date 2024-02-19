@@ -18,7 +18,7 @@ class GrupoMenu(models.Model):
 
 
 class ItensMenu(models.Model):
-    codigo = models.CharField(max_length=40, default='codigo default')
+    codigo = models.CharField(max_length=40)
     Item = models.CharField(max_length=40)
     grupo_id = models.ForeignKey(
         GrupoMenu, on_delete=models.PROTECT)
