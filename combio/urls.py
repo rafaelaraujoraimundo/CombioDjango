@@ -26,7 +26,7 @@ from .api import api
 
 urlpatterns = [
     path('admin/', admin.site.urls, name="admin1"),
-#    path("api/", api.urls),
+    path("api/", api.urls),
     path(
         "logout/",
         auth_views.LogoutView.as_view(

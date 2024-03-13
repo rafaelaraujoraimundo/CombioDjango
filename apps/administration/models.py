@@ -92,6 +92,7 @@ class ServidorFluig(models.Model):
     consumer_secret = models.CharField(max_length=255, null=False)
     access_token = models.CharField(max_length=255, null=False)
     access_secret = models.CharField(max_length=255, null=False)
+    url = models.CharField(max_length=255, null=False)
 
     def __str__(self):
         return self.nome_servidor
