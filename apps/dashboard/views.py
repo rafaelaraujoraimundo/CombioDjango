@@ -8,16 +8,12 @@ import mysql.connector
 from django.contrib.auth.decorators import permission_required
 from dashboard.models import BiChamadosServiceUp
 from bokeh.plotting import figure
-from bokeh.embed import components
-from bokeh.models import FactorRange
+from bokeh.embed import components  
 from plotly.offline import plot
 from bokeh.transform import dodge
-from bokeh.models import ColumnDataSource, Select
-from bokeh.transform import factor_cmap
-from chartkick.django import ColumnChart
 from bokeh.resources import CDN
-import numpy as np
-from bokeh.models import LabelSet, Label, TapTool, CustomJS, CDSView, GroupFilter
+from api_v1.models import FluigDatabaseInfo, FluigDatabaseSize, FluigOperationSystem, FluigRuntime
+from administration.models import ServidorFluig
 from bokeh.layouts import column, row, gridplot
 import chartify
 
@@ -31,186 +27,39 @@ def view_padrao(request):
 @permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
 def dashboard_ti(request):
     activegroup = 'Dashboard'
-    start = request.GET.get('start')
-    end = request.GET.get('end')
-    chamadosti = BiChamadosServiceUp.objects.raw(""" SELECT 1 as ticket_id, queue_name fila,
-    DATE(DATE_SUB(created, INTERVAL (DAYOFMONTH(created) - 1) DAY)) AS ANO_MES,
-            COUNT(created) abertos, count(closed) fechados
-    FROM bi_chamados_service_up
-    group by CONCAT(SUBSTR(created, 1, 4), '-', SUBSTR(created, 6, 2), queue_name )""")
+   
 
-    # Criar DataFrame
+    servidores = ServidorFluig.objects.all()
+    dados_completos = []
 
-    if start:
-        start = datetime.strptime(start, '%Y-%m-%d').date()
-    if end:
-        end = datetime.strptime(end, '%Y-%m-%d').date()
+    for servidor in servidores:
+        # Inicializa um dicionário para o servidor atual
+        dados_servidor = {
+            'servidor': servidor,
+            'ultimo_database_info': None,
+            'ultimo_database_size': None,
+            'ultimo_runtime': None,
+            'ultimo_operation_system': None,
+        }
 
-    if start:
-        chamadosti = [c for c in chamadosti if c.ANO_MES >= start]
-    if end:
-        chamadosti = [c for c in chamadosti if c.ANO_MES <= end]
+        # Obtém o último FluigDatabaseInfo para este servidor
+        dados_servidor['ultimo_database_info'] = FluigDatabaseInfo.objects.filter(servidor_fluig=servidor).order_by('-created_at').first()
 
-    ano_mes = []
-    fila = []
-    abertos = []
-    fechados = []
+        # Obtém o último FluigDatabaseSize para este servidor
+        dados_servidor['ultimo_database_size'] = FluigDatabaseSize.objects.filter(servidor_fluig=servidor).order_by('-created_at').first()
 
-    for chamado in chamadosti:
-        # Acessar os atributos do objeto e adicionar os valores às listas
-        ano_mes.append(chamado.ANO_MES.strftime('%Y-%m'))
-        fila.append(chamado.fila)
-        abertos.append(chamado.abertos)
-        fechados.append(chamado.fechados)
-    data = {
-        'ANO_MES': ano_mes,
-        'fila': fila,
-        'fechados': fechados,
-    }
-    df = pd.DataFrame(data)
-    ANO_MES = ano_mes
-    Abertos = abertos
-    Fechados = fechados
-    filas = fila
+        # Obtém o último FluigRuntime para este servidor
+        dados_servidor['ultimo_runtime'] = FluigRuntime.objects.filter(servidor_fluig=servidor).order_by('-created_at').first()
 
-    # Dashboard Aninhado e agrupado
-    palette = ["#c9d9d3", "#718dbf", "#e84d60"]
+        # Obtém o último FluigOperationSystem para este servidor
+        dados_servidor['ultimo_operation_system'] = FluigOperationSystem.objects.filter(servidor_fluig=servidor).order_by('-created_at').first()
 
-    x = [(str(ano_mes), fila)
-         for ano_mes, fila in zip(df['ANO_MES'], df['fila'])]
-    counts = sum(zip(df['fechados']), ())
+        # Adiciona o dicionário completo ao array de dados
+        dados_completos.append(dados_servidor)
 
-    source = ColumnDataSource(data=dict(x=x, counts=counts))
-
-    p = figure(x_range=FactorRange(*x), width=1600, height=600, title="Chamados fechados por Fila",
-               toolbar_location="above", resizable=True)
-
-    p.vbar(x='x', top='counts', width=0.9, source=source, line_color="white",
-           fill_color=factor_cmap('x', palette=palette, factors=[str(fila) for fila in df['fila']], start=1, end=2))
-    labels = LabelSet(x='x', y='counts', text='counts', level='glyph',
-                      x_offset=-11, y_offset=10, source=source)
-    p.add_layout(labels)
-    p.y_range.start = 0
-    p.x_range.range_padding = 0.1
-    p.xaxis.major_label_orientation = -45
-    p.xgrid.grid_line_color = None
-
-    p1 = figure(x_range=ANO_MES, height=600, width=900,
-                title="Bar Chart", toolbar_location="above", resizable=True, sizing_mode="stretch_width")
-
-    bar_width = 0.3  # Largura das barras
-    bar_offset = 0.30  # Deslocamento das barras
-    bar_offset2 = 0.70
-    p1.vbar(x=np.arange(len(ANO_MES)) + bar_offset2, top=Abertos, width=bar_width,
-            color='blue', legend_label='Abertos')
-    p1.vbar(x=np.arange(len(ANO_MES)) + bar_offset, top=Fechados, width=bar_width,
-            color='red', legend_label='Fechados')
-
-    p1.legend.location = "top_left"  # Posição da legenda
-    p1.legend.title = "Legenda"  # Título da legenda
-    p1.legend.click_policy = "hide"
-    text_offset = 3
-    p1.text(x=np.arange(len(ANO_MES)) + bar_offset2, y=np.add(Abertos, text_offset), text=Abertos, text_font_size='10pt', text_color='black',
-            text_baseline='bottom', text_align='center')
-
-    p1.text(x=np.arange(len(ANO_MES)) + bar_offset, y=np.add(Fechados, text_offset), text=Fechados, text_font_size='10pt', text_color='black',
-            text_baseline='bottom', text_align='center')
-
-    p2 = figure(width_policy="auto", height_policy="auto", x_range=ANO_MES, height=600, width=900,
-                title="Bar Chart Nested", toolbar_location="above", resizable=True, sizing_mode="stretch_width")
-    source = ColumnDataSource(
-        data={'ANO_MES': ANO_MES, 'Filas': filas, 'Abertos': Abertos, 'Fechados': Fechados})
-    p2.vbar(x='ANO_MES', top='Abertos', width=0.5, fill_alpha=0.5,
-            color='blue', legend_field='Filas', source=source)
-    p2.vbar(x='ANO_MES', top='Fechados', width=0.5, fill_alpha=0.5,
-            color='blue', legend_field='Filas', source=source)
-    p2.legend.click_policy = "hide"
-
-    p3 = figure(width_policy="auto", height_policy="auto", x_range=ANO_MES, height=600, title="Bar Chart Stacking and Grouping",
-                toolbar_location="above", resizable=True, width=900, sizing_mode="stretch_width")
-
-    source = ColumnDataSource(
-        data={'ANO_MES': ANO_MES, 'Abertos': Abertos, 'Fechados': Fechados})
-
-    p3.vbar_stack(['Abertos', 'Fechados'], x='ANO_MES', width=0.5, color=['blue', 'red'],
-                  legend_label=['Abertos', 'Fechados'], source=source)
-
-    p3.legend.location = "top_left"  # Posição da legenda
-    p3.legend.title = "Legenda"  # Título da legenda
-
-    text_offset = 5  # Ajuste de posição vertical dos textos
-
-    # Conversão das datas para strings para as posições horizontais
-
-    p3.xaxis.major_label_orientation = 1  # Orientação dos rótulos do eixo x
-
-    # Line Chart
-    p4 = figure(x_range=ANO_MES, height=600,
-                title="Line Chart", toolbar_location="above", resizable=True, sizing_mode="stretch_width")
-    p4.line(ANO_MES, Abertos, line_width=2, color='blue')
-
-    # Multiple Lines
-    p5 = figure(x_range=ANO_MES, height=600,
-                title="Multiple Lines", toolbar_location="above", resizable=True, sizing_mode="stretch_width")
-
-    p5.line(ANO_MES, Abertos, line_width=2,
-            color='blue', legend_label='Abertos')
-    p5.line(ANO_MES, Fechados, line_width=2,
-            color='red', legend_label='Fechados')
-
-# Adicionando os valores acima das linhas Abertos
-    p5.text(ANO_MES, Abertos, text=Abertos, text_font_size='10pt',
-            text_color='blue', text_baseline='bottom', text_align='center')
-
-# Adicionando os valores acima das linhas Fechados
-    p5.text(ANO_MES, Fechados, text=Fechados, text_font_size='10pt',
-            text_color='red', text_baseline='bottom', text_align='center')
-
-    # Stacked Lines
-    p6 = figure(x_range=ANO_MES, height=600, width=500,
-                title="Stacked Lines", toolbar_location=None, sizing_mode="stretch_width")
-    p6.line(ANO_MES, Abertos, line_width=2,
-            color='blue', legend_label='Abertos')
-    p6.line(ANO_MES, [a + f for a, f in zip(Abertos, Fechados)],
-            line_width=2, color='red', legend_label='Total')
-
-    # Combining with Markers
-    p7 = figure(x_range=ANO_MES, height=350, width=500,
-                title="Combining with Markers", toolbar_location=None, sizing_mode="stretch_width")
-    p7.line(ANO_MES, Abertos, line_width=2,
-            color='blue', legend_label='Abertos')
-    p7.circle(ANO_MES, Abertos, size=8, color='blue', fill_color='white')
-
-    # Scatter Markers
-    p8 = figure(x_range=ANO_MES, height=350,
-                title="Scatter Markers", toolbar_location=None, sizing_mode="stretch_width")
-    p8.scatter(ANO_MES, Abertos, size=8, color='blue')
-    # p1.toolbar.autohide = True
-    # p2.toolbar.autohide = True
-   # p3.toolbar.autohide = True
-    # p4.toolbar.autohide = True
-   # p5.toolbar.autohide = True
-   # p6.toolbar.autohide = True
-   # p7.toolbar.autohide = True
-   # p8.toolbar.autohide = True
-    # Renderizar os gráficos
-
-    layout = [
-        [p],
-        [row(p1, p2)],
-        [row(p3, p4)],
-        [row(p5, p6)],
-        [row(p7, p8)]
-    ]
-
-    grid = gridplot(layout, sizing_mode="stretch_width")
-
-    # Obter o HTML e o JavaScript para o layout responsivo
-    script_layout, div_layout = components(grid)
 
     context = {
-        'script_layout': script_layout,
-        'div_layout': div_layout,
+        'dados_completos': dados_completos,
         'activegroup': activegroup
     }
     return render(request, 'dashboards/ti.html', context)
@@ -278,9 +127,9 @@ def dashboard_ti2(request):
 def dashboard_controladoria(request):
     activegroup = 'Dashboard'
     # Conectar ao banco de dados
-    con = mysql.connector.connect(
-        host='172.16.0.15', database='dw_combio', user='usr_combio',
-        password='Cmb@Dw12.2020')
+   # con = mysql.connector.connect(
+    #    host='172.16.0.15', database='dw_combio', user='usr_combio',
+    #    password='Cmb@Dw12.2020')
 
     # Definir a consulta SQL
     sql_query = '''
@@ -415,7 +264,6 @@ def exemplo(request):
     a = nested_chart.show(format='html')
 
     context = {
-        'nested_chart': a,
         'activegroup': activegroup
     }
 
