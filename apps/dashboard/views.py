@@ -53,7 +53,20 @@ def dashboard_ti(request):
 
         # Obtém o último FluigOperationSystem para este servidor
         dados_servidor['ultimo_operation_system'] = FluigOperationSystem.objects.filter(servidor_fluig=servidor).order_by('-created_at').first()
+        
+        if dados_servidor['ultimo_operation_system']:
+            # Converte server_hd_space e server_hd_space_free para valores numéricos
+            try:
+                server_hd_space = float(dados_servidor['ultimo_operation_system'].server_hd_space.replace(',', '.'))
+                server_hd_space_free = float(dados_servidor['ultimo_operation_system'].server_hd_space_free.replace(',', '.'))
+                # Calcula o espaço usado
+                server_hd_space_used = server_hd_space - server_hd_space_free
+            except ValueError:
+                # Em caso de erro na conversão, define server_hd_space_used como None
+                server_hd_space_used = None
 
+            # Atualiza o dicionário com o valor calculado
+            dados_servidor['server_hd_space_used'] = server_hd_space_used
         # Adiciona o dicionário completo ao array de dados
         dados_completos.append(dados_servidor)
 

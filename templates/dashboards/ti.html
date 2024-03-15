@@ -1,182 +1,87 @@
+
+
 {% extends 'menu/index.html'%}
 {% block content %}
 {% load static %}
+{% load my_filters %}
+
 {% for servidor in dados_completos %}
 <div class="container-fluid iq-card">
- 
-
    <div class="row text-center">
-      <div class="col-sm-12 mt-4 mb-4 text-center">
-      <h1> <strong>{{ servidor.servidor.nome_servidor }}</strong></h1>
-      </div>
+       <div class="col-sm-12 mt-4 mb-4 text-center">
+           <h1><strong>{{ servidor.servidor.nome_servidor }}</strong></h1>
+       </div>
    </div>
 
    <div class="row">
-      
-     
+       <div class="col-sm-6 col-md-6 col-lg-4">
+           <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+               <div class="iq-card-body iq-box-relative">
+                   <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-danger">
+                       <i class="ri-database-2-line"></i>
+                   </div>
+                   <img src="{% static 'images/Mysql_logo.png' %}" class="card-img-top mb-4" alt="#">
+                   <p class="card-text"><strong>Base de Dados:</strong> {{ servidor.ultimo_database_info.database_name }}</p>
+                   <p class="card-text"><strong>Versão Banco de Dados:</strong> {{ servidor.ultimo_database_info.database_version }}</p>
+                   <p class="card-text"><strong>Driver:</strong> {{ servidor.ultimo_database_info.driver_name }}</p>
+                   <p class="card-text"><strong>Versão Driver:</strong> {{ servidor.ultimo_database_info.driver_version }}</p>
+                   <p class="card-text"><strong>Tamanho do Banco de Dados:</strong> {{ servidor.ultimo_database_size.size|format_gb }}</p>
+               </div>
+           </div>
+       </div>
 
-      <div class="col-sm-6 col-md-6 col-lg-3">
-         <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
-            <div class="iq-card-body iq-box-relative">
-               <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-danger">
-                  <i class="ri-database-2-line"></i>
+       <div class="col-sm-6 col-md-6 col-lg-4">
+           <div class="iq-card">
+               <div class="iq-card-header d-flex justify-content-between">
+                   <div class="iq-header-title">
+                       <h4 class="card-title">Espaço em Disco</h4>
+                   </div>
                </div>
-               <img src="{% static "images/Mysql_logo.png" %}" class="card-img-top" alt="#">
-               <p class="card-text">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. </p>
-               <p class="card-text">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. </p>
-             
-               <div class="d-flex align-items-center justify-content-between">
-                  <h4><b>$190</b></h4>
-                  <div id="iq-chart-box2"></div>
-                  <span class="text-danger"><b> -6% <i class="ri-arrow-down-fill"></i></b></span>
+               <div class="iq-card-body">
+                   <div id="apex-space-hd-{{ forloop.counter }}"></div>
                </div>
-            </div>
-         </div>
-      </div>
-      <div class="col-sm-6 col-md-6 col-lg-3">
-         <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
-            <div class="iq-card-body iq-box-relative">
-               <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-success">
-                  <i class="ri-database-2-line"></i>
+               <div class="iq-card-header">
+                   <p class="card-text"><strong>Espaço Total:</strong> {{ servidor.ultimo_operation_system.server_hd_space|to_int|format_gb }}</p>
+                   <p class="card-text"><strong>Espaço Livre:</strong> {{ servidor.ultimo_operation_system.server_hd_space_free|to_int|format_gb }}</p>
+                   <p class="card-text"><strong>Espaço Usado:</strong> {{ servidor.server_hd_space_used|to_int|format_gb }}</p>
                </div>
-               <p class="text-secondary">Total Classon</p>
-               <div class="d-flex align-items-center justify-content-between">
-                  <h4><b>45</b></h4>
-                  <div id="iq-chart-box3"></div>
-                  <span class="text-success"><b> +0.36% <i class="ri-arrow-up-fill"></i></b></span>
-               </div>
-            </div>
-         </div>
-      </div>
-      <div class="col-sm-6 col-md-6 col-lg-3">
-         <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
-            <div class="iq-card-body iq-box-relative">
-               <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-warning">
-                  <i class="ri-pie-chart-2-line"></i>
-               </div>
-               <p class="text-secondary">Total Profit</p>
-               <div class="d-flex align-items-center justify-content-between">
-                  <h4><b>60</b></h4>
-                  <div id="iq-chart-box4"></div>
-                  <span class="text-warning"><b> +0.45% <i class="ri-arrow-up-fill"></i></b></span>
-               </div>
-            </div>
-         </div>
-      </div>
-   </div>
+           </div>
+       </div>
+   </div> <!-- Fechamento da primeira row de cards -->
+
    <div class="row">
-      <div class="col-sm-12 col-lg-6">
-         <div class="iq-card">
-            <div class="iq-card-header d-flex justify-content-between">
-               <div class="iq-header-title">
-                  <h4 class="card-title">Line Chart</h4>
+       <div class="col-sm-12 col-lg-6">
+           <div class="iq-card">
+               <div class="iq-card-header d-flex justify-content-between">
+                   <div class="iq-header-title">
+                       <h4 class="card-title">Line Chart</h4>
+                   </div>
                </div>
-            </div>
-            <div class="iq-card-body">
-               <div id="apex-basic"></div>
-            </div>
-         </div>
-         <div class="iq-card">
-            <div class="iq-card-header d-flex justify-content-between">
-               <div class="iq-header-title">
-                  <h4 class="card-title">Column Chart</h4>
+               <div class="iq-card-body">
+                   <div id="apex-basic"></div>
                </div>
-            </div>
-            <div class="iq-card-body">
-               <div id="apex-column"></div>
-            </div>
-         </div>
-         <div class="iq-card">
-            <div class="iq-card-header d-flex justify-content-between">
-               <div class="iq-header-title">
-                  <h4 class="card-title">Mixes Chart</h4>
+           </div>
+       </div>
+
+       <div class="col-sm-12 col-lg-6">
+           <div class="iq-card">
+               <div class="iq-card-header d-flex justify-content-between">
+                   <div class="iq-header-title">
+                       <h4 class="card-title">Column Chart</h4>
+                   </div>
                </div>
-            </div>
-            <div class="iq-card-body">
-               <div id="apex-mixed-chart"></div>
-            </div>
-         </div>
-         <div class="iq-card">
-            <div class="iq-card-header d-flex justify-content-between">
-               <div class="iq-header-title">
-                  <h4 class="card-title"> Bubble Charts</h4>
+               <div class="iq-card-body">
+                   <div id="apex-column"></div>
                </div>
-            </div>
-            <div class="iq-card-body">
-               <div id="apex-bubble-chart"></div>
-            </div>
-         </div>
-         <div class="iq-card">
-            <div class="iq-card-header d-flex justify-content-between">
-               <div class="iq-header-title">
-                  <h4 class="card-title"> Pie Charts</h4>
-               </div>
-            </div>
-            <div class="iq-card-body">
-               <div id="apex-pie-chart"></div>
-            </div>
-         </div>
-      </div>
-      <div class="col-sm-12 col-lg-6">
-         <div class="iq-card">
-            <div class="iq-card-header d-flex justify-content-between">
-               <div class="iq-header-title">
-                  <h4 class="card-title">Line Area Chart</h4>
-               </div>
-            </div>
-            <div class="iq-card-body">
-               <div id="apex-line-area"></div>
-            </div>
-         </div>
-         <div class="iq-card">
-            <div class="iq-card-header d-flex justify-content-between">
-               <div class="iq-header-title">
-                  <h4 class="card-title">Bar Chart</h4>
-               </div>
-            </div>
-            <div class="iq-card-body">
-               <div id="apex-bar"></div>
-            </div>
-         </div>
-         <div class="iq-card">
-            <div class="iq-card-header d-flex justify-content-between">
-               <div class="iq-header-title">
-                  <h4 class="card-title"> Candlestick Charts</h4>
-               </div>
-            </div>
-            <div class="iq-card-body">
-               <div id="apex-candlestick-chart"></div>
-            </div>
-         </div>
-         <div class="iq-card">
-            <div class="iq-card-header d-flex justify-content-between">
-               <div class="iq-header-title">
-                  <h4 class="card-title">  Scatter Charts</h4>
-               </div>
-            </div>
-            <div class="iq-card-body">
-               <div id="apex-scatter-chart"></div>
-            </div>
-         </div>
-         <div class="iq-card">
-            <div class="iq-card-header d-flex justify-content-between">
-               <div class="iq-header-title">
-                  <h4 class="card-title">Radial Bar Charts</h4>
-               </div>
-            </div>
-            <div class="iq-card-body">
-               <div id="apex-radialbar-chart"></div>
-            </div>
-         </div>
-      </div>
-   </div>
-</div>
-</div>
-</div>
+           </div>
+       </div>
+   </div> <!-- Fechamento da segunda row de cards -->
+</div> <!-- Fechamento do container-fluid -->
+
 
     {% endfor %}
      
- </div>
+
 
 <!-- Script para inicializar o gráfico -->
 <script src={% static "js/jquery.min.js" %}></script>
@@ -185,4 +90,43 @@
 <script src={% static "js/apexcharts.js" %}></script>
 <script src={% static "js/morris.min.js" %}></script>
 <script src={% static "js/chart-custom.js" %}></script>
+<script type="text/javascript">
+   var dadosGraficos = [
+       {% for servidor in dados_completos %}
+       {
+           "id": "apex-space-hd-{{ forloop.counter }}",
+           "espacoFree": {{ servidor.ultimo_operation_system.server_hd_space_free|default_if_none:"0" }},
+           "espacoTotal": {{ servidor.ultimo_operation_system.server_hd_space|default_if_none:"0" }}
+       }{% if not forloop.last %},{% endif %}
+       {% endfor %}
+   ];
+</script>
+<script>
+   dadosGraficos.forEach(function(grafico) {
+       var espacoUsado = grafico.espacoTotal - grafico.espacoFree;
+       var options = {
+           chart: {
+               width: 380,
+               type: 'pie'
+           },
+           labels: ['Espaço Usado', 'Espaço Livre'],
+           series: [espacoUsado, grafico.espacoFree],
+           colors: ['#1e3d73', '#89CFF0'],
+           responsive: [{
+               breakpoint: 480,
+               options: {
+                   chart: {
+                       width: 200
+                   },
+                   legend: {
+                       position: 'bottom'
+                   }
+               }
+           }]
+       };
+
+       var chart = new ApexCharts(document.querySelector("#" + grafico.id), options);
+       chart.render();
+   });
+</script>
     {% endblock content %}
