@@ -11,6 +11,7 @@ class FluigDatabaseInfo(models.Model):
 
     class Meta:
         db_table = 'fluig_database_info'
+        app_label = 'api_v1'
 
 class FluigDatabaseSize(models.Model):
     servidor_fluig = models.ForeignKey(ServidorFluig, on_delete=models.PROTECT)
@@ -46,3 +47,34 @@ class FluigOperationSystem(models.Model):
 
     class Meta:
         db_table = 'fluig_operation_system'
+
+class Dataset(models.Model):
+    datasetId = models.CharField(max_length=255)
+    datasetDescription = models.TextField(blank=True, null=True)
+    datasetImpl = models.TextField(blank=True, null=True)
+    datasetBuilder = models.CharField(max_length=255)
+    active = models.BooleanField(default=True)
+    draft = models.BooleanField(default=False)
+    serverOffline = models.BooleanField(default=False)
+    mobileCache = models.BooleanField(default=False)
+    internal = models.BooleanField(default=False)
+    custom = models.BooleanField(default=True)
+    generated = models.BooleanField(default=False)
+    offlineMobileCache = models.BooleanField(default=False)
+    mobileOfflineSummary = models.CharField(max_length=100)
+    updateInterval = models.IntegerField(default=0)
+    lastReset = models.IntegerField(default=0)
+    lastRemoteSync = models.IntegerField(default=0)
+    jobLastExecution = models.CharField(max_length=100, blank=True, null=True)
+    jobNextExecution = models.CharField(max_length=100, blank=True, null=True)
+    type = models.CharField(max_length=100)
+    journalingAdherenceFull = models.BooleanField(default=False)
+    journalingAdherenceHalf = models.BooleanField(default=True)
+    journalingAdherenceNone = models.BooleanField(default=False)
+    syncStatusSuccess = models.BooleanField(default=True)
+    syncStatusWarning = models.BooleanField(default=False)
+    syncStatusError = models.BooleanField(default=False)
+    syncDetails = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table = 'fluig_dataset'

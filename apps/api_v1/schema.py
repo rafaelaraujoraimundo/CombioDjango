@@ -110,3 +110,32 @@ class ApiResponseFluig(BaseModel):
     THREADING: Threading
     DETAILED_MEMORY: Dict[str, DetailedMemoryType]
     OPERATION_SYSTEM: OperationSystem
+
+
+class DatasetSchema(BaseModel):
+    datasetId: str
+    datasetDescription: str = None
+    datasetImpl: str = None
+    datasetBuilder: str
+    active: bool
+    draft: bool
+    serverOffline: bool
+    mobileCache: bool
+    internal: bool
+    custom: bool
+    generated: bool
+    offlineMobileCache: bool
+    mobileOfflineSummary: str
+    updateInterval: int
+    lastReset: int
+    lastRemoteSync: int
+    jobLastExecution: str = None
+    jobNextExecution: str = None
+    type: str
+    journalingAdherenceFull: bool
+    journalingAdherenceHalf: bool
+    journalingAdherenceNone: bool
+    syncStatusSuccess: bool
+    syncStatusWarning: bool
+    syncStatusError: bool
+    syncDetails: str = None

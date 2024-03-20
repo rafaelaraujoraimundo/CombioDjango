@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from dashboard.forms import DateForm
+import json
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
@@ -9,12 +10,10 @@ from django.contrib.auth.decorators import permission_required
 from dashboard.models import BiChamadosServiceUp
 from bokeh.plotting import figure
 from bokeh.embed import components  
-from plotly.offline import plot
 from bokeh.transform import dodge
 from bokeh.resources import CDN
 from api_v1.models import FluigDatabaseInfo, FluigDatabaseSize, FluigOperationSystem, FluigRuntime
 from administration.models import ServidorFluig
-from bokeh.layouts import column, row, gridplot
 import chartify
 
 
@@ -25,55 +24,54 @@ def view_padrao(request):
 
 
 @permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
-def dashboard_ti(request):
+def dashboard_ti(request, servidor_id=None):
     activegroup = 'Dashboard'
-   
 
     servidores = ServidorFluig.objects.all()
-    dados_completos = []
+    servidor_id = request.GET.get('servidor_id')
+    # Se um servidor_id foi fornecido, use-o para encontrar o servidor específico;
+    # caso contrário, use o primeiro servidor da lista ou qualquer lógica padrão que você preferir.
+    servidor_selecionado = get_object_or_404(ServidorFluig, id=servidor_id) if servidor_id else servidores.first()
 
-    for servidor in servidores:
-        # Inicializa um dicionário para o servidor atual
-        dados_servidor = {
-            'servidor': servidor,
-            'ultimo_database_info': None,
-            'ultimo_database_size': None,
-            'ultimo_runtime': None,
-            'ultimo_operation_system': None,
-        }
+    # Inicializa um dicionário para o servidor selecionado
+    dados_servidor = {
+        'servidor': servidor_selecionado,
+        'ultimo_database_info': FluigDatabaseInfo.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
+        'ultimo_database_size': FluigDatabaseSize.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
+        'ultimo_runtime': FluigRuntime.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
+        'ultimo_operation_system': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
+        'dados_memoria': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at')
+    }
 
-        # Obtém o último FluigDatabaseInfo para este servidor
-        dados_servidor['ultimo_database_info'] = FluigDatabaseInfo.objects.filter(servidor_fluig=servidor).order_by('-created_at').first()
+    if dados_servidor['ultimo_operation_system']:
+        try:
+            server_hd_space = float(dados_servidor['ultimo_operation_system'].server_hd_space.replace(',', '.'))
+            server_hd_space_free = float(dados_servidor['ultimo_operation_system'].server_hd_space_free.replace(',', '.'))
+            server_hd_space_used = server_hd_space - server_hd_space_free
+        except ValueError:
+            server_hd_space_used = None
 
-        # Obtém o último FluigDatabaseSize para este servidor
-        dados_servidor['ultimo_database_size'] = FluigDatabaseSize.objects.filter(servidor_fluig=servidor).order_by('-created_at').first()
+    dados_servidor['server_hd_space_used'] = server_hd_space_used
+    dados_memoria = FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').values('created_at', 'server_memory_size', 'server_memory_free')
 
-        # Obtém o último FluigRuntime para este servidor
-        dados_servidor['ultimo_runtime'] = FluigRuntime.objects.filter(servidor_fluig=servidor).order_by('-created_at').first()
-
-        # Obtém o último FluigOperationSystem para este servidor
-        dados_servidor['ultimo_operation_system'] = FluigOperationSystem.objects.filter(servidor_fluig=servidor).order_by('-created_at').first()
-        
-        if dados_servidor['ultimo_operation_system']:
-            # Converte server_hd_space e server_hd_space_free para valores numéricos
-            try:
-                server_hd_space = float(dados_servidor['ultimo_operation_system'].server_hd_space.replace(',', '.'))
-                server_hd_space_free = float(dados_servidor['ultimo_operation_system'].server_hd_space_free.replace(',', '.'))
-                # Calcula o espaço usado
-                server_hd_space_used = server_hd_space - server_hd_space_free
-            except ValueError:
-                # Em caso de erro na conversão, define server_hd_space_used como None
-                server_hd_space_used = None
-
-            # Atualiza o dicionário com o valor calculado
-            dados_servidor['server_hd_space_used'] = server_hd_space_used
-        # Adiciona o dicionário completo ao array de dados
-        dados_completos.append(dados_servidor)
+    # Preparar os dados para o gráfico
+    datas = [dado['created_at'].strftime("%Y-%m-%dT%H:%M:%S") for dado in dados_memoria]
+    memoria_usada_mb = [int((dado['server_memory_size'] - dado['server_memory_free']) / (1024 * 1024)) for dado in dados_memoria]
+    memoria_total_mb = [int(dado['server_memory_size'] / (1024 * 1024)) for dado in dados_memoria]
 
 
+    # Convertendo os dados para JSON para serem utilizados pelo JavaScript
+    dados_grafico = {
+        'datas': datas,
+        'memoria_usada_mb': memoria_usada_mb,
+        'memoria_total_mb': memoria_total_mb,
+    }
+    dados_grafico_json = json.dumps(dados_grafico)
     context = {
-        'dados_completos': dados_completos,
-        'activegroup': activegroup
+        'servidor_selecionado': dados_servidor,  # Passa os dados do servidor selecionado
+        'servidores': servidores,  # Passa a lista de todos os servidores para o template
+        'activegroup': activegroup,
+        'dados_grafico_json': dados_grafico_json, 
     }
     return render(request, 'dashboards/ti.html', context)
 

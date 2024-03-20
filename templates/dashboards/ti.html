@@ -1,132 +1,171 @@
-
-
-{% extends 'menu/index.html'%}
+{% extends 'menu/index.html' %}
 {% block content %}
 {% load static %}
 {% load my_filters %}
 
-{% for servidor in dados_completos %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Servidores</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav nav-pills">
+            {% for servidor in servidores %}
+            <li class="nav-item">
+                <a class="nav-link {% if servidor.id == servidor_selecionado.servidor.id %} active {% endif %}" href="{% url 'dashboard_ti' %}?servidor_id={{ servidor.id }}">{{ servidor.nome_servidor }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</nav>
+
 <div class="container-fluid iq-card">
-   <div class="row text-center">
-       <div class="col-sm-12 mt-4 mb-4 text-center">
-           <h1><strong>{{ servidor.servidor.nome_servidor }}</strong></h1>
-       </div>
-   </div>
+    <div class="row text-center">
+        <div class="col-sm-12 mt-4 mb-4 text-center">
+            <h1><strong>{{ servidor_selecionado.servidor.nome_servidor }}</strong></h1>
+        </div>
+    </div>
 
-   <div class="row">
-       <div class="col-sm-6 col-md-6 col-lg-4">
-           <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
-               <div class="iq-card-body iq-box-relative">
-                   <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-danger">
-                       <i class="ri-database-2-line"></i>
-                   </div>
-                   <img src="{% static 'images/Mysql_logo.png' %}" class="card-img-top mb-4" alt="#">
-                   <p class="card-text"><strong>Base de Dados:</strong> {{ servidor.ultimo_database_info.database_name }}</p>
-                   <p class="card-text"><strong>Versão Banco de Dados:</strong> {{ servidor.ultimo_database_info.database_version }}</p>
-                   <p class="card-text"><strong>Driver:</strong> {{ servidor.ultimo_database_info.driver_name }}</p>
-                   <p class="card-text"><strong>Versão Driver:</strong> {{ servidor.ultimo_database_info.driver_version }}</p>
-                   <p class="card-text"><strong>Tamanho do Banco de Dados:</strong> {{ servidor.ultimo_database_size.size|format_gb }}</p>
-               </div>
-           </div>
-       </div>
+    <div class="row">
+        <div class="col-sm-6 col-md-6 col-lg-3">
+            <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                <div class="iq-card-body iq-box-relative">
+                    <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-danger">
+                        <i class="ri-computer-fill"></i>
+                    </div>
+                    <img src="{% static 'images/fluig-logo.png' %}" class="card-img-top mb-4" alt="#">
+                    <p class="card-text"><strong>Start time Servidor:</strong> {{ servidor_selecionado.ultimo_runtime.start_time|timestamp_to_date }}</p>
+                    <p class="card-text"><strong>Uptime Servidor:</strong> {{ servidor_selecionado.ultimo_runtime.uptime|milliseconds_to_duration }}</p>
+                    <p class="card-text"><strong>Uptime Fluig:</strong> {{ servidor_selecionado.ultimo_operation_system.system_uptime|milliseconds_to_duration }}</p>
+                </div>
+            </div>
+        </div>
 
-       <div class="col-sm-6 col-md-6 col-lg-4">
-           <div class="iq-card">
+        <div class="col-sm-6 col-md-6 col-lg-4">
+            <div class="iq-card">
+                
+                <div class="iq-card-header d-flex justify-content-between iq-box-relative">
+                    <div class="iq-header-title">
+                        <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-danger">
+                            <i class="ri-hard-drive-2-fill"></i>
+                        </div>
+                        <h4 class="card-title">Espaço em Disco</h4>
+                    </div>
+                </div>
+                <div class="iq-card-body">
+                    
+                    <div id="apex-space-hd"></div>
+                </div>
+                <div class="iq-card-header">
+                    <p class="card-text"><strong>Espaço Total:</strong> {{ servidor_selecionado.ultimo_operation_system.server_hd_space|to_int|format_gb }}</p>
+                    <p class="card-text"><strong>Espaço Livre:</strong> {{ servidor_selecionado.ultimo_operation_system.server_hd_space_free|to_int|format_gb }}</p>
+                    <p class="card-text"><strong>Espaço Usado:</strong> {{ servidor_selecionado.server_hd_space_used|to_int|format_gb }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-6 col-lg-4">
+            <div class="iq-card">
+            <div class="iq-card-body">
+                <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-danger">
+                    <i class="ri-database-2-line"></i>
+                </div>
+                <img src="{% static 'images/Mysql_logo.png' %}" class="card-img-top mb-4" alt="#" style="width: 50%;">
+                <p class="card-text"><strong>Base de Dados:</strong> {{ servidor_selecionado.ultimo_database_info.database_name }}</p>
+                <p class="card-text"><strong>Versão Banco de Dados:</strong> {{ servidor_selecionado.ultimo_database_info.database_version }}</p>
+                <p class="card-text"><strong>Driver:</strong> {{ servidor_selecionado.ultimo_database_info.driver_name }}</p>
+                <p class="card-text"><strong>Versão Driver:</strong> {{ servidor_selecionado.ultimo_database_info.driver_version }}</p>
+                <p class="card-text"><strong>Tamanho do Banco de Dados:</strong> {{ servidor_selecionado.ultimo_database_size.size|format_gb }}</p>
+            </div>
+        </div>
+    </div>
+    
+    </div> <!-- Fechamento da primeira row de cards -->
+    <div class="row">
+        <div class="col-sm-12 col-lg-6">
+            <div class="iq-card">
                <div class="iq-card-header d-flex justify-content-between">
-                   <div class="iq-header-title">
-                       <h4 class="card-title">Espaço em Disco</h4>
-                   </div>
+                  <div class="iq-header-title">
+                     <h4 class="card-title">Line Area Chart</h4>
+                  </div>
                </div>
                <div class="iq-card-body">
-                   <div id="apex-space-hd-{{ forloop.counter }}"></div>
+                  <div id="graficoMemoria"></div>
                </div>
-               <div class="iq-card-header">
-                   <p class="card-text"><strong>Espaço Total:</strong> {{ servidor.ultimo_operation_system.server_hd_space|to_int|format_gb }}</p>
-                   <p class="card-text"><strong>Espaço Livre:</strong> {{ servidor.ultimo_operation_system.server_hd_space_free|to_int|format_gb }}</p>
-                   <p class="card-text"><strong>Espaço Usado:</strong> {{ servidor.server_hd_space_used|to_int|format_gb }}</p>
-               </div>
-           </div>
-       </div>
-   </div> <!-- Fechamento da primeira row de cards -->
-
-   <div class="row">
-       <div class="col-sm-12 col-lg-6">
-           <div class="iq-card">
-               <div class="iq-card-header d-flex justify-content-between">
-                   <div class="iq-header-title">
-                       <h4 class="card-title">Line Chart</h4>
-                   </div>
-               </div>
-               <div class="iq-card-body">
-                   <div id="apex-basic"></div>
-               </div>
-           </div>
-       </div>
-
-       <div class="col-sm-12 col-lg-6">
-           <div class="iq-card">
-               <div class="iq-card-header d-flex justify-content-between">
-                   <div class="iq-header-title">
-                       <h4 class="card-title">Column Chart</h4>
-                   </div>
-               </div>
-               <div class="iq-card-body">
-                   <div id="apex-column"></div>
-               </div>
-           </div>
-       </div>
-   </div> <!-- Fechamento da segunda row de cards -->
+            </div>
+        </div>
+    </div>
+    <!-- Aqui você pode inserir outras seções, como gráficos e tabelas, usando os dados de servidor_selecionado -->
 </div> <!-- Fechamento do container-fluid -->
 
-
-    {% endfor %}
-     
-
-
 <!-- Script para inicializar o gráfico -->
-<script src={% static "js/jquery.min.js" %}></script>
-<script src={% static "js/lottie.js" %}></script>
-<script src={% static "js/raphael-min.js" %}></script>
-<script src={% static "js/apexcharts.js" %}></script>
-<script src={% static "js/morris.min.js" %}></script>
-<script src={% static "js/chart-custom.js" %}></script>
+<script src="{% static "js/jquery.min.js" %}"></script>
+<script src="{% static "js/lottie.js" %}"></script>
+<script src="{% static "js/raphael-min.js" %}"></script>
+<script src="{% static "js/apexcharts.js" %}"></script>
+<script src="{% static "js/morris.min.js" %}"></script>
+<script src="{% static "js/chart-custom.jsa" %}"></script>
 <script type="text/javascript">
-   var dadosGraficos = [
-       {% for servidor in dados_completos %}
-       {
-           "id": "apex-space-hd-{{ forloop.counter }}",
-           "espacoFree": {{ servidor.ultimo_operation_system.server_hd_space_free|default_if_none:"0" }},
-           "espacoTotal": {{ servidor.ultimo_operation_system.server_hd_space|default_if_none:"0" }}
-       }{% if not forloop.last %},{% endif %}
-       {% endfor %}
-   ];
-</script>
-<script>
-   dadosGraficos.forEach(function(grafico) {
-       var espacoUsado = grafico.espacoTotal - grafico.espacoFree;
-       var options = {
-           chart: {
-               width: 380,
-               type: 'pie'
-           },
-           labels: ['Espaço Usado', 'Espaço Livre'],
-           series: [espacoUsado, grafico.espacoFree],
-           colors: ['#1e3d73', '#89CFF0'],
-           responsive: [{
-               breakpoint: 480,
-               options: {
-                   chart: {
-                       width: 200
-                   },
-                   legend: {
-                       position: 'bottom'
-                   }
-               }
-           }]
-       };
 
-       var chart = new ApexCharts(document.querySelector("#" + grafico.id), options);
-       chart.render();
-   });
+
+    var espacoUsado = {{ servidor_selecionado.server_hd_space_used|default_if_none:"0"|floatformat }};
+    var espacoLivre = {{ servidor_selecionado.ultimo_operation_system.server_hd_space_free|default_if_none:"0"|floatformat }};
+    
+    var options = {
+        chart: {
+            width: 380,
+            type: 'pie'
+        },
+        labels: ['Espaço Usado', 'Espaço Livre'], // Corrigido para remover o '2' do 'Espaço Usado 2'
+        series: [espacoUsado, espacoLivre],
+        colors: ['#1e3d73', '#89CFF0'],
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+    
+    var chart = new ApexCharts(document.querySelector("#apex-space-hd"), options);
+    chart.render();
+    
+if (jQuery("#graficoMemoria").length) {
+    var dadosGrafico = JSON.parse('{{ dados_grafico_json|safe }}');
+
+var options = {
+    chart: {
+        type: 'area',
+        height: 350,
+    },
+    series: [{
+        name: 'Memória Usada (MB)',
+        data: dadosGrafico.memoria_usada_mb
+    }, {
+        name: 'Memória Total (MB)',
+        data: dadosGrafico.memoria_total_mb
+    }],
+    xaxis: {
+        type: 'datetime',
+        categories: dadosGrafico.datas,
+    },
+    tooltip: {
+        x: {
+            format: 'dd/MM/yy HH:mm'
+        }
+    }
+};
+
+var chart = new ApexCharts(document.querySelector("#graficoMemoria"), options);
+chart.render();
+    }
+    
+    // Aqui você pode inicializar os gráficos específicos para o servidor selecionado
+    // Por exemplo, um gráfico de espaço em disco para o servidor atual
+
 </script>
-    {% endblock content %}
+{% endblock content %}
