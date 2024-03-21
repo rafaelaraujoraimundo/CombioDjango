@@ -49,6 +49,7 @@ class FluigOperationSystem(models.Model):
         db_table = 'fluig_operation_system'
 
 class Dataset(models.Model):
+    servidor_fluig = models.ForeignKey(ServidorFluig, on_delete=models.PROTECT)
     datasetId = models.CharField(max_length=255)
     datasetDescription = models.TextField(blank=True, null=True)
     datasetImpl = models.TextField(blank=True, null=True)

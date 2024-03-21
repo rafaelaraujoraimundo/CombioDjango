@@ -123,6 +123,7 @@ def get_datasets(request):
             for dataset_data in datasets:
                 if dataset_data.get("serverOffline") == True:# Aqui, você adaptaria os campos conforme definido no seu modelo `Dataset`
                     Dataset.objects.create(
+                        servidor_fluig=servidorFluig,
                         datasetId=dataset_data["datasetId"],
                         datasetDescription=dataset_data.get("datasetDescription", ""),
                         datasetImpl=dataset_data.get("datasetImpl", ""),

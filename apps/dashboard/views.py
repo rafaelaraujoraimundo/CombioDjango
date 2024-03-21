@@ -12,7 +12,7 @@ from bokeh.plotting import figure
 from bokeh.embed import components  
 from bokeh.transform import dodge
 from bokeh.resources import CDN
-from api_v1.models import FluigDatabaseInfo, FluigDatabaseSize, FluigOperationSystem, FluigRuntime
+from api_v1.models import FluigDatabaseInfo, FluigDatabaseSize, FluigOperationSystem, FluigRuntime, Dataset
 from administration.models import ServidorFluig
 import chartify
 
@@ -29,9 +29,20 @@ def dashboard_ti(request, servidor_id=None):
 
     servidores = ServidorFluig.objects.all()
     servidor_id = request.GET.get('servidor_id')
-    # Se um servidor_id foi fornecido, use-o para encontrar o servidor específico;
-    # caso contrário, use o primeiro servidor da lista ou qualquer lógica padrão que você preferir.
+
+    status = request.GET.get('status', 'todos') 
+
+
     servidor_selecionado = get_object_or_404(ServidorFluig, id=servidor_id) if servidor_id else servidores.first()
+
+    datasets = Dataset.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at')
+    if status != 'todos':
+        if status == 'sucesso':
+            datasets = datasets.filter(syncStatusSuccess=True)
+        elif status == 'warning':
+            datasets = datasets.filter(syncStatusWarning=True)
+        elif status == 'erro':
+            datasets = datasets.filter(syncStatusError=True)
 
     # Inicializa um dicionário para o servidor selecionado
     dados_servidor = {
@@ -40,7 +51,8 @@ def dashboard_ti(request, servidor_id=None):
         'ultimo_database_size': FluigDatabaseSize.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
         'ultimo_runtime': FluigRuntime.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
         'ultimo_operation_system': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
-        'dados_memoria': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at')
+        'dados_memoria': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at'),
+        'datasets': datasets,
     }
 
     if dados_servidor['ultimo_operation_system']:
