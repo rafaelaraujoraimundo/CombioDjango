@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from ninja import Router
 from typing import List, Any
 from administration.models import User, ServidorFluig
-from apps.api_v1.schema import DatasetSchema
+from api_v1.schema import DatasetSchema
 from combio.settings import DATABASE_ROUTERS
 from .schema import ApiResponseFluig, DatasetSchema
 from ninja_jwt.authentication import JWTAuth

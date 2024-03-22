@@ -1,13 +1,13 @@
 from datetime import timezone
 from requests_oauthlib import OAuth1Session
-from apps.administration.models import ServidorFluig, User
-from apps.api_v1.schema import DatasetSchema
+from administration.models import ServidorFluig, User
+from api_v1.schema import DatasetSchema
 from .models import (FluigDatabaseInfo, FluigDatabaseSize, 
                      FluigRuntime, FluigOperationSystem, Dataset)
 from celery import shared_task
 
 @shared_task(name='api_v1.tasks.get_FluigServer')
-def get_FluigServer(request):
+def get_FluigServer():
     servidoresFluig = ServidorFluig.objects.all()
     for servidorFluig in servidoresFluig:
         CLIENT_KEY = servidorFluig.client_key
@@ -71,7 +71,7 @@ def get_FluigServer(request):
             print(f"Executado Dados do servidor: {now}")
             
 @shared_task(name='api_v1.tasks.get_datasets')
-def get_datasets(request):
+def get_datasets():
     servidoresFluig = ServidorFluig.objects.all()
     all_datasets = []  # Esta lista armazenará todos os datasets validados
     for servidorFluig in servidoresFluig:
