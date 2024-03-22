@@ -9,6 +9,7 @@ from celery import shared_task
 @shared_task(name='api_v1.tasks.get_FluigServer')
 def get_FluigServer():
     servidoresFluig = ServidorFluig.objects.all()
+    print(f"Executado Dados do servidor: {now}")
     for servidorFluig in servidoresFluig:
         CLIENT_KEY = servidorFluig.client_key
         CONSUMER_SECRET = servidorFluig.consumer_secret
@@ -72,6 +73,7 @@ def get_FluigServer():
             
 @shared_task(name='api_v1.tasks.get_datasets')
 def get_datasets():
+    print(f"Executado Dataset: {now}")
     servidoresFluig = ServidorFluig.objects.all()
     all_datasets = []  # Esta lista armazenará todos os datasets validados
     for servidorFluig in servidoresFluig:

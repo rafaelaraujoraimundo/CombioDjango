@@ -32,7 +32,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-sys.path.append(os.path.join(BASE_DIR, "apps"))
+#sys.path.append(os.path.join(BASE_DIR, "apps"))
 
 # Application definition
 
