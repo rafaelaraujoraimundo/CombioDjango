@@ -1,25 +1,12 @@
-from django.http import JsonResponse
-from ninja import Router
-from typing import List, Any
-from administration.models import User, ServidorFluig
-from apps.api_v1.schema import DatasetSchema
-from combio.settings import DATABASE_ROUTERS
-from .schema import ApiResponseFluig, DatasetSchema
-from ninja_jwt.authentication import JWTAuth
-from django.utils import timezone
+from datetime import timezone
 from requests_oauthlib import OAuth1Session
-import time
+from apps.administration.models import ServidorFluig, User
+from apps.api_v1.schema import DatasetSchema
 from .models import (FluigDatabaseInfo, FluigDatabaseSize, 
                      FluigRuntime, FluigOperationSystem, Dataset)
-import json
+from celery import shared_task
 
-from django.shortcuts import get_object_or_404
-
-router = Router()
-
-
-
-@router.get("/monitor", response=Any)
+@shared_task(name='api_v1.tasks.get_FluigServer')
 def get_FluigServer(request):
     servidoresFluig = ServidorFluig.objects.all()
     for servidorFluig in servidoresFluig:
@@ -29,14 +16,11 @@ def get_FluigServer(request):
         ACCESS_SECRET = servidorFluig.access_secret
         body_json = None
         url = servidorFluig.url + '/monitoring/api/v1/statistics/report/'
-        print(url)
-        print(servidorFluig)
         oauth = OAuth1Session(CLIENT_KEY, client_secret=CONSUMER_SECRET, resource_owner_key=ACCESS_TOKEN, resource_owner_secret=ACCESS_SECRET)
         response = oauth.get(url, data=body_json, headers={'Content-Type': 'application/json'})
         
         if response.status_code == 200:
             response_data = response.json()
-            api_response = ApiResponseFluig(**response_data)
             now = timezone.now()
 
             # Salvar DatabaseInfo
@@ -84,27 +68,9 @@ def get_FluigServer(request):
                 system_uptime=op_system.get("system-uptime", 0),
                 created_at=now
             )
+            print(f"Executado Dados do servidor: {now}")
             
-    
-  
-
-
-
-        else:
-            print('Erro na requisição:', response.status_code)
-            print('Erro na requisição:', response)
-            """for i in range(1, 21):  # 10 tentativas no máximo
-            print('Tentativa', i)
-            time.sleep(30)  # Aguarda 10 minutos (600 segundos)
-            response = oauth.post(url, data=body_json, headers={'Content-Type': 'application/json'})
-            if response.status_code == 200:
-                return response"""
-        
-            return 'Não foi possível obter uma resposta adequada após 10 tentativas.' 
-    return api_response
-
-
-@router.get("/datasets", response=Any)
+@shared_task(name='api_v1.tasks.get_datasets')
 def get_datasets(request):
     servidoresFluig = ServidorFluig.objects.all()
     all_datasets = []  # Esta lista armazenará todos os datasets validados
@@ -152,12 +118,6 @@ def get_datasets(request):
                         syncDetails=dataset_data.get("syncDetails", ""),
                         created_at=now
                     )
-                    # Aqui, cada dataset_data já é um dicionário, então podemos passá-lo diretamente
-                    validated_data = DatasetSchema(**dataset_data)
-                    all_datasets.append(validated_data)
+            print(f"Executado Dataset: {now}")
         else:
             print('Erro na requisição:', response.status_code)
-            # Tratamento de erro adequado aqui
-    
-    # A função agora retorna uma lista de datasets validados
-    return all_datasets

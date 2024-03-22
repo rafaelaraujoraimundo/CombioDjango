@@ -15,6 +15,7 @@ import sys
 import os
 from decouple import config
 from django.contrib.messages import constants as messages
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -56,6 +57,7 @@ INSTALLED_APPS += [
     "chartjs",
     "django_extensions",
     "ninja_extra",
+    "django_crontab",
 ]
 
 
@@ -197,4 +199,18 @@ MESSAGE_TAGS = {
     messages.SUCCESS: 'alert-success',
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
+}
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+CELERY_BEAT_SCHEDULE = {
+    'get_FluigServer_every_10_minutes_starting_at_5_past_hour': {
+        'task': 'api_v1.tasks.get_FluigServer',
+        'schedule': crontab(minute='5-59/10'),
+    },
+    'get_datasets_every_10_minutes_starting_at_10_past_hour': {
+        'task': 'api_v1.tasks.get_datasets',
+        'schedule': crontab(minute='10-59/10'),
+    },
 }

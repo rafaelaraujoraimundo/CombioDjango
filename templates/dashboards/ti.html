@@ -129,6 +129,13 @@
                     Erro
                     </button></p>{% endif%}
                 <p class="card-text">{{ dataset.datasetDescription }}</p>
+                <p class="card-text">Ultima Sincro.: {{ dataset.lastRemoteSync|timestamp_to_date }}
+                                     <br>Ultimo Reset:.: {{ dataset.lastReset|timestamp_to_date }}
+                                     <br>Proxima Sincro.: {{ dataset.jobNextExecution }}
+                                     
+                </p>
+               
+                  
                 </div>
         </div>
        </div>
