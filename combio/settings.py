@@ -57,7 +57,8 @@ INSTALLED_APPS += [
     "chartjs",
     "django_extensions",
     "ninja_extra",
-    "django_crontab",
+    "django_celery_results",
+    "django_celery_beat",
 ]
 
 
@@ -123,7 +124,6 @@ DATABASES = {
         "PORT": config("MYSQL_PORT"),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -201,9 +201,6 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger',
 }
 
-
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-
 CELERY_BEAT_SCHEDULE = {
     'get_FluigServer_every_10_minutes_starting_at_5_past_hour': {
         'task': 'api_v1.tasks.get_FluigServer',
@@ -214,3 +211,12 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='10-59/10'),
     },
 }
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+
+
+CELERY_ACCEPT_CONTENT= ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_EXTENDED = True
+#CELERY_CACHE_BACKEND = 'django-cache'

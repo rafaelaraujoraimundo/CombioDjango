@@ -4,7 +4,7 @@ from ninja_jwt.controller import NinjaJWTDefaultController
 from ninja_extra import NinjaExtraAPI
 
   
-api = NinjaExtraAPI()
+api = NinjaExtraAPI(version='2.0.0')
 api.register_controllers(NinjaJWTDefaultController)
 
 api.add_router("/v1/administration", router)

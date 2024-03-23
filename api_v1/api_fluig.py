@@ -8,7 +8,6 @@ from .schema import ApiResponseFluig, DatasetSchema
 from ninja_jwt.authentication import JWTAuth
 from django.utils import timezone
 from requests_oauthlib import OAuth1Session
-import time
 from .models import (FluigDatabaseInfo, FluigDatabaseSize, 
                      FluigRuntime, FluigOperationSystem, Dataset)
 import json

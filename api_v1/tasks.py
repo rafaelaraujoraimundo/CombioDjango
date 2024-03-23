@@ -1,14 +1,17 @@
-from datetime import timezone
+from django.utils import timezone
 from requests_oauthlib import OAuth1Session
-from administration.models import ServidorFluig, User
-from api_v1.schema import DatasetSchema
+from administration.models import ServidorFluig
 from .models import (FluigDatabaseInfo, FluigDatabaseSize, 
                      FluigRuntime, FluigOperationSystem, Dataset)
+from celery.schedules import crontab
+import logging
 from celery import shared_task
+logger = logging.getLogger(__name__)
 
-@shared_task(name='api_v1.tasks.get_FluigServer')
+@shared_task
 def get_FluigServer():
     servidoresFluig = ServidorFluig.objects.all()
+    now = timezone.now()
     print(f"Executado Dados do servidor: {now}")
     for servidorFluig in servidoresFluig:
         CLIENT_KEY = servidorFluig.client_key
@@ -22,7 +25,7 @@ def get_FluigServer():
         
         if response.status_code == 200:
             response_data = response.json()
-            now = timezone.now()
+            
 
             # Salvar DatabaseInfo
             db_info = response_data.get("DATABASE_INFO", {})
@@ -69,10 +72,14 @@ def get_FluigServer():
                 system_uptime=op_system.get("system-uptime", 0),
                 created_at=now
             )
-            print(f"Executado Dados do servidor: {now}")
-            
-@shared_task(name='api_v1.tasks.get_datasets')
+            logger.info(f"Executado Dados do servidor: {now}")
+        else:
+            logger.info('Erro na requisição:', response.status_code)   
+
+
+@shared_task
 def get_datasets():
+    now = timezone.now()
     print(f"Executado Dataset: {now}")
     servidoresFluig = ServidorFluig.objects.all()
     all_datasets = []  # Esta lista armazenará todos os datasets validados
@@ -84,7 +91,7 @@ def get_datasets():
         url = servidorFluig.url + '/dataset/api/v2/datasets'
         oauth = OAuth1Session(CLIENT_KEY, client_secret=CONSUMER_SECRET, resource_owner_key=ACCESS_TOKEN, resource_owner_secret=ACCESS_SECRET)
         response = oauth.get(url, headers={'Content-Type': 'application/json'})
-        now = timezone.now()
+        
         if response.status_code == 200:
             response_data = response.json()
             datasets = response_data.get("items", [])  # Assume que a chave dos datasets é "items"
@@ -120,6 +127,6 @@ def get_datasets():
                         syncDetails=dataset_data.get("syncDetails", ""),
                         created_at=now
                     )
-            print(f"Executado Dataset: {now}")
+            logger.info(f"Executado Dataset: {now}")
         else:
-            print('Erro na requisição:', response.status_code)
+            logger.info('Erro na requisição:', response.status_code)

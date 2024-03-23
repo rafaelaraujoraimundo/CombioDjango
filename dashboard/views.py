@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime
 import mysql.connector
+from api_v1.tasks import get_FluigServer, get_datasets
 from django.contrib.auth.decorators import permission_required
 from dashboard.models import BiChamadosServiceUp
 from bokeh.plotting import figure
@@ -26,10 +27,8 @@ def view_padrao(request):
 @permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
 def dashboard_ti(request, servidor_id=None):
     activegroup = 'Dashboard'
-
     servidores = ServidorFluig.objects.all()
     servidor_id = request.GET.get('servidor_id')
-
     status = request.GET.get('status', 'todos') 
 
 

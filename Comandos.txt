@@ -55,3 +55,40 @@ Grupo - Ligado com o grupo do Django,
 python manage.py crontab add
 python manage.py crontab show
 python manage.py crontab remove
+
+
+#Celery
+Videos de Configuração
+#Configurar Celery
+https://www.youtube.com/watch?v=b-6mEAr1m-A
+#Configurar Celery Beat para agendamento de tarefas no Django
+https://www.youtube.com/watch?si=yUSCpZOSB1I-PVac&v=evMYrqI2W_M&feature=youtu.be
+
+
+
+#execução WIndows
+celery -A combio worker --pool=threads --concurrency=8
+#execução Linux
+celery -A combio worker -l INFO -E 
+
+#celery beat 
+celery -A combio beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+Iniciar REDIS
+#INstalar e Iniciar WSL no windows
+wsl --install
+
+#para isntalar
+curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
+
+sudo apt-get update
+sudo apt-get install redis
+
+#Para iniciar
+sudo service redis-server start
+
+@Para testar
+redis-cli ping
+a repsosta deverá ser: PONG
