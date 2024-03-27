@@ -52,6 +52,7 @@ def dashboard_ti(request, servidor_id=None):
         'ultimo_operation_system': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
         'dados_memoria': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at'),
         'datasets': datasets,
+        'lasted_update_dataset': Dataset.objects.latest('created_at').created_at
     }
 
     if dados_servidor['ultimo_operation_system']:

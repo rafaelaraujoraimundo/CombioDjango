@@ -7,6 +7,8 @@ from combio.settings import DATABASE_ROUTERS
 from .schema import ApiResponseFluig, DatasetSchema
 from ninja_jwt.authentication import JWTAuth
 from django.utils import timezone
+import datetime
+import pytz
 from requests_oauthlib import OAuth1Session
 from .models import (FluigDatabaseInfo, FluigDatabaseSize, 
                      FluigRuntime, FluigOperationSystem, Dataset)
@@ -36,7 +38,7 @@ def get_FluigServer(request):
         if response.status_code == 200:
             response_data = response.json()
             api_response = ApiResponseFluig(**response_data)
-            now = timezone.now()
+            now =  datetime.datetime.now(pytz.timezone('America/Sao_Paulo'))
 
             # Salvar DatabaseInfo
             db_info = response_data.get("DATABASE_INFO", {})
@@ -115,7 +117,7 @@ def get_datasets(request):
         url = servidorFluig.url + '/dataset/api/v2/datasets'
         oauth = OAuth1Session(CLIENT_KEY, client_secret=CONSUMER_SECRET, resource_owner_key=ACCESS_TOKEN, resource_owner_secret=ACCESS_SECRET)
         response = oauth.get(url, headers={'Content-Type': 'application/json'})
-        now = timezone.now()
+        now =  datetime.datetime.now(pytz.timezone('America/Sao_Paulo'))
         if response.status_code == 200:
             response_data = response.json()
             datasets = response_data.get("items", [])  # Assume que a chave dos datasets é "items"
