@@ -37,11 +37,11 @@ def dashboard_ti(request, servidor_id=None):
     datasets = Dataset.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at')
     if status != 'todos':
         if status == 'sucesso':
-            datasets = datasets.filter(syncStatusSuccess=True)
+            datasets = datasets.filter(syncstatussuccess=True)
         elif status == 'warning':
-            datasets = datasets.filter(syncStatusWarning=True)
+            datasets = datasets.filter(syncstatuswarning=True)
         elif status == 'erro':
-            datasets = datasets.filter(syncStatusError=True)
+            datasets = datasets.filter(syncstatuserror=True)
 
     # Inicializa um dicionário para o servidor selecionado
     dados_servidor = {

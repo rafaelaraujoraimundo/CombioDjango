@@ -15,9 +15,9 @@
 
         <!-- Campo Item -->
         <div class="form-group">
-            <label for="{{ form.Item.id_for_label }}">Item</label>
-            <input type="text" class="form-control {% if form.Item.errors %}is-invalid{% endif %}" id="{{ form.Item.id_for_label }}" name="{{ form.Item.name }}" value="{{ form.Item.value|default_if_none:'' }}">
-            {% for error in form.Item.errors %}
+            <label for="{{ form.item.id_for_label }}">Item</label>
+            <input type="text" class="form-control {% if form.Item.errors %}is-invalid{% endif %}" id="{{ form.item.id_for_label }}" name="{{ form.item.name }}" value="{{ form.item.value|default_if_none:'' }}">
+            {% for error in form.item.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}
         </div>
@@ -28,7 +28,7 @@
             <select class="form-control {% if form.grupo_id.errors %}is-invalid{% endif %}" id="{{ form.grupo_id.id_for_label }}" name="{{ form.grupo_id.name }}">
                 <option value="">---------</option>
                 {% for grupo in form.grupo_id.field.queryset %}
-                    <option value="{{ grupo.pk }}" {% if form.grupo_id.value == grupo.pk %}selected{% endif %}>{{ grupo.NomeGrupo }}</option>
+                    <option value="{{ grupo.pk }}" {% if form.grupo_id.value == grupo.pk %}selected{% endif %}>{{ grupo.nomegrupo }}</option>
                 {% endfor %}
             </select>
             {% for error in form.grupo_id.errors %}

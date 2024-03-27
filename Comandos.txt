@@ -92,3 +92,10 @@ sudo service redis-server start
 @Para testar
 redis-cli ping
 a repsosta deverá ser: PONG
+
+
+#Docker compose.
+#Build do projeto
+docker-compose build
+docker-compose up -d
+docker-compose down

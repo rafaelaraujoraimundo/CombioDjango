@@ -3,8 +3,8 @@ from django.core import serializers
 
 
 def GetGroup():
-    groupMenu = GrupoMenu.objects.all()
-    return groupMenu
+    groupmenu = GrupoMenu.objects.all()
+    return groupmenu
 
 
 def GetMenu():

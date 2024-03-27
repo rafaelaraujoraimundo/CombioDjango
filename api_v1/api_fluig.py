@@ -124,38 +124,38 @@ def get_datasets(request):
             for dataset_data in datasets:
                 if dataset_data.get("serverOffline") == True:# Aqui, você adaptaria os campos conforme definido no seu modelo `Dataset`
                     Dataset.objects.create(
-                        servidor_fluig=servidorFluig,
-                        datasetId=dataset_data["datasetId"],
-                        datasetDescription=dataset_data.get("datasetDescription", ""),
-                        datasetImpl=dataset_data.get("datasetImpl", ""),
-                        datasetBuilder=dataset_data["datasetBuilder"],
-                        active=dataset_data["active"],
-                        draft=dataset_data["draft"],
-                        serverOffline=dataset_data["serverOffline"],
-                        mobileCache=dataset_data["mobileCache"],
-                        internal=dataset_data["internal"],
-                        custom=dataset_data["custom"],
-                        generated=dataset_data["generated"],
-                        offlineMobileCache=dataset_data["offlineMobileCache"],
-                        mobileOfflineSummary=dataset_data["mobileOfflineSummary"],
-                        updateInterval=dataset_data["updateInterval"],
-                        lastReset=dataset_data["lastReset"],
-                        lastRemoteSync=dataset_data["lastRemoteSync"],
-                        jobLastExecution=dataset_data.get("jobLastExecution", ""),
-                        jobNextExecution=dataset_data.get("jobNextExecution", ""),
-                        type=dataset_data["type"],
-                        journalingAdherenceFull=dataset_data["journalingAdherenceFull"],
-                        journalingAdherenceHalf=dataset_data["journalingAdherenceHalf"],
-                        journalingAdherenceNone=dataset_data["journalingAdherenceNone"],
-                        syncStatusSuccess=dataset_data["syncStatusSuccess"],
-                        syncStatusWarning=dataset_data["syncStatusWarning"],
-                        syncStatusError=dataset_data["syncStatusError"],
-                        syncDetails=dataset_data.get("syncDetails", ""),
-                        created_at=now
+                        servidor_fluig = servidorFluig,
+                        datasetid = dataset_data["datasetId"],
+                        datasetdescription = dataset_data.get("datasetDescription", ""),
+                        datasetimpl = dataset_data.get("datasetimpl", ""),
+                        datasetbuilder = dataset_data["datasetBuilder"],
+                        active = dataset_data["active"],
+                        draft = dataset_data["draft"],
+                        serveroffline = dataset_data["serverOffline"],
+                        mobilecache = dataset_data["mobileCache"],
+                        internal = dataset_data["internal"],
+                        custom = dataset_data["custom"],
+                        generated = dataset_data["generated"],
+                        offlinemobilecache = dataset_data["offlineMobileCache"],
+                        mobileofflinesummary = dataset_data["mobileOfflineSummary"],
+                        updateinterval = dataset_data["updateInterval"],
+                        lastreset = dataset_data["lastReset"],
+                        lastremotesync = dataset_data["lastRemoteSync"],
+                        joblastexecution = dataset_data.get("jobLastExecution", ""),
+                        jobnextexecution = dataset_data.get("jobNextExecution", ""),
+                        type = dataset_data["type"],
+                        journalingadherencefull = dataset_data["journalingAdherenceFull"],
+                        journalingadherencehalf = dataset_data["journalingAdherenceHalf"],
+                        journalingadherencenone = dataset_data["journalingAdherenceNone"],
+                        syncstatussuccess = dataset_data["syncStatusSuccess"],
+                        syncstatuswarning = dataset_data["syncStatusWarning"],
+                        syncstatuserror = dataset_data["syncStatusError"],
+                        syncdetails = dataset_data.get("syncDetails", ""),
+                        created_at = now
                     )
                     # Aqui, cada dataset_data já é um dicionário, então podemos passá-lo diretamente
-                    validated_data = DatasetSchema(**dataset_data)
-                    all_datasets.append(validated_data)
+                    # validated_data = DatasetSchema(**dataset_data)
+                    all_datasets.append(dataset_data)
         else:
             print('Erro na requisição:', response.status_code)
             # Tratamento de erro adequado aqui

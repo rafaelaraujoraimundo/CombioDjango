@@ -62,7 +62,7 @@ class CustomUserChangeForm(UserChangeForm):
 class ServidorFluigForm(forms.ModelForm):
     class Meta:
         model = ServidorFluig
-        fields = ['servidor', 'nome_servidor', 'client_key', 'consumer_secret', 'access_token', 'access_secret']
+        fields = ['servidor', 'nome_servidor', 'client_key', 'consumer_secret', 'access_token', 'access_secret', 'url']
 
 
 
@@ -76,4 +76,4 @@ class ItensMenuForm(forms.ModelForm):
     )
     class Meta:
         model = ItensMenu
-        fields = ['codigo', 'Item', 'grupo_id', 'icon_item', 'url', 'permission']
+        fields = ['codigo', 'item', 'grupo_id', 'icon_item', 'url', 'permission']

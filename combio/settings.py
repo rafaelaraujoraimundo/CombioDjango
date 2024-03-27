@@ -110,9 +110,13 @@ WSGI_APPLICATION = 'combio.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+      "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("POSTGRESQL_NAME"),
+        "USER": config("POSTGRESQL_USER"),
+        "PASSWORD": config("POSTGRESQL_PASSWORD"),
+        "HOST": config("POSTGRESQL_HOST"),
+        "PORT": config("POSTGRESQL_PORT"),
     },
     "dwcombio_db": {
         "ENGINE": "django.db.backends.mysql",
@@ -200,13 +204,17 @@ MESSAGE_TAGS = {
 }
 
 CELERY_BEAT_SCHEDULE = {
-    'get_FluigServer_every_10_minutes_starting_at_5_past_hour': {
+    'get_FluigServer_every_5_minutes_starting_at_5_past_hour': {
         'task': 'api_v1.tasks.get_FluigServer',
-        'schedule': crontab(minute='5-59/10'),
+        'schedule': crontab(minute='5-59/5'),
     },
-    'get_datasets_every_10_minutes_starting_at_10_past_hour': {
+    'get_datasets_every_5_minutes_starting_at_5_past_hour': {
         'task': 'api_v1.tasks.get_datasets',
-        'schedule': crontab(minute='10-59/10'),
+        'schedule': crontab(minute='1-59/5'),
+    },
+    'get_memory_every_1_minutes_starting_at_1_past_hour': {
+        'task': 'api_v1.tasks.get_memory',
+        'schedule': crontab(minute='1-59/1'),
     },
 }
 
