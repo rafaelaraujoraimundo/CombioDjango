@@ -4,7 +4,7 @@ import json
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from datetime import datetime
+from datetime import datetime, timedelta
 import mysql.connector
 from api_v1.tasks import get_FluigServer, get_datasets
 from django.contrib.auth.decorators import permission_required
@@ -16,6 +16,7 @@ from bokeh.resources import CDN
 from api_v1.models import FluigDatabaseInfo, FluigDatabaseSize, FluigOperationSystem, FluigRuntime, Dataset
 from administration.models import ServidorFluig
 import chartify
+from django.utils import timezone
 
 
 def view_padrao(request):
@@ -27,10 +28,10 @@ def view_padrao(request):
 @permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
 def dashboard_ti(request, servidor_id=None):
     activegroup = 'Dashboard'
-    servidores = ServidorFluig.objects.all()
+    title = 'Servidores Fluig'
+    servidores = ServidorFluig.objects.all().order_by('id')
     servidor_id = request.GET.get('servidor_id')
     status = request.GET.get('status', 'todos') 
-
 
     servidor_selecionado = get_object_or_404(ServidorFluig, id=servidor_id) if servidor_id else servidores.first()
 
@@ -52,7 +53,8 @@ def dashboard_ti(request, servidor_id=None):
         'ultimo_operation_system': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
         'dados_memoria': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at'),
         'datasets': datasets,
-        'lasted_update_dataset': Dataset.objects.latest('created_at').created_at
+        'lasted_update_dataset': Dataset.objects.latest('created_at').created_at,
+        'lasted_update_operation_system': FluigOperationSystem.objects.latest('created_at').created_at,
     }
 
     if dados_servidor['ultimo_operation_system']:
@@ -64,7 +66,17 @@ def dashboard_ti(request, servidor_id=None):
             server_hd_space_used = None
 
     dados_servidor['server_hd_space_used'] = server_hd_space_used
-    dados_memoria = FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').values('created_at', 'server_memory_size', 'server_memory_free')
+
+    agora = timezone.now()
+
+# Filtra objetos criados no início do dia até o momento atual
+    inicio_do_dia = agora.replace(hour=0, minute=0, second=0, microsecond=0)
+    fim_do_dia = inicio_do_dia + timedelta(days=1)
+    dados_memoria = FluigOperationSystem.objects.filter(
+                                                        servidor_fluig=servidor_selecionado,
+                                                        created_at__range=(inicio_do_dia, fim_do_dia)
+                                                ).order_by('-created_at'
+                                                                        ).values('created_at', 'server_memory_size', 'server_memory_free')
 
     # Preparar os dados para o gráfico
     datas = [dado['created_at'].strftime("%Y-%m-%dT%H:%M:%S") for dado in dados_memoria]
@@ -77,13 +89,14 @@ def dashboard_ti(request, servidor_id=None):
         'datas': datas,
         'memoria_usada_mb': memoria_usada_mb,
         'memoria_total_mb': memoria_total_mb,
-    }
+     }
     dados_grafico_json = json.dumps(dados_grafico)
     context = {
         'servidor_selecionado': dados_servidor,  # Passa os dados do servidor selecionado
         'servidores': servidores,  # Passa a lista de todos os servidores para o template
         'activegroup': activegroup,
         'dados_grafico_json': dados_grafico_json, 
+        'title': title,
     }
     return render(request, 'dashboards/ti.html', context)
 

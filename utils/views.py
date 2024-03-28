@@ -7,6 +7,7 @@ from menu.menu import GetGroup, GetMenu
 
 def processar_arquivo(request):
     activegroup = 'utils'
+    title = 'Upload de Arquivos para Processamento'
     arquivos = Arquivo.objects.all()
     if request.method == 'POST':
         form = UploadArquivoForm(request.POST, request.FILES)
@@ -25,4 +26,4 @@ def processar_arquivo(request):
     else:
         form = UploadArquivoForm()
 
-    return render(request, 'utils/upload_arquivo.html', {'form': form, 'arquivos': arquivos, 'activegroup': activegroup})
+    return render(request, 'utils/upload_arquivo.html', {'form': form, 'arquivos': arquivos, 'activegroup': activegroup, 'title': title})

@@ -206,15 +206,15 @@ MESSAGE_TAGS = {
 CELERY_BEAT_SCHEDULE = {
     'get_FluigServer_every_5_minutes_starting_at_5_past_hour': {
         'task': 'api_v1.tasks.get_FluigServer',
-        'schedule': crontab(minute='5-59/5'),
+        'schedule': crontab(minute='5-59/10'),
     },
     'get_datasets_every_5_minutes_starting_at_5_past_hour': {
         'task': 'api_v1.tasks.get_datasets',
-        'schedule': crontab(minute='1-59/5'),
+        'schedule': crontab(minute='1-59/10'),
     },
-    'get_memory_every_1_minutes_starting_at_1_past_hour': {
+    'get_memory_every_10_minutes_starting_at_0_past_hour': {
         'task': 'api_v1.tasks.get_memory',
-        'schedule': crontab(minute='1-59/1'),
+        'schedule': crontab(minute='0-59/10'),
     },
 }
 

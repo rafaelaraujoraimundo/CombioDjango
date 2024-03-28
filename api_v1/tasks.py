@@ -117,6 +117,7 @@ def get_datasets():
         if response.status_code == 200:
             response_data = response.json()
             datasets = response_data.get("items", [])  # Assume que a chave dos datasets é "items"
+            Dataset.objects.filter(servidor_fluig=servidorFluig).delete()
             for dataset_data in datasets:
                 if dataset_data.get("serverOffline") == True:# Aqui, você adaptaria os campos conforme definido no seu modelo `Dataset`
                     Dataset.objects.create(
