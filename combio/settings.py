@@ -204,11 +204,11 @@ MESSAGE_TAGS = {
 }
 
 CELERY_BEAT_SCHEDULE = {
-    'get_FluigServer_every_5_minutes_starting_at_5_past_hour': {
+    'get_FluigServer_every_10_minutes_starting_at_5_past_hour': {
         'task': 'api_v1.tasks.get_FluigServer',
         'schedule': crontab(minute='5-59/10'),
     },
-    'get_datasets_every_5_minutes_starting_at_5_past_hour': {
+    'get_datasets_every_10_minutes_starting_at_5_past_hour': {
         'task': 'api_v1.tasks.get_datasets',
         'schedule': crontab(minute='1-59/10'),
     },
@@ -218,7 +218,7 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_BROKER_URL = 'redis://172.16.0.15:6379'
 
 
 CELERY_ACCEPT_CONTENT= ['json']

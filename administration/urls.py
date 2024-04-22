@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from administration.views import user_list, user_edit, servidorfluig_list, servidorfluig_edit, servidorfluig_create, servidorfluig_delete, ItensMenuList, ItensMenuCreate
+from administration.views import (itemMenu_delete, ItensMenu_edit, ItensMenuCreate, ItensMenuList,
+    servidorfluig_create, servidorfluig_delete, servidorfluig_edit, servidorfluig_list, user_edit,
+    user_list)
 
 urlpatterns = [
     path('userList/', user_list, name="administration_users"),
@@ -14,4 +16,6 @@ urlpatterns = [
 
     path('itensmenu/', ItensMenuList.as_view(), name='administration_itensmenu_list'),
     path('itensmenu/new/', ItensMenuCreate.as_view(), name='administration_itensmenu_new'),
+    path('itensmenu/<int:itensMenu_id>/',ItensMenu_edit , name='administration_itensmenu_edit'),
+    path('itensmenuDelete/<int:itensMenu_id>/',itemMenu_delete , name='administration_itensmenu_delete'),
 ]

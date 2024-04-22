@@ -9,7 +9,7 @@ def index(request):
     activemenu = 'index'
     groups = GetGroup()
     menus = GetMenu()
-    a = backup_dados()
+    #a = backup_dados()
     user_groups = request.user.groups.all()
     context = {
         "nome_pagina": "Página inicial", 'groups': groups,

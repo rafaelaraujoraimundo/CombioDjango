@@ -1,6 +1,7 @@
-{% extends "menu/index.html" %}
-
+{% extends 'menu/index.html' %}
 {% block content %}
+{% load static %}
+{% load my_filters %}
 <div class="container-fluid">
     <div class="mb-4">
         <a href="{% url 'administration_itensmenu_new' %}" class="btn btn-primary">
@@ -21,16 +22,16 @@
             {% for itensmenu in object_list %}
                 <tr>
                     <td>{{ itensmenu.grupo_id }}</td>
-                    <td>{{ itensmenu.Item }}</td>
+                    <td>{{ itensmenu.item }}</td>
                     <td>{{ itensmenu.codigo }} </td>
                     <td> 
-                        <a class="mr-3" href="{% url 'administration_servidorfluig_edit' itensmenu.id %}">
+                        <a class="mr-3" href="{% url 'administration_itensmenu_edit' itensmenu.id %}">
                             <i class="fa fa-edit"></i> Editar
                         </a>
-                       
-                        <a href="{% url 'administration_servidorfluig_delete' itensmenu.id %}">
+                      
+                        <a href="#" class="delete-trigger mr-3" data-id="{{ itensmenu.id }}" data-item="{{ itensmenu.item }}">
                             <i class="fa fa-trash"></i> Excluir
-                        </a>
+                        
                     </td>
                 </tr>
             {% empty %}
@@ -42,4 +43,46 @@
     </table>
 </div>
 </div>
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja excluir <strong id="deleteItemName"></strong> (ID: <span id="deleteItemId"></span>)?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{% static "js/jquery-3.3.1.min.js" %}"></script>
+    <script>
+        $(document).ready(function() {
+            $('.delete-trigger').click(function(event) {
+                event.preventDefault();  // Evita que o link navegue
+                var itemId = $(this).data('id');
+                var itemName = $(this).data('item');
+                var formAction = '/administration/itensmenuDelete/' + itemId + '/';  // Substitua pelo seu URL de view
+        
+                // Define os valores no modal
+                $('#deleteItemId').text(itemId);
+                $('#deleteItemName').text(itemName);
+                $('#deleteForm').attr('action', formAction);
+        
+                // Mostra o modal
+                $('#confirmDeleteModal').modal('show');
+            });
+        
+            // Opcional: você pode adicionar aqui qualquer código para lidar com a submissão do formulário, como AJAX
+        });
+        </script>
 {% endblock %}

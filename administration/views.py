@@ -171,3 +171,33 @@ class ItensMenuCreate(CreateView):
             # Este é o lugar para adicionar qualquer lógica quando o formulário não é válido
             # Por exemplo, adicionar mensagens de erro personalizadas, logging, etc.
             return self.form_invalid(form)
+
+
+def ItensMenu_edit(request, itensMenu_id):
+    activegroup = 'administration'
+    title = 'Edição de Itens de Menu'
+    context = {'activegroup': activegroup,
+               'title' : title}
+    itensMenu = get_object_or_404(ItensMenu, pk=itensMenu_id)
+    if request.method == "POST":
+        form = ItensMenuForm(request.POST, instance=itensMenu)
+        if form.is_valid():
+            form.save()
+            return redirect('administration_itensmenu_list')
+        else:
+            context['form'] = form
+    else:
+        form = ItensMenuForm(instance=itensMenu)
+        context['form'] = form
+    return render(request, 'administration/itensmenu/itensmenu_edit.html', context)
+
+
+def itemMenu_delete(request, itensMenu_id):
+   
+    itensMenu = get_object_or_404(ItensMenu, pk=itensMenu_id)
+    if request.method == "POST":
+        itensMenu.delete()
+        messages.success(request, f'"{itensMenu.item}" foi excluído com sucesso.')
+        return redirect('administration_itensmenu_list')
+   
+    return redirect('administration_itensmenu_list')

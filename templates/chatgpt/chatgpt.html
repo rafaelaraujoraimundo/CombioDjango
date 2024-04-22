@@ -1,0 +1,13 @@
+{% extends 'menu/index.html' %}
+{% block content %}
+{% load static %}
+{% load my_filters %}
+
+<div id="chat-container">
+    <div id="chat-box"></div>
+    <input type="text" id="user-input" placeholder="Digite sua mensagem aqui..." autofocus>
+    <button onclick="sendMessage()">Enviar</button>
+</div>
+<script src="{% static 'js/chatgpt.js' %}"></script>
+
+{% endblock content %}
