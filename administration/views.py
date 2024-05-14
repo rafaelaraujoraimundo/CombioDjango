@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from administration.models import User, ServidorFluig
+from administration.models import PasswordManager, ServidorFluig, User
 from administration.forms import CustomUserChangeForm
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.forms import UserChangeForm
@@ -13,7 +13,9 @@ from django.views.generic.edit import CreateView
 from .forms import ServidorFluigForm
 from menu.models import ItensMenu
 from django.urls import reverse_lazy
-from .forms import ItensMenuForm
+from .forms import ItensMenuForm, PasswordManagerForm
+from .models import PasswordManager, PasswordGroup
+
 
 
 def user_list(request):
@@ -201,3 +203,36 @@ def itemMenu_delete(request, itensMenu_id):
         return redirect('administration_itensmenu_list')
    
     return redirect('administration_itensmenu_list')
+
+
+
+class PasswordManagerList(ListView):
+    model = PasswordManager
+    template_name = 'administration/passwordManager/passwordManager_list.html'
+
+
+    def get_context_data(self, **kwargs):
+        # Primeiro, pegue o contexto existente da classe base
+        context = super(PasswordManagerList, self).get_context_data(**kwargs)
+        # Agora, adicione suas variáveis de contexto
+        context['PasswordGroups'] = PasswordGroup.objects.all()
+        context['activegroup'] = 'administration'
+        context['title'] = 'Password Manager'
+        # Retorne o contexto atualizado
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        for password in queryset:
+            password.decrypted_password = password.get_password()  # Adiciona a senha descriptografada ao objeto
+        return queryset
+    
+def password_manager_create(request):
+    if request.method == 'POST':
+        form = PasswordManagerForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('administration_passwordmanager_list')
+    else:
+        form = PasswordManagerForm()
+    return render(request, 'administration/passwordManager/password_manager_form.html', {'form': form})

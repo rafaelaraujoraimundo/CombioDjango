@@ -16,11 +16,11 @@ import json
 
 from django.shortcuts import get_object_or_404
 
-router = Router()
+routerFLuig = Router()
 
 
 
-@router.get("/monitor", response=Any)
+@routerFLuig.get("/monitor", response=Any)
 def get_FluigServer(request):
     servidoresFluig = ServidorFluig.objects.all()
     for servidorFluig in servidoresFluig:
@@ -105,7 +105,7 @@ def get_FluigServer(request):
     return api_response
 
 
-@router.get("/datasets", response=Any)
+@routerFLuig.get("/datasets", response=Any)
 def get_datasets(request):
     servidoresFluig = ServidorFluig.objects.all()
     all_datasets = []  # Esta lista armazenará todos os datasets validados

@@ -4,7 +4,7 @@ from django.contrib.auth.models import (
     AbstractBaseUser,
     PermissionsMixin,
 )
-
+from .encryptor import encrypt_password, decrypt_password
 
 class UserManager(BaseUserManager):
 
@@ -97,3 +97,34 @@ class ServidorFluig(models.Model):
 
     def __str__(self):
         return self.nome_servidor
+
+from django.db import models
+
+class PasswordType(models.Model):
+    nome = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nome
+
+class PasswordGroup(models.Model):
+    nome = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nome
+
+class PasswordManager(models.Model):
+    site_name = models.CharField(max_length=100)
+    url = models.URLField()
+    username = models.CharField(max_length=100)
+    encrypted_password = models.CharField(max_length=255)  # Armazenar a senha criptografada
+    tipo = models.ForeignKey(PasswordType, on_delete=models.PROTECT, related_name='passwords')
+    grupo = models.ForeignKey(PasswordGroup, on_delete=models.PROTECT, related_name='passwords')
+
+    def set_password(self, password):
+        self.encrypted_password = encrypt_password(password)
+
+    def get_password(self):
+        return decrypt_password(self.encrypted_password)
+
+    def __str__(self):
+        return self.site_name

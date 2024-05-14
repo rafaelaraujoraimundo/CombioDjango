@@ -1,5 +1,5 @@
 from api_v1.api_administration import router
-from api_v1.api_fluig import router as routerFLuig
+from api_v1.api_fluig import routerFLuig
 from ninja_jwt.controller import NinjaJWTDefaultController
 from ninja_extra import NinjaExtraAPI
 

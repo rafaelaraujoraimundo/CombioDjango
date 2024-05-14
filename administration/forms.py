@@ -2,10 +2,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import Group, Permission
 from django.forms.widgets import CheckboxSelectMultiple
-from .models import User, ServidorFluig
+from .models import User, ServidorFluig, PasswordManager
 from menu.models import ItensMenu
 from django import forms
-
 
 class CustomUserCreationForm(UserCreationForm):
     usuario_datasul = forms.CharField(
@@ -77,3 +76,20 @@ class ItensMenuForm(forms.ModelForm):
     class Meta:
         model = ItensMenu
         fields = ['codigo', 'item', 'grupo_id', 'icon_item', 'url', 'permission']
+
+
+
+
+class PasswordManagerForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, label='Senha')
+
+    class Meta:
+        model = PasswordManager
+        fields = ['site_name', 'url', 'username', 'password', 'tipo', 'grupo']
+
+    def save(self, commit=True):
+        password_manager = super().save(commit=False)
+        password_manager.set_password(self.cleaned_data['password'])
+        if commit:
+            password_manager.save()
+        return password_manager
