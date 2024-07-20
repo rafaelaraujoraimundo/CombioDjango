@@ -4,8 +4,8 @@
   --iq-title-text: #3f414d;
   --iq-body-text: #777d74;
   --iq-body-bg: #fbfbfb;
-  --iq-primary: #1e3d73;
-  --iq-secondary: #a09e9e;
+  --iq-primary: #116533;
+  --iq-secondary: #399444;
   --iq-success: #65f9b3;
   --iq-warning: #ffbf43;
   --iq-danger: #fe517e;
@@ -21,8 +21,8 @@
   --iq-light-warning: #fefaee;
   --iq-light-info: #f4f0ff;
   --iq-light-dark: #f0efef;
-  --iq-primary-hover: #1d335a;
-  --iq-secondary-hover: #3948e8;
+  --iq-primary-hover: #399444;
+  --iq-secondary-hover: #116533;
   --iq-success-hover: #8defc0;
   --iq-danger-hover: #ff6a6a;
   --iq-warning-hover: #fae837;
@@ -32,7 +32,7 @@
   --iq-light-card: #ffffff;
   --iq-primary-rgb: 100, 114, 248;
   /* color for customizer*/
-  --iq-color1: #1e3d73;
+  --iq-color1: #116533;
   --iq-color2: #02d871;
   --iq-color3: #309cf3;
   --iq-color4: #ff00ff;

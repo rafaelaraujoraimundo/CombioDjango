@@ -1,92 +1,134 @@
-<!DOCTYPE html>
-
 {% load static %}
-{% load widget_tweaks %}
-{% load account socialaccount %}
-
-<html lang="pt-BR">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    
-    <title>Combio</title>
-    
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    
-    <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">    
-    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
-</head>
-
-<body class="bg-success bg-gradient">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-xl-10 col-lg-12 col-md-9">
-                <div class="card o-hidden border-0 shadow-lg my-5">
-                    <div class="card-body p-0">
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block" style="text-align: center;  padding-top: 110px;" >
-                                
-                                <img src={% static 'images/COMBIO.png' %} width="400" height="120">
-                         
-                            </div>
-                                
-                            <div class="col-lg-6">
-                                <div class="p-5">
-                                    <div class="text-left mb-5">
-                                        <h1 class="h4 text-gray-900 mb-1">Seja bem-vindo!</h1>
-
-                                        <p>Faça login para continuar</p>
-                                    </div>
-
-                                    {% if form.errors %}
-                                        <div class="alert alert-dismissible alert-warning" role="alert">
-                                            E-mail ou senha incorretos
-                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                    {% endif %}
-
-
-
-        
-
-                                        {% get_providers as socialaccount_providers %}
-
-                                        {% if socialaccount_providers %}
-                                                                                                                    
-                                        <div class="socialaccount_ballot">
-                                        
-                                          <ul class="btn btn-success btn-block ">
-                                              {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-                                          </ul>
-                                        
-                                          <div class="login-or"></div>
-                                        
-                                        </div>
-                                        
-                                      
-                                            
-                                        {% endif %}
-
-                                        
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-            
-        </div>
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <title>FinDash - Responsive Bootstrap 4 Admin Dashboard Template</title>
+      <!-- Favicon -->
+      <link rel="shortcut icon" href={% static "images/favicon.ico" %} />
+      <!-- Bootstrap CSS -->
+      <link rel="stylesheet" href={% static "css/bootstrap.min.css" %}>
+      <!-- Typography CSS -->
+      <link rel="stylesheet" href={% static "css/typography.css" %}>
+      <!-- Style CSS -->
+      <link rel="stylesheet" href={% static "css/style.css" %}>
+      <!-- Responsive CSS -->
+      <link rel="stylesheet" href={% static "css/responsive.css" %}>
+   </head>
+   <body>
+      <!-- loader Start -->
+      <div id="loading">
+         <div id="loading-center">
+         </div>
+      </div>
+      <!-- loader END -->
+        <!-- Sign in Start -->
+        <section class="sign-in-page">
+          <div id="container-inside">
+              <div class="cube"></div>
+              <div class="cube"></div>
+              <div class="cube"></div>
+              <div class="cube"></div>
+              <div class="cube"></div>
+          </div>
+            <div class="container p-0">
+                <div class="row no-gutters height-self-center">
+                  <div class="col-sm-12 align-self-center bg-primary rounded">
+                    <div class="row m-0">
+                      <div class="col-md-5 bg-white sign-in-page-data">
+                          <div class="sign-in-from">
+                              <h1 class="mb-0 text-center">Login</h1>
+                              <p class="text-center text-dark">Entre com seu email e senha para efetuar o login.</p>
+                              {% if form.non_field_errors %}
+                              <div class="alert alert-danger" role="alert">
+                                  {% for error in form.non_field_errors %}
+                                      {{ error }}
+                                  {% endfor %}
+                              </div>
+                          {% endif %}
+                              <form class="login" method="POST" action="{% url 'account_login' %}">
+                                {% csrf_token %}
+                                {% csrf_token %}
+    <div class="form-group">
+        <label for="{{ form.login.id_for_label }}">Endereço de E-mail</label>
+        <input type="email" class="form-control {% if form.login.errors %}is-invalid{% endif %}"
+               id="{{ form.login.id_for_label }}" name="{{ form.login.name }}"
+               placeholder="Digite seu e-mail" autocomplete="email"
+               value="{{ form.login.value|default_if_none:'' }}" required>
+        {% for error in form.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
     </div>
-    
-    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
-    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
-</body>
+
+    <div class="form-group">
+        <label for="{{ form.password.id_for_label }}">Senha</label>
+        <input type="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}"
+               id="{{ form.password.id_for_label }}" name="{{ form.password.name }}"
+               placeholder="Digite sua senha" autocomplete="current-password"
+               required>
+        {% for error in form.password.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+    </div>
+    {% for error in form.password.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+                                {% if redirect_field_value %}
+                                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                                {% endif %}
+                                <button class="btn btn-primary d-block w-100 mb-2" type="submit">Login</button>
+                              </form>
+                              
+                          </div>
+                      </div>
+                      <div class="col-md-7 text-center">
+                          <div class="mt-5 sign-in-detail text-info">
+                            <a class="mb-5 mt-5" href="#"><img src={% static "images/logo-negativo.png" %} class="img-fluid" alt="logo"></a>
+                              
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </section>
+        <!-- Sign in END -->
+       
+      <!-- Optional JavaScript -->
+      <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+      <script src= {% static "js/jquery.min.js" %}></script>
+      <script src= {% static "js/popper.min.js" %}></script>
+      <script src= {% static "js/bootstrap.min.js" %}></script>
+      <!-- Appear JavaScript -->
+      <script src= {% static "js/jquery.appear.js" %}></script>
+      <!-- Countdown JavaScript -->
+      <script src= {% static "js/countdown.min.js" %}></script>
+      <!-- Counterup JavaScript -->
+      <script src= {% static "js/waypoints.min.js" %}></script>
+      <script src= {% static "js/jquery.counterup.min.js" %}></script>
+      <!-- Wow JavaScript -->
+      <script src= {% static "js/wow.min.js" %}></script>
+      <!-- Apexcharts JavaScript -->
+      <script src= {% static "js/apexcharts.js" %}></script>
+      <!-- lottie JavaScript -->
+      <script src= {% static "js/lottie.js" %}></script>
+      <!-- Slick JavaScript --> 
+      <script src= {% static "js/slick.min.js" %}></script>
+      <!-- Select2 JavaScript -->
+      <script src= {% static "js/select2.min.js" %}></script>
+      <!-- Owl Carousel JavaScript -->
+      <script src= {% static "js/owl.carousel.min.js" %}></script>
+      <!-- Magnific Popup JavaScript -->
+      <script src= {% static "js/jquery.magnific-popup.min.js" %}></script>
+      <!-- Smooth Scrollbar JavaScript -->
+      <script src= {% static "js/smooth-scrollbar.js" %}></script>
+      <!-- Style Customizer -->
+      <script src= {% static "js/style-customizer.js" %}></script>
+      <!-- Chart Custom JavaScript -->
+      <script src= {% static "js/chart-custom.js" %}></script>
+      <!-- Custom JavaScript -->
+      <script src= {% static "js/custom.js" %}></script>
+   </body>
 </html>
