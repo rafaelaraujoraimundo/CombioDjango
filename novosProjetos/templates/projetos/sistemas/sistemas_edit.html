@@ -1,0 +1,21 @@
+{% extends "menu/index.html" %}  <!-- Substitua base_generic.html pelo seu template base -->
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+        <!-- Campo Codigo -->
+        <div class="form-group">
+            <label for="{{ form.nome.id_for_label }}">Nome</label>
+            <input type="text" class="form-control {% if form.nome.errors %}is-invalid{% endif %}" id="{{ form.nome.id_for_label }}" name="{{ form.nome.name }}" value="{{ form.nome.value|default_if_none:'' }}">
+            {% for error in form.codigo.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+      
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+    </form>
+</div>
+{% endblock %}

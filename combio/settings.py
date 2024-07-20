@@ -70,6 +70,7 @@ INSTALLED_APPS += [
     "dashboard",
     "utils",
     "api_v1",
+    "novosProjetos",
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

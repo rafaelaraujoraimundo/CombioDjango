@@ -9,6 +9,7 @@ class GrupoMenu(models.Model):
     nomegrupo = models.CharField(max_length=40)
     icon_grupo = models.CharField(max_length=80)
     grupo = models.ForeignKey(Group, on_delete=models.PROTECT, null=True)
+    order = models.PositiveIntegerField(default=99)
 
     class Meta:
         db_table = 'grupomenu'
@@ -26,9 +27,9 @@ class ItensMenu(models.Model):
     url = models.CharField(max_length=80)
     permission = models.ForeignKey(
         Permission, on_delete=models.PROTECT, null=True)
-
+    order = models.PositiveIntegerField(default=99)
     class Meta:
         db_table = 'itensmenu'
 
     def __str__(self):
-        return self.item
+        return self.grupo_id.nomegrupo + ' - ' + self.item

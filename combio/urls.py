@@ -21,6 +21,8 @@ from menu.views import index, erro_page
 from django.conf.urls.static import static
 from django.conf import settings
 from .api import api
+from novosProjetos.views import novosprojetos_dashboard
+from django.views.generic.base import RedirectView
 
 
 
@@ -28,10 +30,11 @@ urlpatterns = [
     path('admin/', admin.site.urls, name="admin1"),
     #path("api/", api.urls),
     path("logout/",auth_views.LogoutView.as_view(template_name="login/logout.html"),name="logout"),
-    path("",index,name="index"),
+    path('', RedirectView.as_view(url='/projetos/dashboard', permanent=True),name="index"),
     path('accounts/', include('allauth.urls')),
     path('administration/', include('administration.urls')),
     path('dashboards/', include('dashboard.urls')),
+    path('projetos/', include('novosProjetos.urls')),
     path('utils/', include('utils.urls')),
     path("error/",erro_page,name="erro_page"),
 ]
