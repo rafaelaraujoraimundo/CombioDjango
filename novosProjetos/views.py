@@ -1,93 +1,74 @@
-from django.utils import timezone
-from datetime import datetime, timedelta
-import json
 from  django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
-import django.utils
 from django.views.generic import ListView
 from django.views.generic import CreateView
 from api_v1.models import Dataset, FluigDatabaseInfo, FluigDatabaseSize, FluigOperationSystem, FluigRuntime
 from novosProjetos.forms import ConsultoriaForm, ProjetoForm, SistemasForm
 from novosProjetos.models import Sistemas, Consultoria, Projeto
 from administration.models import ServidorFluig
+from django.db.models import F, Sum
 
 # Create your views here.
 @permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
 def novosprojetos_dashboard(request):
     title = 'Projetos Combio'
     activegroup = 'Projetos'
-    servidores = ServidorFluig.objects.all().order_by('id')
-    servidor_id = request.GET.get('servidor_id')
-    status = request.GET.get('status', 'todos') 
+    consultoria_id = request.GET.get('consultoria_id')
+    consultorias = Consultoria.objects.all()
+    sistemas = Sistemas.objects.all()
 
-    servidor_selecionado = get_object_or_404(ServidorFluig, id=servidor_id) if servidor_id else servidores.first()
+    if consultoria_id:
+        projetos_filtrados = Projeto.objects.filter(consultoria__id=consultoria_id)
+        consultoria_selecionada = Consultoria.objects.get(id=consultoria_id)
+    else:
+        projetos_filtrados = Projeto.objects.all()
+        consultoria_selecionada = None
 
-    datasets = Dataset.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at')
-    if status != 'todos':
-        if status == 'sucesso':
-            datasets = datasets.filter(syncstatussuccess=True)
-        elif status == 'warning':
-            datasets = datasets.filter(syncstatuswarning=True)
-        elif status == 'erro':
-            datasets = datasets.filter(syncstatuserror=True)
+    
+    #Grafico de Rosca
+    grafico_por_sistemas = []
+    for sistema in sistemas:
+        count_projetos = projetos_filtrados.filter(sistemas=sistema).count()
+        if count_projetos > 0:  # Incluir apenas sistemas com projetos
+            grafico_por_sistemas.append({'label': sistema.nome, 'value': count_projetos})
 
-    # Inicializa um dicionário para o servidor selecionado
-    dados_servidor = {
-        'servidor': servidor_selecionado,
-        'ultimo_database_info': FluigDatabaseInfo.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
-        'ultimo_database_size': FluigDatabaseSize.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
-        'ultimo_runtime': FluigRuntime.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
-        'ultimo_operation_system': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at').first(),
-        'dados_memoria': FluigOperationSystem.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at'),
-        'datasets': datasets,
-        'lasted_update_dataset': Dataset.objects.latest('created_at').created_at,
-        'lasted_update_operation_system': FluigOperationSystem.objects.latest('created_at').created_at,
-    }
+    # GRafico de Consultoria Empilhado
+    categorias = [consultoria.nome for consultoria in consultorias]
+    dados_temp = {sistema.nome: [0] * len(categorias) for sistema in sistemas}
+    active_categories = [False] * len(categorias)  # Rastreador de categorias ativas
 
-    if dados_servidor['ultimo_operation_system']:
-        try:
-            server_hd_space = float(dados_servidor['ultimo_operation_system'].server_hd_space.replace(',', '.'))
-            server_hd_space_free = float(dados_servidor['ultimo_operation_system'].server_hd_space_free.replace(',', '.'))
-            server_hd_space_used = server_hd_space - server_hd_space_free
-        except ValueError:
-            server_hd_space_used = None
+    # Coletar dados
+    for idx, consultoria in enumerate(consultorias):
+        for sistema in sistemas:
+            count = projetos_filtrados.filter(consultoria=consultoria, sistemas=sistema).count()
+            dados_temp[sistema.nome][idx] = count
+            if count > 0:
+                active_categories[idx] = True  # Marca a categoria como ativa
 
-    dados_servidor['server_hd_space_used'] = server_hd_space_used
-
-    agora = timezone.now()
-
-# Filtra objetos criados no início do dia até o momento atual
-    inicio_do_dia = agora.replace(hour=0, minute=0, second=0, microsecond=0)
-    fim_do_dia = inicio_do_dia + timedelta(days=1)
-    dados_memoria = FluigOperationSystem.objects.filter(
-                                                        servidor_fluig=servidor_selecionado,
-                                                        created_at__range=(inicio_do_dia, fim_do_dia)
-                                                ).order_by('-created_at'
-                                                                        ).values('created_at', 'server_memory_size', 'server_memory_free')
-
-    # Preparar os dados para o gráfico
-    datas = [dado['created_at'].strftime("%Y-%m-%dT%H:%M:%S") for dado in dados_memoria]
-    memoria_usada_mb = [int((dado['server_memory_size'] - dado['server_memory_free']) / (1024 * 1024)) for dado in dados_memoria]
-    memoria_total_mb = [int(dado['server_memory_size'] / (1024 * 1024)) for dado in dados_memoria]
+    # Filtrar categorias e dados baseados na atividade
+    categorias_ativas = [cat for idx, cat in enumerate(categorias) if active_categories[idx]]
+    series = [{'name': sistema, 'data': [data[idx] for idx, active in enumerate(active_categories) if active]} for sistema, data in dados_temp.items()]
+    valor_total_projetos = projetos_filtrados.annotate(
+        custo_projeto=F('horas_utilizadas') * F('consultoria__valor_hora')
+    ).aggregate(total=Sum('custo_projeto'))['total'] or 0  # Usar 'or 0' para lidar com None
 
 
-    # Convertendo os dados para JSON para serem utilizados pelo JavaScript
-    dados_grafico = {
-        'datas': datas,
-        'memoria_usada_mb': memoria_usada_mb,
-        'memoria_total_mb': memoria_total_mb,
-     }
-    dados_grafico_json = json.dumps(dados_grafico)
     context = {
-        'servidor_selecionado': dados_servidor,  # Passa os dados do servidor selecionado
-        'servidores': servidores,  # Passa a lista de todos os servidores para o template
         'activegroup': activegroup,
-        'dados_grafico_json': dados_grafico_json, 
+        'projetos': projetos_filtrados,
+        'consultorias': consultorias,
+        'consultoria_selecionada': consultoria_selecionada,
         'title': title,
+        'categorias': categorias_ativas,
+        'series': series,
+        'valor_total_projetos': valor_total_projetos,
+        'grafico_por_sistemas': grafico_por_sistemas
     }
+
     return render(request, 'projetos/dashboard.html', context)
+
 
 def novosprojetos_list(request):
     title = 'Relação dos Projetos de Customização'

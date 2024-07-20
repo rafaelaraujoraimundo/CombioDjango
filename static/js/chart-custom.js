@@ -8954,63 +8954,7 @@ if(jQuery('#home-perfomer-chart').length){
         }])
       }, 1000)
     }
-    if(jQuery('#iq-income-chart').length){
-    	var options = {
-          series: [{
-          name: 'Successful deals',
-          data: [30, 50, 35, 60, 40, 60, 60]
-        }, {
-          name: 'Failed deals',
-          data: [40, 50, 55, 50, 30, 80, 30]
-        }],
-          chart: {
-          type: 'bar',
-          height: 350,
-          stacked: true
-        },
-        colors: ["#1e3d73", "#fe517e"],
-
-        plotOptions: {
-          bar: {
-            horizontal: false,
-            columnWidth: '15%',
-            endingShape: 'rounded'
-          },
-        },
-        legend: {
-         show: false
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          show: true,
-          width: 2,
-          colors: ['transparent']
-        },
-        xaxis: {
-          categories: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
-        },
-        yaxis: {
-          title: {
-            text: ''
-          }
-        },
-        fill: {
-          opacity: 1
-        },
-        tooltip: {
-          y: {
-            formatter: function (val) {
-              return "$ " + val + " thousands"
-            }
-          }
-        }
-        };
-
-        var chart = new ApexCharts(document.querySelector("#iq-income-chart"), options);
-        chart.render();
-    }
+ 
     if(jQuery('#iq-chart-timeline').length){
     	am4core.ready(function() {
 
