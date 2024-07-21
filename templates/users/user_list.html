@@ -2,37 +2,151 @@
 
 {% block content %}
 <div class="container-fluid">
+    <div class="mb-4">
+        <a href="{% url 'adminsitration_user_new' %}" class="btn btn-primary">
+            <i class="fa fa-plus"></i> Adicionar Usuários
+        </a>
+    </div>
     <div class="table-responsive">
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>E-mail</th>
-                <th>Usuário Datasul</th>
-                <th>Usuário Fluig</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
+        <table class="table table-striped table-bordered">
+            <thead>
                 <tr>
-                    <td>{{ user.id }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.usuario_datasul }}</td>
-                    <td>{{ user.usuario_fluig }}</td>
-                    <td>
-                        <a href="{% url 'user_edit' user.id %}">
-                            <i class="fa fa-edit"></i> Editar
-                        </a>
-                    </td>
+                    <th>ID</th>
+                    <th>Ativo</th>
+                    <th>E-mail</th>
+                    <th>Usuário Datasul</th>
+                    <th>Usuário Fluig</th>
+                    <th>Ações</th>
                 </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="5">Não há usuários registrados.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>
+                            {% if user.is_active %}
+                                <i class="fa fa-check text-success"></i>
+                            {% else %}
+                                <i class="fa fa-times text-danger"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.usuario_datasul }}</td>
+                        <td>{{ user.usuario_fluig }}</td>
+                        <td>
+                            <a href="{% url 'user_edit' user.id %}">
+                                <i class="fa fa-edit"></i> Editar
+                            </a>
+                            <a href="#" class="change-password-trigger ml-2" data-id="{{ user.id }}" data-email="{{ user.email }}">
+                                <i class="fa fa-key"></i> Alterar Senha
+                            </a>
+                            <a href="#" class="delete-trigger ml-2" data-id="{{ user.id }}" data-email="{{ user.email }}">
+                                <i class="fa fa-trash"></i> Excluir
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6">Não há usuários registrados.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<!-- Modal para Alterar Senha -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Alterar Senha</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" id="changePasswordForm" action="{% url 'administration_change_password' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="user_id" id="userId" value="">
+                    <div class="form-group">
+                        <label for="userEmail">Usuário</label>
+                        <input type="text" class="form-control" id="userEmail" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">Nova Senha</label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirmar Senha</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
+<!-- Modal para Exclusão -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja excluir o usuário <strong id="deleteUserEmail"></strong> (ID: <span id="deleteUserId"></span>)?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inclua o jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.change-password-trigger').click(function(event) {
+            event.preventDefault();  // Evita que o link navegue
+            var userId = $(this).data('id');
+            var userEmail = $(this).data('email');
+
+            // Define os valores no modal
+            $('#userId').val(userId);
+            $('#userEmail').val(userEmail);
+
+            // Mostra o modal
+            $('#changePasswordModal').modal('show');
+        });
+
+        $('.delete-trigger').click(function(event) {
+            event.preventDefault();  // Evita que o link navegue
+            var userId = $(this).data('id');
+            var userEmail = $(this).data('email');
+            var formAction = '/administration/userdelete/' + userId + '/';  // Substitua pelo seu URL de view
+
+            // Define os valores no modal
+            $('#deleteUserId').text(userId);
+            $('#deleteUserEmail').text(userEmail);
+            $('#deleteForm').attr('action', formAction);
+
+            // Mostra o modal
+            $('#confirmDeleteModal').modal('show');
+        });
+    });
+</script>
 {% endblock %}

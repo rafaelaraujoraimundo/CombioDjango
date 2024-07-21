@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="container-fluid">
-    <h1>Editar Usuário</h1>
     <form method="post">
       {% csrf_token %}
       <div class="form-group">
@@ -58,20 +57,24 @@
                 {% endfor %}
             </div>
         </div>
-    
+    </div>
+     
         <div class="col-md-6">
             <div class="form-group">
-                <label for="{{ form.groups.id_for_label }}">Permissões</label>
+                <label for="{{ form.groups.id_for_label }}">Permissões</label><br>
                 {% for user_permission in form.user_permissions %}
-                <div class="custom-control custom-checkbox">
+                
+                
                     {{ user_permission }}
-                </div>
+            
+
                 {% endfor %}
             </div>
         </div>
     </div>
 
-     
+
+
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>

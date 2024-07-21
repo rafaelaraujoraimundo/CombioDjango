@@ -13,7 +13,6 @@ from django.utils.decorators import method_decorator
 
 # Create your views here.
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_project_user', login_url='erro_page')
 def novosprojetos_dashboard(request):
     title = 'Projetos Combio'
     activegroup = 'Projetos'
@@ -96,8 +95,9 @@ class ConsultoriaList(ListView):
         # Retorne o contexto atualizado
         return context
 
+
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_project_admin', login_url='erro_page'), name='dispatch')
 class ConsultoriaCreate(CreateView):
     model = Consultoria
     #fields = ['codigo', 'Item', 'grupo_id', 'icon_item', 'url', 'permission']
@@ -126,7 +126,7 @@ class ConsultoriaCreate(CreateView):
             return self.form_invalid(form)
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
+@permission_required('global_permissions.combio_project_admin', login_url='erro_page')
 def consultoria_edit(request, consultoria_id):
     activegroup = 'Projetos'
     title = 'Edição de Projetos'
@@ -146,7 +146,7 @@ def consultoria_edit(request, consultoria_id):
     return render(request, 'projetos/consultoria/consultoria_edit.html', context)
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
+@permission_required('global_permissions.combio_project_admin', login_url='erro_page')
 def consultoria_delete(request, consultoria_id):
    
     consultoria = get_object_or_404(Consultoria, pk=consultoria_id)
@@ -157,9 +157,8 @@ def consultoria_delete(request, consultoria_id):
    
     return redirect('projetos_consultoria_list')
 
-
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_project_admin', login_url='erro_page'), name='dispatch')
 class SistemasList(ListView):
     model = Sistemas
     queryset = Sistemas.objects.all()
@@ -177,7 +176,7 @@ class SistemasList(ListView):
 
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
+@permission_required('global_permissions.combio_project_admin', login_url='erro_page')
 def sistemas_edit(request, sistemas_id):
     activegroup = 'Projetos'
     title = 'Edição de Projetos'
@@ -197,7 +196,7 @@ def sistemas_edit(request, sistemas_id):
     return render(request, 'projetos/sistemas/sistemas_edit.html', context)
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
+@permission_required('global_permissions.combio_project_admin', login_url='erro_page')
 def sistemas_delete(request, sistemas_id):
    
     sistemas = get_object_or_404(Sistemas, pk=sistemas_id)
@@ -209,7 +208,7 @@ def sistemas_delete(request, sistemas_id):
     return redirect('projetos_sistemas_list')
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_project_user', login_url='erro_page'), name='dispatch')
 class ProjetosList(ListView):
     model = Projeto
     queryset = Projeto.objects.all()
@@ -227,7 +226,7 @@ class ProjetosList(ListView):
     
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
+@permission_required('global_permissions.combio_project_user', login_url='erro_page')
 def projetos_delete(request, projetos_id):
    
     projeto = get_object_or_404(Projeto, pk=projetos_id)
@@ -240,7 +239,7 @@ def projetos_delete(request, projetos_id):
 
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
+@permission_required('global_permissions.combio_project_admin', login_url='erro_page')
 def sistema_create(request):
     activegroup = 'Projetos'
     title = 'Criação de Sistemas'
@@ -259,7 +258,7 @@ def sistema_create(request):
     return render(request, 'projetos/sistemas/sistemas_form.html', context)
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
+@permission_required('global_permissions.combio_project_admin', login_url='erro_page')
 def consultoria_create(request):
     activegroup = 'Projetos'
     title = 'Criação de Consultoria'
@@ -278,7 +277,7 @@ def consultoria_create(request):
     return render(request, 'projetos/consultoria/consultoria_form.html', context)
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
+@permission_required('global_permissions.combio_project_user', login_url='erro_page')
 def projeto_create(request):
     activegroup = 'Projetos'
     title = 'Criação de Projetos'

@@ -1,0 +1,98 @@
+{% extends 'menu/index.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">Email</label>
+            <input type="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" id="{{ form.email.id_for_label }}" name="{{ form.email.name }}" value="{{ form.email.value|default_if_none:'' }}">
+            {% for error in form.email.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+        <div class="form-group">
+            <label for="{{ form.usuario_datasul.id_for_label }}">Usuário Datasul</label>
+            <input type="text" class="form-control {% if form.usuario_datasul.errors %}is-invalid{% endif %}" id="{{ form.usuario_datasul.id_for_label }}" name="{{ form.usuario_datasul.name }}" value="{{ form.usuario_datasul.value|default_if_none:'' }}">
+            {% for error in form.usuario_datasul.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="{{ form.usuario_fluig.id_for_label }}">Usuário Fluig</label>
+            <input type="text" class="form-control {% if form.usuario_fluig.errors %}is-invalid{% endif %}" id="{{ form.usuario_fluig.id_for_label }}" name="{{ form.usuario_fluig.name }}" value="{{ form.usuario_fluig.value|default_if_none:'' }}">
+            {% for error in form.usuario_fluig.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="{{ form.password1.id_for_label }}">Senha</label>
+            <input type="password" class="form-control {% if form.password1.errors %}is-invalid{% endif %}" id="{{ form.password1.id_for_label }}" name="{{ form.password1.name }}">
+            {% for error in form.password1.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="{{ form.password2.id_for_label }}">Confirmação de Senha</label>
+            <input type="password" class="form-control {% if form.password2.errors %}is-invalid{% endif %}" id="{{ form.password2.id_for_label }}" name="{{ form.password2.name }}">
+            {% for error in form.password2.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+        <div class="form-group">
+            <label for="{{ form.is_active.id_for_label }}">Usuário Ativo?</label>
+            <div class="form-check {% if form.is_active.errors %}is-invalid{% endif %}">
+                <input type="checkbox" class="form-check-input" id="{{ form.is_active.id_for_label }}" name="{{ form.is_active.name }}" {% if form.is_active.value %}checked{% endif %}>
+                {% for error in form.is_active.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <br>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.groups.id_for_label }}">Grupos</label>
+                    {% for choice in form.groups %}
+                    <div class="form-check">
+                        {{ choice }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+         
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="{{ form.groups.id_for_label }}">Permissões</label><br>
+                {% for user_permission in form.permissions %}
+                
+                
+                    {{ user_permission }}
+            
+
+                {% endfor %}
+            </div>
+        </div>
+        </div>
+         
+        </div>
+
+        <button type="submit" class="btn btn-primary mb-4">Submit</button>
+    </form>
+</div>
+{% endblock %}

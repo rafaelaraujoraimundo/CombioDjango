@@ -1,0 +1,10 @@
+{% for group in widget.optgroups %}
+<div> Estou auqi</div>
+    <div id="{{ widget.attrs.id }}_{{ forloop.counter0 }}">
+        {% for option in group.options %}
+            <div class="custom-control custom-checkbox custom-control-inline">
+                {{ option.template_name }}
+            </div>
+        {% endfor %}
+    </div>
+{% endfor %}

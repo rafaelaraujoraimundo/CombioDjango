@@ -3,11 +3,14 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from administration.views import (itemMenu_delete, ItensMenu_edit, ItensMenuCreate, ItensMenuList,
     password_manager_create, PasswordManagerList, servidorfluig_create, servidorfluig_delete, password_manager_create,
-    servidorfluig_edit, servidorfluig_list, user_edit, user_list)
+    servidorfluig_edit, servidorfluig_list, user_edit, user_list,create_user,change_password,delete_user)
 
 urlpatterns = [
     path('userList/', user_list, name="administration_users"),
     path('useredit/<int:user_id>/',user_edit , name='user_edit'),
+     path('user/new', create_user, name='adminsitration_user_new'),
+     path('change-password/', change_password, name='administration_change_password'),
+       path('userdelete/<int:user_id>/', delete_user, name='user_delete'),
 
     path('servidorfluig/', servidorfluig_list, name="administration_servidorfluig_list"),
     path('servidorfluig/<int:servidor_id>/',servidorfluig_edit , name='administration_servidorfluig_edit'),

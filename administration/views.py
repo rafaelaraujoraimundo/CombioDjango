@@ -4,7 +4,7 @@ from administration.forms import CustomUserChangeForm
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.forms import UserChangeForm
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.forms import CheckboxSelectMultiple
@@ -13,22 +13,54 @@ from django.views.generic.edit import CreateView
 from .forms import ServidorFluigForm
 from menu.models import ItensMenu
 from django.urls import reverse_lazy
-from .forms import ItensMenuForm, PasswordManagerForm
+from .forms import ItensMenuForm, PasswordManagerForm, UserCreationForm
 from .models import PasswordManager, PasswordGroup
+from django.utils.decorators import method_decorator
 
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+def delete_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == "POST":
+        user.delete()
+        return redirect('administration_users')
+    return redirect('administration_users')
 
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+def change_password(request):
+    if request.method == 'POST':
+        user_id = request.POST['user_id']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+        
+        if new_password != confirm_password:
+            messages.error(request, 'As senhas não coincidem.')
+            return redirect('administration_users')
+        
+        user = get_object_or_404(User, id=user_id)
+        user.set_password(new_password)
+        user.save()
+        messages.success(request, 'Senha alterada com sucesso.')
+        return redirect('administration_users')
+    else:
+        messages.error(request, 'Método não permitido.')
+        return redirect('administration_users')
 
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def user_list(request):
     # Permissões e Definições para o Menu
     activegroup = 'administration'
     title = 'Usuários'
-    users = User.objects.all()
+    users = User.objects.all().order_by('id')
     context = {'users': users,
                'activegroup': activegroup,
                'title': title}
     return render(request, 'users/user_list.html', context)
 
-
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def user_edit(request, user_id):
     activegroup = 'administration'
     title = 'Edição de Usuário'
@@ -61,7 +93,8 @@ def user_edit(request, user_id):
         context['form'] = form
         return render(request, 'users/user_edit.html', context=context)
 
-
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def servidorfluig_list(request):
     # Permissões e Definições para o Menu
     activegroup = 'administration'
@@ -76,7 +109,8 @@ def servidorfluig_list(request):
 
 
 
-
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def servidorfluig_edit(request, servidor_id):
     activegroup = 'administration'
     title = 'Edição de Servidores Fluig'
@@ -95,7 +129,8 @@ def servidorfluig_edit(request, servidor_id):
         context['form'] = form
     return render(request, 'administration/servidorfluig/servidor_edit.html', context)
 
-
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def servidorfluig_create(request):
     activegroup = 'administration'
     title = 'Criação de Servidor Fluig'
@@ -113,7 +148,8 @@ def servidorfluig_create(request):
         context['form'] = form
     return render(request, 'administration/servidorfluig/servidor_new.html', context)
 
-
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def servidorfluig_delete(request, servidor_id):
     activegroup = 'administration'
     title = 'Exclusão de Servidores Fluig'
@@ -128,8 +164,8 @@ def servidorfluig_delete(request, servidor_id):
         form = ServidorFluigForm(instance=servidorfluig)
         context['form'] = form
     return render(request, 'administration/servidorfluig/servidor_delete.html', context)
-
-        
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')   
 class ItensMenuList(ListView):
     model = ItensMenu
     queryset = ItensMenu.objects.all()
@@ -146,7 +182,8 @@ class ItensMenuList(ListView):
         return context
     
 
-
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
 class ItensMenuCreate(CreateView):
     model = ItensMenu
     #fields = ['codigo', 'Item', 'grupo_id', 'icon_item', 'url', 'permission']
@@ -174,7 +211,8 @@ class ItensMenuCreate(CreateView):
             # Por exemplo, adicionar mensagens de erro personalizadas, logging, etc.
             return self.form_invalid(form)
 
-
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def ItensMenu_edit(request, itensMenu_id):
     activegroup = 'administration'
     title = 'Edição de Itens de Menu'
@@ -193,7 +231,8 @@ def ItensMenu_edit(request, itensMenu_id):
         context['form'] = form
     return render(request, 'administration/itensmenu/itensmenu_edit.html', context)
 
-
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def itemMenu_delete(request, itensMenu_id):
    
     itensMenu = get_object_or_404(ItensMenu, pk=itensMenu_id)
@@ -205,7 +244,8 @@ def itemMenu_delete(request, itensMenu_id):
     return redirect('administration_itensmenu_list')
 
 
-
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
 class PasswordManagerList(ListView):
     model = PasswordManager
     template_name = 'administration/passwordManager/passwordManager_list.html'
@@ -226,7 +266,9 @@ class PasswordManagerList(ListView):
         for password in queryset:
             password.decrypted_password = password.get_password()  # Adiciona a senha descriptografada ao objeto
         return queryset
-    
+
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def password_manager_create(request):
     if request.method == 'POST':
         form = PasswordManagerForm(request.POST)
@@ -236,3 +278,20 @@ def password_manager_create(request):
     else:
         form = PasswordManagerForm()
     return render(request, 'administration/passwordManager/password_manager_form.html', {'form': form})
+
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+def create_user(request):
+    activegroup = 'administration'
+    title = 'Criação de Usuarios'
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('administration_users')  # Redirecionar para a página de login após o registro bem-sucedido
+    else:
+        form = UserCreationForm()
+    context = {'form': form,
+               'activegroup': activegroup,
+               'title': title}
+    return render(request, 'administration/user/user_form.html', context)

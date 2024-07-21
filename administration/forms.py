@@ -29,17 +29,16 @@ class CustomUserChangeForm(UserChangeForm):
 
     groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'custom-control-input'}),
         required=False,
         label="Groups"
     )
     user_permissions = forms.ModelMultipleChoiceField(
         queryset=Permission.objects.filter(codename__icontains='combio'),
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'custom-control-input'}),
         required=False,
         label="Permissions"
     )
-
     is_active = forms.BooleanField(
         required=False,  # Não é obrigatório
         label="Usuario Ativo?",  # Rótulo do campo
@@ -93,3 +92,41 @@ class PasswordManagerForm(forms.ModelForm):
         if commit:
             password_manager.save()
         return password_manager
+    
+
+
+class UserCreationForm(forms.ModelForm):
+    password1 = forms.CharField(label='Senha', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Confirmação de Senha', widget=forms.PasswordInput)
+    groups = forms.ModelMultipleChoiceField(queryset=Group.objects.all(), required=False, widget=forms.CheckboxSelectMultiple)
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=Permission.objects.filter(codename__istartswith='combio'),
+        required=False,
+        widget=forms.CheckboxSelectMultiple
+    )
+
+    
+
+    class Meta:
+        model = User
+        fields = ('email', 'usuario_datasul', 'usuario_fluig', 'groups', 'permissions', 'is_active')
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("As senhas não coincidem")
+        return password2
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.save()
+            self.save_m2m()  # Save the many-to-many data for the form
+        return user
+
+
+class CustomCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
+    template_name = 'widgets/custom_checkbox_select.html'
+    option_template_name = 'widgets/custom_checkbox_option.html'
