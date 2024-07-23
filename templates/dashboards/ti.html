@@ -12,7 +12,7 @@
         <ul class="navbar-nav nav-pills">
             {% for servidor in servidores %}
             <li class="nav-item">
-                <a class="nav-link {% if servidor.id == servidor_selecionado.servidor.id %} active {% endif %}" href="{% url 'dashboard_ti' %}?servidor_id={{ servidor.id }}">{{ servidor.nome_servidor }}</a>
+                <a class="nav-link {% if servidor.id == servidor_selecionado.servidor.id %} active {% endif %}" href="{% url 'dashboard_fluig' %}?servidor_id={{ servidor.id }}">{{ servidor.nome_servidor }}</a>
             </li>
             {% endfor %}
         </ul>
@@ -104,10 +104,10 @@
     <div class="row text-center">
         <div class="col-sm-12 mt-4 mb-4 text-center">
             <div class="filtragem-status mb-3">
-                <a href="{% url 'dashboard_ti' %}?servidor_id={{ servidor_selecionado.servidor.id }}&status=todos" class="btn btn-outline-primary">Todos</a>
-                <a href="{% url 'dashboard_ti' %}?servidor_id={{ servidor_selecionado.servidor.id }}&status=sucesso" class="btn btn-success">Sucesso</a>
-                <a href="{% url 'dashboard_ti' %}?servidor_id={{ servidor_selecionado.servidor.id }}&status=warning" class="btn btn-warning">Warning</a>
-                <a href="{% url 'dashboard_ti' %}?servidor_id={{ servidor_selecionado.servidor.id }}&status=erro" class="btn btn-danger">Erro</a>
+                <a href="{% url 'dashboard_fluig' %}?servidor_id={{ servidor_selecionado.servidor.id }}&status=todos" class="btn btn-outline-primary">Todos</a>
+                <a href="{% url 'dashboard_fluig' %}?servidor_id={{ servidor_selecionado.servidor.id }}&status=sucesso" class="btn btn-success">Sucesso</a>
+                <a href="{% url 'dashboard_fluig' %}?servidor_id={{ servidor_selecionado.servidor.id }}&status=warning" class="btn btn-warning">Warning</a>
+                <a href="{% url 'dashboard_fluig' %}?servidor_id={{ servidor_selecionado.servidor.id }}&status=erro" class="btn btn-danger">Erro</a>
             </div>
         </div>
     </div>

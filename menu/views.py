@@ -22,3 +22,6 @@ def index(request):
 
 def erro_page(request):
     return render(request, "menu/utils/pages-error.html")
+
+def error_404_view(request, exception=None):
+    return render(request, 'menu/utils/pages-error404.html', {})

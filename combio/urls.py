@@ -17,13 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from menu.views import index, erro_page
+from menu.views import index, erro_page, error_404_view
 from django.conf.urls.static import static
 from django.conf import settings
 from .api import api
 from novosProjetos.views import novosprojetos_dashboard
 from django.views.generic.base import RedirectView
 
+handler404 = 'menu.views.error_404_view'
 
 
 urlpatterns = [
@@ -38,6 +39,7 @@ urlpatterns = [
     path('projetos/', include('novosProjetos.urls')),
     path('utils/', include('utils.urls')),
     path("error/",erro_page,name="erro_page"),
+    path("error404",error_404_view, name="error_404")
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

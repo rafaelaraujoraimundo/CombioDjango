@@ -31,7 +31,7 @@ SECRET_KEY = config('SECRET_KEY')
 CRYPTO_KEY_MODULO = config('CRYPT_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
@@ -230,3 +230,6 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_RESULT_EXTENDED = True
 #CELERY_CACHE_BACKEND = 'django-cache'
+
+
+

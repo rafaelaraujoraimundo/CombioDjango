@@ -50,7 +50,6 @@
                           {% endif %}
                               <form class="login" method="POST" action="{% url 'account_login' %}">
                                 {% csrf_token %}
-                                {% csrf_token %}
     <div class="form-group">
         <label for="{{ form.login.id_for_label }}">Endereço de E-mail</label>
         <input type="email" class="form-control {% if form.login.errors %}is-invalid{% endif %}"
