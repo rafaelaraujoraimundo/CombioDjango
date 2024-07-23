@@ -1,9 +1,9 @@
-FROM python:3.11-slim
+FROM python:3.12.3-slim
 
 RUN apt update
 RUN apt-get install libmariadb-dev-compat -y
 RUN apt install pkg-config -y
-RUN apt-get install gcc -y
+RUN apt-get install gcc g++ libffi-dev python3-dev -y 
 COPY . /app
 
 WORKDIR /app
