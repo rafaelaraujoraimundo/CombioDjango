@@ -11,6 +11,9 @@ services:
       - .:/app
       - static-data:/app/staticfiles
       - media-data:/app/media
+    command: >
+      sh -c "python manage.py collectstatic --no-input &&
+             gunicorn combio.wsgi:application -b 0.0.0.0:8000 --workers 4"
     depends_on:
       - redis
   redis:
