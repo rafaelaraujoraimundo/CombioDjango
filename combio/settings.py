@@ -33,10 +33,14 @@ CRYPTO_KEY_MODULO = config('CRYPT_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-#ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','127.0.0.1:810','127.0.0.1', 'localhost','172.16.0.15:810','172.16.0.15']
+ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['127.0.0.1', 'localhost','127.0.0.1:810','127.0.0.1', 'localhost','172.16.0.15:810','172.16.0.15']
 
-#sys.path.append(os.path.join(BASE_DIR, "apps"))
+#CRSF
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:810', 'http://localhost:810', 'http://172.16.0.15:810']
+CSRF_COOKIE_SECURE = True
 
 # Application definition
 
