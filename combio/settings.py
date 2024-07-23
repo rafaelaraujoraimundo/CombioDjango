@@ -34,7 +34,7 @@ CRYPTO_KEY_MODULO = config('CRYPT_KEY')
 DEBUG = config('DEBUG', cast=bool)
 
 #ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','127.0.0.1:810']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','127.0.0.1:810','127.0.0.1', 'localhost','172.16.0.15:810','172.16.0.15']
 
 #sys.path.append(os.path.join(BASE_DIR, "apps"))
 
