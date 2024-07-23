@@ -25,3 +25,6 @@ def erro_page(request):
 
 def error_404_view(request, exception=None):
     return render(request, 'menu/utils/pages-error404.html', {})
+
+def error_500_view(request, exception=None):
+    return render(request, 'menu/utils/pages-error500.html', {})

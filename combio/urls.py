@@ -24,8 +24,8 @@ from .api import api
 from novosProjetos.views import novosprojetos_dashboard
 from django.views.generic.base import RedirectView
 
-#handler404 = 'menu.views.error_404_view'
-
+handler404 = 'menu.views.error_404_view'
+handler500 = 'menu.views.error_500_view'
 
 urlpatterns = [
     path('admin/', admin.site.urls, name="admin1"),
