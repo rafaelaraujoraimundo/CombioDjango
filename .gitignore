@@ -7,6 +7,9 @@ db.sqlite3
 media
 uploads
 docker/**/
+/staticfiles/**
+staticfiles
+staticfiles/
 
 # Backup files #
 *.bak

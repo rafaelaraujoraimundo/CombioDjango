@@ -24,7 +24,7 @@ from .api import api
 from novosProjetos.views import novosprojetos_dashboard
 from django.views.generic.base import RedirectView
 
-handler404 = 'menu.views.error_404_view'
+#handler404 = 'menu.views.error_404_view'
 
 
 urlpatterns = [
