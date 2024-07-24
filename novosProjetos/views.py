@@ -284,7 +284,7 @@ def projeto_create(request):
     context = {'activegroup': activegroup,
                'title' : title}
     if request.method == 'POST':
-        form = ProjetoForm(request.POST)
+        form = ProjetoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('projetos_projetos_list')
