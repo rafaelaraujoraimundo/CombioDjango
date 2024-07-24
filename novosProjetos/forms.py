@@ -23,7 +23,7 @@ class ProjetoForm(forms.ModelForm):
         widgets = {
             'nome_projeto': forms.TextInput(attrs={'class': 'form-control'}),
             'data_entrega': forms.DateInput(format=('%Y-%m-%d'), attrs={'class': 'form-control', 'type': 'date'}),
-            'horas_utilizadas': forms.NumberInput(attrs={'class': 'form-control'}),
+            'horas_utilizadas': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'descricao_solucao': forms.Textarea(attrs={'class': 'form-control'}),
             'anexo_escopo': forms.FileInput(attrs={'class': 'form-control-file'}),
             'anexo_documentacao': forms.FileInput(attrs={'class': 'form-control-file'}),

@@ -1,0 +1,131 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2>Editar Projeto</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <!-- Campos do formulário -->
+
+        <!-- Campo Nome do Projeto -->
+        <div class="form-group">
+            <label for="{{ form.nome_projeto.id_for_label }}">Nome do Projeto</label>
+            <input type="text" class="form-control {% if form.nome_projeto.errors %}is-invalid{% endif %}" id="{{ form.nome_projeto.id_for_label }}" name="{{ form.nome_projeto.name }}" value="{{ form.nome_projeto.value|default_if_none:'' }}">
+            {% for error in form.nome_projeto.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campo Data de Entrega -->
+        <div class="form-group">
+            <label for="{{ form.data_entrega.id_for_label }}">Data de Entrega</label>
+            <input type="date" class="form-control {% if form.data_entrega.errors %}is-invalid{% endif %}" id="{{ form.data_entrega.id_for_label }}" name="{{ form.data_entrega.name }}" value="{{ form.data_entrega.value|date:'Y-m-d'|default_if_none:'' }}">
+            {% for error in form.data_entrega.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campo Horas Utilizadas -->
+        <div class="form-group">
+            <label for="{{ form.horas_utilizadas.id_for_label }}">Horas Utilizadas</label>
+            <input type="number" class="form-control {% if form.horas_utilizadas.errors %}is-invalid{% endif %}" id="{{ form.horas_utilizadas.id_for_label }}" name="{{ form.horas_utilizadas.name }}" value="{{ form.horas_utilizadas.value|stringformat:'s' }}" step: '0.01'>
+            {% for error in form.horas_utilizadas.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campo Consultoria -->
+        <div class="form-group">
+            <label for="{{ form.consultoria.id_for_label }}">Consultoria</label>
+            <select class="form-control {% if form.consultoria.errors %}is-invalid{% endif %}" id="{{ form.consultoria.id_for_label }}" name="{{ form.consultoria.name }}">
+                <option value="">---------</option>
+                {% for consultoria in form.consultoria.field.queryset %}
+                    <option value="{{ consultoria.pk }}" {% if form.consultoria.value == consultoria.pk %}selected{% endif %}>{{ consultoria.nome }}</option>
+                {% endfor %}
+            </select>
+            {% for error in form.consultoria.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campo Sistemas -->
+        <div class="form-group">
+            <label for="{{ form.sistemas.id_for_label }}">Sistemas</label>
+            <select class="form-control {% if form.sistemas.errors %}is-invalid{% endif %}" id="{{ form.sistemas.id_for_label }}" name="{{ form.sistemas.name }}">
+                <option value="">---------</option>
+                {% for sistema in form.sistemas.field.queryset %}
+                    <option value="{{ sistema.pk }}" {% if form.sistemas.value == sistema.pk %}selected{% endif %}>{{ sistema.nome }}</option>
+                {% endfor %}
+            </select>
+            {% for error in form.sistemas.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campo Descrição da Solução -->
+        <div class="form-group">
+            <label for="{{ form.descricao_solucao.id_for_label }}">Descrição da Solução</label>
+            <textarea class="form-control {% if form.descricao_solucao.errors %}is-invalid{% endif %}" id="{{ form.descricao_solucao.id_for_label }}" name="{{ form.descricao_solucao.name }}">{{ form.descricao_solucao.value|default_if_none:'' }}</textarea>
+            {% for error in form.descricao_solucao.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Anexo do Escopo -->
+        <div class="form-group">
+            <label for="{{ form.anexo_escopo.id_for_label }}">Anexo do Escopo</label>
+            {% if form.instance.anexo_escopo %}
+            <div>
+                <a href="{{ form.instance.anexo_escopo.url }}">Ver arquivo atual</a>
+            </div>
+            {% endif %}
+            <input type="file" class="form-control-file" id="{{ form.anexo_escopo.id_for_label }}" name="{{ form.anexo_escopo.name }}">
+            {% if form.anexo_escopo.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.anexo_escopo.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Anexo da Documentação -->
+        <div class="form-group">
+            <label for="{{ form.anexo_documentacao.id_for_label }}">Anexo da Documentação</label>
+            {% if form.instance.anexo_documentacao %}
+            <div>
+                <a href="{{ form.instance.anexo_documentacao.url }}">Ver arquivo atual</a>
+            </div>
+            {% endif %}
+            <input type="file" class="form-control-file" id="{{ form.anexo_documentacao.id_for_label }}" name="{{ form.anexo_documentacao.name }}">
+            {% if form.anexo_documentacao.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.anexo_documentacao.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.anexo_fontes.id_for_label }}">Anexo dos Fontes</label>
+            {% if form.instance.anexo_fontes %}
+            <div>
+                <a href="{{ form.instance.anexo_fontes.url }}">Ver arquivo atual</a>
+            </div>
+            {% endif %}
+            <input type="file" class="form-control-file" id="{{ form.anexo_fontes.id_for_label }}" name="{{ form.anexo_fontes.name }}">
+            {% if form.anexo_fontes.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.anexo_fontes.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Botão de Salvar -->
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+    </form>
+</div>
+{% endblock %}

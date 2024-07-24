@@ -1,4 +1,5 @@
 # Create your models here.
+from pathlib import Path
 from django.db import models
 from django.utils.timezone import now
 import os
@@ -68,13 +69,13 @@ class Projeto(models.Model):
         super().save(*args, **kwargs)
     
     def delete(self, *args, **kwargs):
-        # Delete attached files if they exist
-        if self.anexo_escopo:
-            os.remove(os.path.join(settings.MEDIA_ROOT, self.anexo_escopo.path))
-        if self.anexo_documentacao:
-            os.remove(os.path.join(settings.MEDIA_ROOT, self.anexo_documentacao.path))
-        if self.anexo_fontes:
-            os.remove(os.path.join(settings.MEDIA_ROOT, self.anexo_fontes.path))
-        
-        # Delete the model instance
+    # Lista de campos de arquivo
+        files = [self.anexo_escopo, self.anexo_documentacao, self.anexo_fontes]
+        for file_field in files:
+            if file_field:
+                file_path = Path(settings.MEDIA_ROOT) / file_field.path
+                if file_path.exists():
+                    file_path.unlink()  # Usar unlink para excluir o arquivo
+
+    # Deletar a instância do modelo após a remoção dos arquivos
         super().delete(*args, **kwargs)

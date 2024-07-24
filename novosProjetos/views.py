@@ -294,3 +294,26 @@ def projeto_create(request):
         form = ProjetoForm()
         context['form'] = form
     return render(request, 'projetos/projetos/projetos_form.html', context)
+
+
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_project_user', login_url='erro_page')  # Verifique a permissão adequada
+def edit_projeto(request, projeto_id):
+    projeto = get_object_or_404(Projeto, pk=projeto_id)
+    if request.method == 'POST':
+        form = ProjetoForm(request.POST, request.FILES, instance=projeto)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Projeto "{projeto.nome_projeto}" atualizado com sucesso!')
+            return redirect('projetos_projetos_list')  # Redirecione para a lista de projetos após sucesso
+        else:
+            messages.error(request, 'Erro ao atualizar o projeto. Por favor, verifique os dados inseridos.')
+    else:
+        form = ProjetoForm(instance=projeto)  # Cria um formulário preenchido com os dados do projeto
+
+    context = {
+        'form': form,
+        'projeto': projeto,
+        'title': 'Editar Projeto'
+    }
+    return render(request, 'projetos/projetos/projetos_edit.html', context)  # Use o template adequado

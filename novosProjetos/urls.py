@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import permission_required
 
 from .views import (consultoria_delete, consultoria_edit,  ConsultoriaList,
     novosprojetos_dashboard, novosprojetos_list, projetos_delete, ProjetosList,
-    sistema_create, sistemas_delete, sistemas_edit, SistemasList, consultoria_create, projeto_create)
+    sistema_create, sistemas_delete, sistemas_edit, SistemasList, consultoria_create, projeto_create, edit_projeto)
 
 urlpatterns = [
     path('dashboard', novosprojetos_dashboard, name="novosprojetos_dashboard"),
@@ -23,6 +23,7 @@ urlpatterns = [
     path('projetos/', ProjetosList.as_view(), name='projetos_projetos_list'),
     path('projetos/new/', projeto_create, name='projetos_projetos_new'),
     path('projetos/delete/<int:projetos_id>/',projetos_delete , name='projetos_projetos_delete'),
+    path('projetos/edit/<int:projeto_id>/', edit_projeto, name='projetos_projeto_edit'),
 
     #path('servidorfluig/', servidorfluig_list, name="administration_servidorfluig_list"),
     #path('servidorfluig/<int:servidor_id>/',servidorfluig_edit , name='administration_servidorfluig_edit'),
