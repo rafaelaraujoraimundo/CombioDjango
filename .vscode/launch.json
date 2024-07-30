@@ -21,7 +21,8 @@
             "request": "launch",
             "program": "${workspaceFolder}\\manage.py",
             "args": [
-                "runserver"
+                "runserver",
+                "0.0.0.0:80"
             ],
             "django": true,
             "justMyCode": true

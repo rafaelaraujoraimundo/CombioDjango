@@ -39,8 +39,10 @@ ALLOWED_HOSTS = ['*']
 #CRSF
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:810', 'http://localhost:810', 'http://172.16.0.15:810']
-CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = ['https://combiochatbot.share.zrok.io','http://127.0.0.1:810', 'http://localhost:810', 'http://172.16.0.15:810','http://179.191.91.6:8000','http://172.16.0.15:8000','http://0.0.0.0:8000']
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+SECURE_SSL_REDIRECT = False
 
 # Application definition
 
@@ -76,6 +78,7 @@ INSTALLED_APPS += [
     "utils",
     "api_v1",
     "novosProjetos",
+    "chatbot",
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -238,3 +241,10 @@ CELERY_RESULT_EXTENDED = True
 
 
 
+#EMAIL
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT =  config('EMAIL_PORT', cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER') #config('EMAIL_HOST_USER')  # substitua pelo seu e-mail do Gmail
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  #config('EMAIL_HOST_PASSWORD')   # substitua pela sua senha ou token de app

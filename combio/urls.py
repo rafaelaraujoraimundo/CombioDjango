@@ -39,7 +39,8 @@ urlpatterns = [
     path('projetos/', include('novosProjetos.urls')),
     path('utils/', include('utils.urls')),
     path("error/",erro_page,name="erro_page"),
-    path("error404",error_404_view, name="error_404")
+    path("error404",error_404_view, name="error_404"),
+    path('chatbot/', include('chatbot.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

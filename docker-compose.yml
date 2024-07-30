@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3'
 
 services:
   app:
@@ -75,6 +75,74 @@ services:
     volumes:
       - ./docker/portainer/data:/data
 
+
+  # set file ownership
+  zrok-init:
+    image: busybox
+    # matches uid:gid of "ziggy" in zrok container image
+    command: chown -Rc 2171:2171 /mnt/
+    user: root
+    volumes:
+      - zrok_env:/mnt
+
+  # enable zrok environment
+  zrok-enable:
+    image: ${ZROK_CONTAINER_IMAGE:-docker.io/openziti/zrok}
+    depends_on:
+      zrok-init:
+        condition: service_completed_successfully
+    entrypoint: zrok-enable.bash
+    volumes:
+      - ./docker/zrok/data:/mnt
+    environment:
+      HOME: /mnt
+      ZROK_ENABLE_TOKEN:
+      ZROK_API_ENDPOINT:
+      ZROK_ENVIRONMENT_NAME:
+
+  # reserve zrok frontend subdomain and start sharing the target
+  zrok-share:
+    image: ${ZROK_CONTAINER_IMAGE:-docker.io/openziti/zrok}
+    restart: unless-stopped
+    entrypoint: zrok-share.bash
+    depends_on:
+      nginx:
+        condition: service_started
+      zrok-enable:
+        condition: service_completed_successfully
+      
+    volumes:
+      - ./docker/zrok/data:/mnt
+    environment:
+      # internal configuration
+      HOME: /mnt  # zrok homedir in container
+
+      # most relevant options
+      ZROK_UNIQUE_NAME:     "combiochatbot" # name is used to construct frontend domain name, e.g. "myapp" in "myapp.share.zrok.io"
+      ZROK_BACKEND_MODE:    'proxy' # web, caddy, drive, proxy
+      ZROK_TARGET:          'http://172.16.0.19:810' # backend target, is a path in container filesystem unless proxy mode
+      ZROK_INSECURE:        # "--insecure" if proxy target has unverifiable TLS server certificate
+      ZROK_OAUTH_PROVIDER:  # google, github
+      ZROK_OAUTH_EMAILS:    # allow space-separated list of OAuth email address glob patterns
+      ZROK_BASIC_AUTH:      # username:password, mutually-exclusive with ZROK_OAUTH_PROVIDER
+
+      # least relevant options
+      ZROK_VERBOSE:           # "--verbose"
+      ZROK_SHARE_OPTS:        # additional arguments to "zrok reserve public" command
+      ZROK_FRONTENDS:         # "public"
+      PFXLOG_NO_JSON: "true"  # suppress JSON logging format
+
+  # demo server
+  zrok-test:
+    image: ${ZROK_CONTAINER_IMAGE:-docker.io/openziti/zrok}
+    command: test endpoint --address 0.0.0.0  # 9090
+
 volumes:
   static-data:
   media-data:
+  zrok_env:
+    driver: local
+    driver_opts:
+      type: 'none'
+      device: './docker/zrok/data'
+      o: 'bind'
