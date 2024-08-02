@@ -170,6 +170,7 @@ class BiApbTitAp(Base):
     num_dias = models.IntegerField(blank=True, null=True)
     responsavel = models.CharField(max_length=80, blank=True, null=True)
     nome_abrev = models.CharField(max_length=80, blank=True, null=True)
+    cnpj = models.CharField(max_length=40, blank=True, null=True)
 
     class Meta:
         managed = False
