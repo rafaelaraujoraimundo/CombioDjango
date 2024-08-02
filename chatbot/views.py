@@ -65,6 +65,8 @@ def process_incoming_message(message):
                                 execute_stage_action(wa_id, new_stage, message_body, message_id, timestamp_recebido )
                                 
                                 return  # Finaliza a função após processar a mensagem desejada
+                    else:
+                        print(f"Phone id: {phone_number_id}")
     except (KeyError, IndexError) as e:
         print(f"Error parsing message: {str(e)}")
 
