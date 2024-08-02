@@ -118,9 +118,9 @@ services:
       HOME: /mnt  # zrok homedir in container
 
       # most relevant options
-      ZROK_UNIQUE_NAME:     "combiochatbot" # name is used to construct frontend domain name, e.g. "myapp" in "myapp.share.zrok.io"
-      ZROK_BACKEND_MODE:    'proxy' # web, caddy, drive, proxy
-      ZROK_TARGET:          'http://172.16.0.15:810' # backend target, is a path in container filesystem unless proxy mode
+      ZROK_UNIQUE_NAME:      "${ZROK_UNIQUE_NAME}" # name is used to construct frontend domain name, e.g. "myapp" in "myapp.share.zrok.io"
+      ZROK_BACKEND_MODE:    ${ZROK_BACKEND_MODE} # web, caddy, drive, proxy
+      ZROK_TARGET:          "${ZROK_TARGET_DEV}" # backend target, is a path in container filesystem unless proxy mode
       ZROK_INSECURE:        # "--insecure" if proxy target has unverifiable TLS server certificate
       ZROK_OAUTH_PROVIDER:  # google, github
       ZROK_OAUTH_EMAILS:    # allow space-separated list of OAuth email address glob patterns
