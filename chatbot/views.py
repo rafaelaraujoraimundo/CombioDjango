@@ -32,36 +32,39 @@ def process_incoming_message(message):
         for entry in entries:
             changes = entry.get('changes', [])
             for change in changes:
-                if 'contacts' in change.get('value', {}) and 'messages' in change.get('value', {}):
-                    message_details = change.get('value', {}).get('messages', [])
-                    for msg in message_details:
-                        if 'text' in msg and 'body' in msg['text']:
-                            wa_id = msg.get('from')
-                            message_id = msg.get('id')
-                            message_body = msg['text']['body']
-                            naive_timestamp_recebido = datetime.fromtimestamp(int(msg.get('timestamp')))
-                            timestamp_recebido = timezone.make_aware(naive_timestamp_recebido, timezone.get_default_timezone())
-                            
-                            last_message = WhatsAppMessage.objects.filter(wa_id=wa_id).order_by('-id').first()
-                            if last_message and last_message.stage == 'finalizado':
-                                new_stage = 'initial'  # Reiniciar o estágio para initial após finalizado
-                            elif should_send_initial_message(wa_id):
-                                new_stage = 'initial'  # Tempo excedido, tratar como inicial
-                            else:
-                                new_stage = determine_next_stage(last_message.stage, message_body) if last_message else 'initial'
-                            
-                            WhatsAppMessage.objects.create(
-                                wa_id=wa_id,
-                                message_id=message_id,
-                                message_body=message_body,
-                                timestamp_recebido=timestamp_recebido,
-                                stage=new_stage
-                            )
-                            execute_stage_action(wa_id, new_stage, message_body, message_id, timestamp_recebido )
-                            
-                            # Salvar a mensagem no banco de dados com o novo estágio
-                            
-                            return  # Finaliza a função após processar a mensagem desejada
+                value = change.get('value', {})
+                if 'contacts' in value and 'messages' in value:
+                    # Verificação do phone_number_id
+                    phone_number_id = value.get('metadata', {}).get('phone_number_id')
+                    if phone_number_id == config('WHATSAPP_ID_RECEIVER'):
+                        message_details = value.get('messages', [])
+                        for msg in message_details:
+                            if 'text' in msg and 'body' in msg['text']:
+                                print(message)
+                                wa_id = msg.get('from')
+                                message_id = msg.get('id')
+                                message_body = msg['text']['body']
+                                naive_timestamp_recebido = datetime.fromtimestamp(int(msg.get('timestamp')))
+                                timestamp_recebido = timezone.make_aware(naive_timestamp_recebido, timezone.get_default_timezone())
+                                
+                                last_message = WhatsAppMessage.objects.filter(wa_id=wa_id).order_by('-id').first()
+                                if last_message and last_message.stage == 'finalizado':
+                                    new_stage = 'initial'  # Reiniciar o estágio para initial após finalizado
+                                elif should_send_initial_message(wa_id):
+                                    new_stage = 'initial'  # Tempo excedido, tratar como inicial
+                                else:
+                                    new_stage = determine_next_stage(last_message.stage, message_body) if last_message else 'initial'
+                                
+                                WhatsAppMessage.objects.create(
+                                    wa_id=wa_id,
+                                    message_id=message_id,
+                                    message_body=message_body,
+                                    timestamp_recebido=timestamp_recebido,
+                                    stage=new_stage
+                                )
+                                execute_stage_action(wa_id, new_stage, message_body, message_id, timestamp_recebido )
+                                
+                                return  # Finaliza a função após processar a mensagem desejada
     except (KeyError, IndexError) as e:
         print(f"Error parsing message: {str(e)}")
 

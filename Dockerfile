@@ -8,6 +8,7 @@ RUN apt update && \
 # Configura o diretório de trabalho
 WORKDIR /app
 
+ENV PYTHONUNBUFFERED=1
 # Instala dependências do Python
 # Copie apenas o requirements.txt inicialmente
 COPY requirements.txt /app/
