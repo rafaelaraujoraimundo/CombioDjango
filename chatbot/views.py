@@ -223,26 +223,28 @@ def send_template_message(to, template_name, language="pt_BR"):
     return response.json()
 
 def consulta_contato_datasul(cnpj):
-    url = "https://combio-dts-prod-prime.totvscloud.com.br/dts/datasul-rest/resources/prg/esp/combio/v1/api_chatbot/buscacontatos/"
+    url = f"{config('DATASUL_HOST')}/esp/combio/v1/api_chatbot/buscacontatos/"
     payload = json.dumps({"cnpj": cnpj})
     headers = {
-        'Authorization': 'Basic ci5yYWltdW5kbzpBbmluaEAxMzMxMTkxOA==',
+        'Authorization': f'Basic {config('DATASUL_TOKEN')}',
         'Content-Type': 'application/json',
     }
     response = requests.post(url, headers=headers, data=payload)
     if response.status_code == 200:
+        print(response.json())
         return response.json()
     return None
 
 
 def consulta_titulos_api(codigo_emit):
-    url = "https://combio-dts-prod-prime.totvscloud.com.br/dts/datasul-rest/resources/prg/esp/combio/v1/api_chatbot/buscatitulos/"
+    url = f"{config('DATASUL_HOST')}/esp/combio/v1/api_chatbot/buscatitulos/"
     payload = json.dumps({"codigo": codigo_emit})
     headers = {
-        'Authorization': 'Basic ci5yYWltdW5kbzpBbmluaEAxMzMxMTkxOA==',
+        'Authorization': f'Basic {config('DATASUL_TOKEN')}',
         'Content-Type': 'application/json',
     }
     response = requests.post(url, headers=headers, data=payload)
     if response.status_code == 200:
+        print(response.json())
         return response.json().get('items', [])
     return []
