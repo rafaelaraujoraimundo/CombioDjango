@@ -331,8 +331,8 @@ def send_message_chatbot(request):
                 # Chama a função de consulta do CNPJ
                 titulos = consulta_titulos_api_cnpj(user_message)
                 if titulos:
-                    nome_emit = "Nome da Empresa "  # Esse valor pode ser fixo ou pode vir da API se disponível
-                    mensagem = f"Empresa: *{nome_emit}*<br>"
+                    nome_emit = titulos[0]["nome_fornecedor"]  # Esse valor pode ser fixo ou pode vir da API se disponível
+                    mensagem = f"Empresa: <string>{nome_emit}</strong><br><br>"
                     for titulo in titulos:
                         cod_tit_ap = str(titulo['cod_tit_ap'])
                         cod_parcela = str(titulo['cod_parcela'])
@@ -348,7 +348,7 @@ def send_message_chatbot(request):
                             f"<strong>Valor Saldo</strong>: {val_sdo_tit_ap}<br>"
                         )
                     mensagem += (
-                        f"<br><br><strong>Política interna de Pagamentos:*</strong><br>"
+                        f"<br><strong>Política interna de Pagamentos:*</strong><br>"
                         f"Os títulos com data de vencimento entre os dias 1 e 15 serão pagos no dia 15 do mês atual.<br>"
                         f"Os títulos com data de vencimento entre os dias 16 e 31 serão pagos no último dia do mês atual.<br>"
                     )
@@ -363,7 +363,7 @@ def send_message_chatbot(request):
                 interaction.save()
                 
             else:
-                response = "CNPJ inválido. Favor digitar apenas números ou digite SAIR para voltar ao menu principal<br>"
+                response = "CNPJ inválido. Favor digitar apenas números ou digite SAIR para voltar ao menu principal"
         
         elif interaction.stage == 'status':
             if user_message.lower() == 'sair':

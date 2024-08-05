@@ -21,6 +21,27 @@
         </div>
     </form>
     <script>
+        function typeMessage(element, message, delay = 12) { // Ajuste de velocidade
+            let i = 0;
+            function typing() {
+                if (i < message.length) {
+                    const currentChar = message.charAt(i);
+                    if (currentChar === '<') {
+                        const tagClose = message.indexOf('>', i);
+                        if (tagClose !== -1) {
+                            element.append(message.substring(i, tagClose + 1));
+                            i = tagClose + 1;
+                        }
+                    } else {
+                        element.append(currentChar);
+                        i++;
+                    }
+                    setTimeout(typing, delay);
+                }
+            }
+            typing();
+        }
+
         $(document).ready(function() {
             $('#chat-form').on('submit', function(event) {
                 event.preventDefault();
@@ -34,7 +55,9 @@
                     },
                     success: function(data) {
                         $('#messages').append('<div class="message user-message"><strong>Você:</strong> ' + message + '</div>');
-                        $('#messages').append('<div class="message bot-message"><strong>ChatCombio:</strong> ' + data.response + '</div>');
+                        var botMessageElement = $('<div class="message bot-message"><strong>ChatCombio:</strong> </div>');
+                        $('#messages').append(botMessageElement);
+                        typeMessage(botMessageElement, data.response);
                         $('#message-input').val('');
                         $('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);
                     }
