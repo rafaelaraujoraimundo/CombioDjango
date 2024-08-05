@@ -1,17 +1,27 @@
+import re
 from django.http import JsonResponse, HttpResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 import json
 import datetime
 import requests
 from django.utils.dateparse import parse_datetime
 from datetime import datetime, timedelta
-from dashboard.models import BiApbTitAp
-from .models import WhatsAppMessage
+from .models import WhatsAppMessage, Message, Interaction
 import json
 from django.utils import timezone
 from decouple import config
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
+from .utils import consulta_titulos_api_cnpj
+from django.contrib.auth.decorators import login_required
+
+
+def clear_session(request):
+    
+    request.session.flush()
+    return HttpResponse("Session cleared")
+
 
 @csrf_exempt
 def whatsapp_webhook(request):
@@ -40,7 +50,7 @@ def process_incoming_message(message):
                         message_details = value.get('messages', [])
                         for msg in message_details:
                             if 'text' in msg and 'body' in msg['text']:
-                                print(message)
+                                #print(message)
                                 wa_id = msg.get('from')
                                 message_id = msg.get('id')
                                 message_body = msg['text']['body']
@@ -62,6 +72,7 @@ def process_incoming_message(message):
                                     timestamp_recebido=timestamp_recebido,
                                     stage=new_stage
                                 )
+                                #print(f" wa_di: {wa_id} / new_stage: {new_stage}")
                                 execute_stage_action(wa_id, new_stage, message_body, message_id, timestamp_recebido )
                                 
                                 return  # Finaliza a função após processar a mensagem desejada
@@ -189,6 +200,7 @@ def execute_stage_action(wa_id, stage, message_body, message_id, timestamp_receb
 
 def send_message(to, text):
     token = config('TOKEN_WHATSAPP')
+    print(token)
     url = f"https://graph.facebook.com/v20.0/{config('WHATSAPP_ID')}/messages"
     headers = {
         'Authorization': 'Bearer ' + token,
@@ -201,14 +213,15 @@ def send_message(to, text):
         'text': {'preview_url': False, 'body': text}
     }
     response = requests.post(url, headers=headers, json=data)
+    print(response.json())
     return response.json()
 
 def send_template_message(to, template_name, language="pt_BR"):
     token = config('TOKEN_WHATSAPP')
-    
+    print(token)
     url = f"https://graph.facebook.com/v20.0/{config('WHATSAPP_ID')}/messages"
     headers = {
-        'Authorization': 'Bearer ' + token,
+        'Authorization': 'Bearer '+ token,
         'Content-Type': 'application/json',
     }
     data = {
@@ -222,9 +235,10 @@ def send_template_message(to, template_name, language="pt_BR"):
             },
         }
     }
-    print(data)
+    
 
     response = requests.post(url, headers=headers, json=data)
+    print(response.json())
     return response.json()
 
 def consulta_contato_datasul(cnpj):
@@ -236,7 +250,6 @@ def consulta_contato_datasul(cnpj):
     }
     response = requests.post(url, headers=headers, data=payload)
     if response.status_code == 200:
-        print(response.json())
         return response.json()
     return None
 
@@ -253,3 +266,126 @@ def consulta_titulos_api(codigo_emit):
         print(response.json())
         return response.json().get('items', [])
     return []
+
+@login_required
+def chatbot_view(request):
+
+    context = {
+        'activegroup': 'chatbot',
+        'title': 'Chatbot Combio',
+       }
+    return render(request, 'chatbot/chatbot.html', context)
+
+@login_required
+def send_message_chatbot(request):
+    if request.method == 'POST':
+        user_message = request.POST.get('message')
+        user = request.user
+
+        # Verifique se a sessão existe, caso contrário, crie uma nova
+        if not request.session.session_key:
+            request.session.create()
+
+        session_key = request.session.session_key
+
+        # Inicializar a variável de resposta
+        response = "Comando não reconhecido. Por favor, tente novamente.<br>"
+
+        # Obter ou criar a interação baseada no usuário logado e na sessão
+        interaction, created = Interaction.objects.get_or_create(
+            user=user, 
+            session_key=session_key, 
+            defaults={'stage': 'inicio'}
+        )
+        
+        if interaction.stage == 'inicio':
+            if user_message == '1':
+                interaction.stage = 'solicitar_cnpj'
+                interaction.save()
+                response = "Por favor, digite o número do CNPJ:<br>"
+            elif user_message == '2':
+                interaction.stage = 'status'
+                interaction.save()
+                response = ("Selecione o tipo de Status:<br>"
+                            "1- Solicitações<br>"
+                            "2- Pedidos de Compra<br>"
+                            "3- Ordem de Compra<br>"
+                            "Ou digite SAIR para voltar ao menu inicial<br>")
+            else:
+                response = ("Bem vindos ao ChatBot da Combio.<br>"
+                            "Por favor escolha uma opção<br>"
+                            "1- Financeiro<br>"
+                            "2- Status de Solicitações, Pedidos e ou Ordem de Compra<br>")
+        
+        elif interaction.stage == 'solicitar_cnpj':
+            if user_message.lower() == 'sair':
+                interaction.stage = 'inicio'
+                interaction.save()
+                response = ("Bem vindos ao ChatBot da Combio.<br>"
+                            "Por favor escolha uma opção<br>"
+                            "1- Financeiro<br>"
+                            "2- Status de Solicitações, Pedidos e ou Ordem de Compra<br>")
+            elif re.match(r'^\d{14}$', user_message):
+                interaction.cnpj = user_message
+                
+                # Chama a função de consulta do CNPJ
+                titulos = consulta_titulos_api_cnpj(user_message)
+                if titulos:
+                    nome_emit = "Nome da Empresa "  # Esse valor pode ser fixo ou pode vir da API se disponível
+                    mensagem = f"Empresa: *{nome_emit}*<br>"
+                    for titulo in titulos:
+                        cod_tit_ap = str(titulo['cod_tit_ap'])
+                        cod_parcela = str(titulo['cod_parcela'])
+                        dat_emis_docto = datetime.strptime(titulo['dat_emis_docto'], '%Y-%m-%d').strftime('%d/%m/%Y') if titulo['dat_emis_docto'] else 'N/A'
+                        dat_vencto_tit_ap = datetime.strptime(titulo['dat_vencto_tit_ap'], '%Y-%m-%d').strftime('%d/%m/%Y') if titulo['dat_vencto_tit_ap'] else 'N/A'
+                        val_sdo_tit_ap = f"{titulo['val_sdo_tit_ap']:,.2f}" if titulo['val_sdo_tit_ap'] else '0.00'
+
+                        mensagem += (
+                            f"\n"
+                            f"<strong>NF</strong>: {cod_tit_ap}, "
+                            f"<strong>Emissão</strong>: {dat_emis_docto}, "
+                            f"<strong>Vencimento</strong>: {dat_vencto_tit_ap}, "
+                            f"<strong>Valor Saldo</strong>: {val_sdo_tit_ap}<br>"
+                        )
+                    mensagem += (
+                        f"<br><br><strong>Política interna de Pagamentos:*</strong><br>"
+                        f"Os títulos com data de vencimento entre os dias 1 e 15 serão pagos no dia 15 do mês atual.<br>"
+                        f"Os títulos com data de vencimento entre os dias 16 e 31 serão pagos no último dia do mês atual.<br>"
+                    )
+                else:
+                    mensagem = "Nenhum título encontrado para o CNPJ fornecido.<br>"
+                
+                # Definir a resposta e reiniciar o estágio
+                response = mensagem + "<br><br>Obrigado por utilizar nosso ChatBot. Você será redirecionado ao início.<br>"
+                
+                # Reiniciar o estágio da interação
+                interaction.stage = 'inicio'
+                interaction.save()
+                
+            else:
+                response = "CNPJ inválido. Favor digitar apenas números ou digite SAIR para voltar ao menu principal<br>"
+        
+        elif interaction.stage == 'status':
+            if user_message.lower() == 'sair':
+                interaction.stage = 'inicio'
+                interaction.save()
+                response = ("Bem vindos ao ChatBot da Combio.<br>"
+                            "Por favor escolha uma opção<br>"
+                            "1- Financeiro<br>"
+                            "2- Status de Solicitações, Pedidos e ou Ordem de Compra<br>")
+            elif user_message in ['1', '2', '3']:
+                # Aqui você pode adicionar a lógica para cada opção
+                interaction.stage = 'inicio'
+                interaction.save()
+                response = "Processando sua solicitação..."
+            else:
+                response = ("Selecione o tipo de Status:<br>"
+                            "1- Solicitações<br>"
+                            "2- Pedidos de Compra<br>"
+                            "3- Ordem de Compra<br>"
+                            "Ou digite SAIR para voltar ao menu inicial<br>")
+
+        else:
+            response = "Comando não reconhecido. Por favor, tente novamente.<br>"
+
+        return JsonResponse({'response': response})

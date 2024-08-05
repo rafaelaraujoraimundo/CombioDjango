@@ -1,0 +1,45 @@
+{% extends 'menu/index.html' %}
+{% block content %}
+{% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/combio.css' %}">
+    
+    <div id="chat-window" class="comment-area mt-3">
+        <div id="messages" class="p-3">
+            <div class="message bot-message">
+                <strong>ChatCombio:</strong> Bem vindos ao ChatBot da Combio.<br>Por favor escolha uma opção<br>1- Financeiro<br>2- Status de Solicitações, Pedidos e ou Ordem de Compra
+            </div>
+        </div>
+    </div>
+    <form id="chat-form">
+        <div class="row mt-4 comment-text d-flex align-items-center mt-3">
+            <div class="col">
+                <input type="text" id="message-input" class="form-control" name="message" autocomplete="off" required>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary btn-lg">Enviar</button>
+            </div>
+        </div>
+    </form>
+    <script>
+        $(document).ready(function() {
+            $('#chat-form').on('submit', function(event) {
+                event.preventDefault();
+                var message = $('#message-input').val();
+                $.ajax({
+                    url: '{% url "send_message_chatbot" %}',
+                    method: 'POST',
+                    data: {
+                        'message': message,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(data) {
+                        $('#messages').append('<div class="message user-message"><strong>Você:</strong> ' + message + '</div>');
+                        $('#messages').append('<div class="message bot-message"><strong>ChatCombio:</strong> ' + data.response + '</div>');
+                        $('#message-input').val('');
+                        $('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock content %}

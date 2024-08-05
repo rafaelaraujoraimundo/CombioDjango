@@ -1,0 +1,42 @@
+
+.message {
+    max-width: 70%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    position: relative;
+    clear: both;
+    color: white; /* Ajuste a cor da letra para branco */
+}
+
+.user-message {
+    background-color: #1c361f; /* Cor do balão do usuário */
+    float: right;
+    text-align: right;
+}
+
+.bot-message {
+    background-color: #399444; /* Cor do balão do bot */
+    float: left;
+    text-align: left;
+}
+
+#chat-window {
+    height: calc(100vh - 300px); /* Ajuste a altura do chat window */
+    overflow-y: auto;
+    padding-bottom: 40px; /* Espaço suficiente para o formulário de entrada */
+}
+
+#chat-form {
+    position: fixed;
+    bottom: 60px; /* Ajuste a posição para garantir que não seja sobreposto pelo footer */
+    width: 100%;
+    padding: 10px;
+    background-color: white; /* Fundo branco para o formulário de entrada */
+    border-top: 1px solid #ccc;
+    z-index: 1000; /* Garantir que o formulário de entrada fique acima do conteúdo */
+}
+
+#message-input {
+    background: white;
+}
