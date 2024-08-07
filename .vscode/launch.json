@@ -22,7 +22,7 @@
             "program": "${workspaceFolder}\\manage.py",
             "args": [
                 "runserver",
-                "0.0.0.0:80"
+                "0.0.0.0:8000"
             ],
             "django": true,
             "justMyCode": true
