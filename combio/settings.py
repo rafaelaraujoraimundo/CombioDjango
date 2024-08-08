@@ -34,7 +34,7 @@ CRYPTO_KEY_MODULO = config('CRYPT_KEY')
 DEBUG = config('DEBUG', cast=bool)
 
 #ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['179.191.91.6', '127.0.0.1', 'localhost', '172.16.0.15', 'chat.combio.com.br','combiochatbot.share.zrok.io']
+ALLOWED_HOSTS = ['179.191.91.6', '127.0.0.1', 'localhost', '172.16.0.15', 'chat.combio.com.br','combiochatbot.share.zrok.io','172.16.0.19']
 
 #CRSF
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
