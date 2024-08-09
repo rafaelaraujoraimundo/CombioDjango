@@ -57,8 +57,8 @@ def send_message_chatbot(request):
                 interaction.stage = 'status'
                 interaction.save()
                 response = ("Selecione o tipo de Status:<br>"
-                            "1- Solicitações<br>"
-                            "2- Pedidos de Compra<br>"
+                            "1- Pedidos de Compra<br>"
+                            "2- Solicitações<br>"
                             "3- Ordem de Compra<br>"
                             "Ou digite SAIR para voltar ao menu inicial<br>")
             else:
@@ -119,10 +119,14 @@ def send_message_chatbot(request):
                             "1- Financeiro<br>"
                             "2- Status de Solicitações, Pedidos e ou Ordem de Compra<br>")
             elif user_message in ['1', '2', '3']:
-                if user_message == '2':
+                if user_message == '1':
                     interaction.stage = 'consulta_pedido'
                     interaction.save()
                     response = "Por favor, digite o número do pedido de compra:<br>"
+                elif user_message in ['2', '3']:  # Opções 2 e 3 para "Solicitações" e "Ordem de Compra"
+                    response = "Modulo não implantado<br><br>Obrigado por utilizar nosso ChatBot.<br>"
+                    interaction.stage = 'inicio'
+                    interaction.save()
                 else:
                     interaction.stage = 'inicio'
                     interaction.save()
@@ -152,13 +156,14 @@ def send_message_chatbot(request):
                     end_entrega = pedido.get('end-entrega', 'N/A')
 
                     mensagem = (
-                        f"<br>Pedido: {numero_pedido}<br>"
-                        f"Filial: {end_entrega}<br>"
+                        f"<br> Filial: {end_entrega} - "
+                        f"Pedido: {numero_pedido}<br>"
                         f"Nome Emitente: {nome_emit}<br>"
                         f"MLA Aprovação: {responsavel}<br>"
-                        f"Valor Total: {valor_total}<br>"
-                        f"Emergencial: {emergencial}<br>"
-                        f"Aprovado: {aprovado}<br>"
+                        f"Valor Total: R$ {float(valor_total):,.2f}<br>"
+                        f"Aprovado: {'SIM' if aprovado else 'NÃO'} - "
+                        f"Emergencial: {'SIM' if emergencial else 'NÃO'}<br>"
+                        
                         f"<br>Recebimentos:<br>"
                     )
 
@@ -168,7 +173,7 @@ def send_message_chatbot(request):
                             f"- Data Movimento: {data_movto}, "
                             f"Nota: {receb.get('numero-nota', 'N/A')}, "
                             f"Quantidade Recebida: {receb.get('quant-receb', 'N/A')}, "
-                            f"Preço Unitário: {receb.get('pre-unit-for', 'N/A')}<br>"
+                            f"Preço Unitário: R$ {float(receb.get('pre-unit-for', 0)):,.2f}<br>"
                         )
 
                     mensagem += "<br>Ordens de Compra:<br>"
@@ -180,8 +185,8 @@ def send_message_chatbot(request):
                                 f"Cod. Item: {ordem.get('it-codigo', 'N/A')}, "
                                 f"Descrição: {ordem.get('it-codigo-desc', 'N/A')}, "
                                 f"Quantidade Solicitada: {ordem.get('qt-solic', 'N/A')}, "
-                                f"Preço Unitário: {ordem.get('preco-unit', 'N/A')}<br>"
-                            )
+                                f"Preço Unitário: R$ {float(ordem.get('preco-unit', 0)):,.2f}<br>"
+                                                       )
                         else:
                             mensagem += "...<br>"
                             break
@@ -190,7 +195,7 @@ def send_message_chatbot(request):
                         
                         aprovacao_data = consulta_aprovacao_pedido(numero_pedido)
                         if aprovacao_data and 'items' in aprovacao_data:
-                            mensagem += "<br>Aprovações:<br>"
+                            mensagem += "<br>Aprovações:"
                             for aprov in aprovacao_data['items']:
                                 dt_geracao = aprov.get('dt_geracao', 'N/A')
                                 cod_usuar = aprov.get('cod_usuar', 'N/A')
@@ -200,15 +205,17 @@ def send_message_chatbot(request):
 
                                 situacao = "Pendente" if ind_situacao == 1 else "Aprovado"
                                 mensagem += (
-                                    f"- Situação: {situacao.upper()}, "
+                                    f"<br>- Situação: {situacao.upper()}, "
                                     f"Data Geração: {dt_geracao}, "
                                     f"Usuário: {cod_usuar}, "
                                     f"Nome: {nome_usuar}, "
-                                    
-                                    f"Data Aprovação: {dt_aprova}<br>"
-                                )
+                                    )
+                                if dt_aprova:
+                                    data_formatada = datetime.strptime(dt_aprova, '%Y-%m-%d').strftime('%d/%m/%Y')
+                                    mensagem += f"Data Aprovação: {data_formatada}"
+                                
 
-                    response = mensagem + "<br>Obrigado por utilizar nosso ChatBot.<br>"
+                    response = mensagem + "<br><br>Obrigado por utilizar nosso ChatBot.<br>"
                 else:
                     response = "Pedido não encontrado ou número de pedido inválido.<br>"
 
@@ -216,7 +223,13 @@ def send_message_chatbot(request):
                 interaction.save()
 
         else:
-            response = "Comando não reconhecido. Por favor, tente novamente.<br>"
+            # Qualquer tecla pressionada após a interação
+            response = ("Bem vindos ao ChatBot da Combio.<br>"
+                        "Por favor escolha uma opção<br>"
+                        "1- Financeiro<br>"
+                        "2- Status de Solicitações, Pedidos e ou Ordem de Compra<br>")
+            interaction.stage = 'inicio'
+            interaction.save()
 
         return JsonResponse({'response': response})
 
