@@ -21,9 +21,14 @@
         </div>
     </form>
     <script>
+        function scrollToBottom() {
+            $('#chat-window').animate({ scrollTop: $('#chat-window')[0].scrollHeight }, 500);
+        }
+        
         function typeMessage(element, message, delay = 1) { // Ajuste de velocidade
             let i = 0;
             function typing() {
+                //scrollToBottom()
                 if (i < message.length) {
                     const currentChar = message.charAt(i);
                     if (currentChar === '<') {
@@ -37,15 +42,22 @@
                         i++;
                     }
                     setTimeout(typing, delay);
+                    //scrollToBottom(); 
+                } else {
+                   scrollToBottom();  // Certifique-se de rolar para o fundo após a digitação
                 }
             }
             typing();
+            scrollToBottom();
         }
-
+        
         $(document).ready(function() {
             $('#chat-form').on('submit', function(event) {
                 event.preventDefault();
                 var message = $('#message-input').val();
+                $('#messages').append('<div class="message user-message"><strong>Você:</strong> ' + message + '</div>');
+             // Rolagem após a mensagem do usuário
+        
                 $.ajax({
                     url: '{% url "send_message_chatbot" %}',
                     method: 'POST',
@@ -54,12 +66,12 @@
                         'csrfmiddlewaretoken': '{{ csrf_token }}'
                     },
                     success: function(data) {
-                        $('#messages').append('<div class="message user-message"><strong>Você:</strong> ' + message + '</div>');
                         var botMessageElement = $('<div class="message bot-message"><strong>ChatCombio:</strong> </div>');
                         $('#messages').append(botMessageElement);
                         typeMessage(botMessageElement, data.response);
+                        scrollToBottom();
                         $('#message-input').val('');
-                        $('#chat-window').scrollTop($('#chat-window')[0].scrollHeight);
+                        
                     }
                 });
             });
