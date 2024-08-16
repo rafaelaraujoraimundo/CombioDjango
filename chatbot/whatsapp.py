@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from decouple import config
 import requests
-from .models import WhatsAppMessage
-from .utils import consulta_titulos_api_cnpj
+from .models import Contatos, WhatsAppMessage
 from datetime import datetime
+from .whatsapp_interno import process_internal_message
 
 def process_incoming_message(message):
     try:
@@ -23,6 +23,12 @@ def process_incoming_message(message):
                                 wa_id = msg.get('from')
                                 message_id = msg.get('id')
                                 message_body = msg['text']['body']
+                                # Verifica se o número está registrado como um contato interno
+                                contato_model = Contatos.objects.filter(telefone=wa_id).first()
+                                if contato_model:
+                                    # Redireciona o processamento para o arquivo whatsapp_interno.py
+                                    process_internal_message(wa_id, msg)
+                                    return
                                 naive_timestamp_recebido = datetime.fromtimestamp(int(msg.get('timestamp')))
                                 timestamp_recebido = timezone.make_aware(naive_timestamp_recebido, timezone.get_default_timezone())
 
@@ -88,7 +94,8 @@ def execute_stage_action(wa_id, stage, message_body, message_id, timestamp_receb
         contato_data = consulta_contato_datasul(cnpj)
         if contato_data:
             contatos_validos = [item for item in contato_data['items'] if item['telefone'] == wa_id]
-            if not contatos_validos:
+            contato_model = Contatos.objects.filter(telefone=wa_id).first()
+            if not contatos_validos and not contato_model:
                 send_message(wa_id, "Nenhum telefone correspondente encontrado para o CNPJ fornecido. Por favor, solicite o cadastro para a equipe de compras.")
                 WhatsAppMessage.objects.create(
                     wa_id=wa_id,
@@ -99,12 +106,12 @@ def execute_stage_action(wa_id, stage, message_body, message_id, timestamp_receb
                 )
                 send_message(wa_id, f"Obrigado por utilizar nosso ChatBot...")
                 return
-            nome_contato = contatos_validos[0]['nome_contato']
-            nome_emit = contatos_validos[0]['nome_emit']
-            codigo_emit = contatos_validos[0]['codigo']
-
-        titulos = consulta_titulos_api(codigo_emit)
+            nome_contato = contatos_validos[0]['nome_contato'] if contatos_validos else contato_model.nome
+            #nome_emit = contatos_validos[0]['nome_emit']
+            #codigo_emit = contatos_validos[0]['codigo']
+        titulos = consulta_titulos_api(cnpj)
         if titulos:
+            nome_emit = titulos[0]['nome_fornecedor']
             mensagem = f"Olá {nome_contato}, segue informações de NF abertas em nosso sistema:\n\n Empresa: *{nome_emit}* \n"
             for titulo in titulos:
                 cod_tit_ap = str(titulo['cod_tit_ap'])
@@ -197,9 +204,9 @@ def consulta_contato_datasul(cnpj):
         return response.json()
     return None
 
-def consulta_titulos_api(codigo_emit):
-    url = f"{config('DATASUL_HOST')}/esp/combio/v1/api_chatbot/buscatitulos/"
-    payload = json.dumps({"codigo": codigo_emit})
+def consulta_titulos_api(cnpj):
+    url = f"{config('DATASUL_HOST')}/esp/combio/v1/api_chatbot/piBuscatitulosCNPJ/"
+    payload = json.dumps({"cnpj": cnpj})
     headers = {
         'Authorization': f'Basic {config('DATASUL_TOKEN')}',
         'Content-Type': 'application/json',

@@ -27,3 +27,15 @@ class Interaction(models.Model):
 
     class Meta:
         unique_together = ('user', 'session_key')
+
+
+
+class Contatos(models.Model):
+    nome = models.CharField(max_length=100)
+    unidade = models.CharField(max_length=50)
+    setor =  models.CharField(max_length=50, default='TI')
+    cargo = models.CharField(max_length=50, default='Cargo')
+    telefone = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.nome
