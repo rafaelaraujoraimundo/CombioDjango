@@ -61,9 +61,8 @@ INSTALLED_APPS += [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "global_permissions",
-    "crispy_forms",
     "chartkick.django",
-    "chartjs",
+  
     "django_extensions",
     "ninja_extra",
     "django_celery_results",
@@ -79,6 +78,7 @@ INSTALLED_APPS += [
     "api_v1",
     "novosProjetos",
     "chatbot",
+    "inventario",
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

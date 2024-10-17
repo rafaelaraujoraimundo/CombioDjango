@@ -17,10 +17,12 @@ from api_v1.models import FluigDatabaseInfo, FluigDatabaseSize, FluigOperationSy
 from administration.models import ServidorFluig
 import chartify
 from django.utils import timezone
+from inventario.tasks import populate_hardware_data
 
 
 def view_padrao(request):
     activegroup = 'Dashboard'
+    
     context = {'activegroup': activegroup}
     return render(request, 'dashboards/ti.html', context)
 

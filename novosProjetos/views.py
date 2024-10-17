@@ -11,7 +11,7 @@ from administration.models import ServidorFluig
 from django.db.models import F, Sum
 from django.utils.decorators import method_decorator
 from django.core.mail import EmailMessage
-
+from inventario.tasks import populate_hardware_data
 # Create your views here.
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
 def novosprojetos_dashboard(request):
@@ -20,7 +20,7 @@ def novosprojetos_dashboard(request):
     consultoria_id = request.GET.get('consultoria_id')
     consultorias = Consultoria.objects.all()
     sistemas = Sistemas.objects.all()
-    email = EmailMessage(
+    """ email = EmailMessage(
     'Assunto do e-mail - TESTE',
     '<p>Este é um e-mail <strong>HTML DESENVOLVIMENTO</strong></p>',
     'rafael.araujo@combioenergia.com.br',
@@ -28,7 +28,8 @@ def novosprojetos_dashboard(request):
     headers={'Message-ID': 'foo'},
 )
     email.content_subtype = 'html'  # Indica que o corpo do e-mail deve ser tratado como HTML
-    email.send()
+    email.send() """
+
     if consultoria_id:
         projetos_filtrados = Projeto.objects.filter(consultoria__id=consultoria_id)
         consultoria_selecionada = Consultoria.objects.get(id=consultoria_id)
