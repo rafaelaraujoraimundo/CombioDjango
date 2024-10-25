@@ -130,8 +130,8 @@ def status_delete(request, status_id):
     return redirect('status_list')
 
 
-
-# View para listagem dos itens de estoque
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class EstoqueList(ListView):
     model = Estoque
     queryset = Estoque.objects.all()
@@ -145,7 +145,7 @@ class EstoqueList(ListView):
 
 # View para criação de novos itens de estoque
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class EstoqueCreate(CreateView):
     model = Estoque
     form_class = EstoqueForm
@@ -160,7 +160,7 @@ class EstoqueCreate(CreateView):
 
 # View para editar itens de estoque existentes
 @login_required(login_url='account_login')
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def estoque_edit(request, estoque_id):
     activegroup = 'inventario'
     title = 'Edição de Item no Estoque'
@@ -180,7 +180,7 @@ def estoque_edit(request, estoque_id):
 
 # View para exclusão de itens de estoque
 @login_required(login_url='account_login')
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def estoque_delete(request, estoque_id):
     estoque = get_object_or_404(Estoque, pk=estoque_id)
     if request.method == "POST":
@@ -191,6 +191,7 @@ def estoque_delete(request, estoque_id):
     return redirect('estoque_list')
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ControlekitList(ListView):
     model = Controlekit
     template_name = 'inventario/controlekit/controlekit_list.html'
@@ -203,7 +204,7 @@ class ControlekitList(ListView):
 
 # View para criar novo kit
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ControlekitCreate(CreateView):
     model = Controlekit
     form_class = ControlekitForm
@@ -227,7 +228,7 @@ class ControlekitCreate(CreateView):
 
 # View para editar kit
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ControlekitUpdate(UpdateView):
     model = Controlekit
     form_class = ControlekitForm
@@ -246,7 +247,7 @@ class ControlekitUpdate(UpdateView):
 
 # View para excluir kit
 @login_required(login_url='account_login')
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def controlekit_delete(request, controlekit_id):
     controlekit = get_object_or_404(Controlekit, pk=controlekit_id)
     if request.method == "POST":
@@ -269,7 +270,7 @@ class ControleFonesList(ListView):
 
 # View para criar novo fone
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ControleFonesCreate(CreateView):
     model = ControleFones
     form_class = ControleFonesForm
@@ -287,7 +288,7 @@ class ControleFonesCreate(CreateView):
 
 # View para editar fone
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ControleFonesUpdate(UpdateView):
     model = ControleFones
     form_class = ControleFonesForm
@@ -305,7 +306,7 @@ class ControleFonesUpdate(UpdateView):
 
 # View para excluir fone
 @login_required(login_url='account_login')
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def controlefones_delete(request, controlefones_id):
     controlefones = get_object_or_404(ControleFones, pk=controlefones_id)
     if request.method == "POST":
@@ -329,7 +330,7 @@ class CelularList(ListView):
 
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class CelularCreate(CreateView):
     model = Celular
     form_class = CelularForm
@@ -358,7 +359,7 @@ class CelularCreate(CreateView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class CelularUpdate(UpdateView):
     model = Celular
     form_class = CelularForm
@@ -378,7 +379,7 @@ class CelularUpdate(UpdateView):
 
 
 @login_required(login_url='account_login')
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def celular_delete(request, celular_id):
     celular = get_object_or_404(Celular, pk=celular_id)
     if request.method == "POST":
@@ -400,7 +401,7 @@ class AcoesProntuarioList(ListView):
 
 # Criação de nova Ação de Prontuário
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class AcoesProntuarioCreate(CreateView):
     model = AcoesProntuario
     form_class = AcoesProntuarioForm
@@ -415,7 +416,7 @@ class AcoesProntuarioCreate(CreateView):
 
 # Edição de Ações de Prontuário
 @login_required(login_url='account_login')
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def acoesprontuario_edit(request, acoesprontuario_id):
     activegroup = 'administration'
     title = 'Edição de Ação de Prontuário'
@@ -435,7 +436,7 @@ def acoesprontuario_edit(request, acoesprontuario_id):
 
 # Exclusão de Ações de Prontuário
 @login_required(login_url='account_login')
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def acoesprontuario_delete(request, acoesprontuario_id):
     acoesprontuario = get_object_or_404(AcoesProntuario, pk=acoesprontuario_id)
     if request.method == "POST":
@@ -447,7 +448,7 @@ def acoesprontuario_delete(request, acoesprontuario_id):
 
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioCelularListView(ListView):
     model = ProntuarioCelular
     template_name = 'inventario/celular/prontuario_celular_list.html'
@@ -468,7 +469,7 @@ class ProntuarioCelularListView(ListView):
 
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioCelularCreate(CreateView):
     model = ProntuarioCelular
     form_class = ProntuarioCelularForm
@@ -508,7 +509,7 @@ class ProntuarioCelularCreate(CreateView):
 
 # View para editar um registro de ação no prontuário do celular
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioCelularUpdate(UpdateView):
     model = ProntuarioCelular
     form_class = ProntuarioCelularForm
@@ -533,7 +534,7 @@ class ProntuarioCelularUpdate(UpdateView):
 
 # View para excluir um registro de ação do prontuário do celular
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioCelularDelete(DeleteView):
     model = ProntuarioCelular
     template_name = 'inventario/celular/prontuario_celular_confirm_delete.html'
@@ -561,7 +562,7 @@ class ProntuarioMonitorListView(ListView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioMonitorCreate(CreateView):
     model = ProntuarioMonitor
     form_class = ProntuarioMonitorForm
@@ -602,7 +603,7 @@ class ProntuarioMonitorCreate(CreateView):
 
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioMonitorUpdate(UpdateView):
     model = ProntuarioMonitor
     form_class = ProntuarioMonitorForm
@@ -643,7 +644,7 @@ class ProntuarioMonitorUpdate(UpdateView):
         return reverse_lazy('prontuario_monitor_list', kwargs={'monitor_id': self.object.monitor.id})
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioMonitorDelete(DeleteView):
     model = ProntuarioMonitor
     template_name = 'inventario/monitor/prontuario_monitor_confirm_delete.html'
@@ -667,7 +668,7 @@ class MonitorList(ListView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class MonitorCreate(CreateView):
     model = Monitor
     form_class = MonitorForm
@@ -696,7 +697,7 @@ class MonitorCreate(CreateView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class MonitorUpdate(UpdateView):
     model = Monitor
     form_class = MonitorForm
@@ -726,7 +727,7 @@ class MonitorUpdate(UpdateView):
         return context
 
 @login_required(login_url='account_login')
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def monitor_delete(request, monitor_id):
     monitor = get_object_or_404(Monitor, pk=monitor_id)
     if request.method == "POST":
