@@ -1,0 +1,85 @@
+<!-- Campo Usuário -->
+<div class="form-group">
+    <label for="usuarioInput">Nome do Usuário</label>
+    <input class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" list="usuarios" id="usuarioInput" name="usuario" autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
+    <datalist id="usuarios">
+        {% for user in usuarios_list %}
+            <option value="{{ user.nom_funcionario }}" data-cdn-funcionario="{{ user.cdn_funcionario }}" data-cdn-estab="{{ user.cdn_estab }}">
+        {% endfor %}
+    </datalist>
+    <input type="hidden" id="usuarioCode" name="matricula" value="{{ form.matricula.value|default_if_none:'' }}">
+    {% for error in form.usuario.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+    {% endfor %}
+</div>
+
+<!-- Segunda linha: Ação e Data -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="{{ form.acao.id_for_label }}">Ação</label>
+            <select class="form-control {% if form.acao.errors %}is-invalid{% endif %}" id="{{ form.acao.id_for_label }}" name="{{ form.acao.name }}">
+                {% for choice_value, choice_label in form.acao.field.choices %}
+                    <option value="{{ choice_value }}" {% if form.acao.value|stringformat:"s" == choice_value|stringformat:"s" %}selected{% endif %}>{{ choice_label }}</option>
+                {% endfor %}
+            </select>
+            {% for error in form.acao.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="{{ form.data.id_for_label }}">Data</label>
+            <input type="date" class="form-control {% if form.data.errors %}is-invalid{% endif %}" 
+                   id="{{ form.data.id_for_label }}" 
+                   name="{{ form.data.name }}" 
+                   value="{{ form.data.value|date:'Y-m-d'|default_if_none:'' }}">
+            {% for error in form.data.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Terceira linha: Unidade de Destino e Local -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="estabelecimentoInput">Unidade de Destino (Estabelecimento)</label>
+            <input class="form-control {% if form.unidade_destino.errors %}is-invalid{% endif %}" list="estabelecimentos" id="estabelecimentoInput" name="unidade_destino" autocomplete="off" value="{{ form.unidade_destino.value|default_if_none:'' }}">
+            <datalist id="estabelecimentos">
+                {% for est in estabelecimentos_list %}
+                    <option value="{{ est.estabelecimento }} - {{ est.sigla_unidade }}" data-value="{{ est.estabelecimento }}">
+                {% endfor %}
+            </datalist>
+            {% for error in form.unidade_destino.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="centroCustoInput">Centro de Custo (Local)</label>
+            <input class="form-control {% if form.local.errors %}is-invalid{% endif %}" list="centros_custo" id="centroCustoInput" name="local" autocomplete="off" value="{{ form.local.value|default_if_none:'' }}">
+            <datalist id="centros_custo">
+                {% for cc in centros_custo_list %}
+                    <option value="{{ cc.centrocusto }} - {{ cc.descricaocusto }}" data-value="{{ cc.centrocusto }}">
+                {% endfor %}
+            </datalist>
+            {% for error in form.local.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Quarta linha: Motivo da Ocorrência -->
+<div class="form-group">
+    <label for="{{ form.motivo_ocorrencia.id_for_label }}">Motivo da Ocorrência</label>
+    <textarea class="form-control {% if form.motivo_ocorrencia.errors %}is-invalid{% endif %}" id="{{ form.motivo_ocorrencia.id_for_label }}" name="{{ form.motivo_ocorrencia.name }}">{{ form.motivo_ocorrencia.value|default_if_none:'' }}</textarea>
+    {% for error in form.motivo_ocorrencia.errors %}
+        <div class="invalid-feedback">{{ error }}</div>
+    {% endfor %}
+</div>

@@ -1,5 +1,6 @@
 from django import forms
-from .models import AcoesProntuario, Celular, ControleFones, Controlekit, Estoque, Status, TipoItem
+from .models import (AcoesProntuario, Celular, ControleFones, Controlekit, Estoque, Monitor,
+    ProntuarioCelular, ProntuarioMonitor, Status, TipoItem)
 from dashboard.models import BiFuncionariosCombio
 from django.utils.timezone import now
 
@@ -131,7 +132,29 @@ class CelularForm(forms.ModelForm):
         self.fields['centro_custo'].widget.attrs.update({'list': 'centros_custo'})
 
 
+class MonitorForm(forms.ModelForm):
+    class Meta:
+        model = Monitor
+        fields = [
+            'numero_serie', 'fabricante', 'modelo', 'patrimonio', 
+            'estabelecimento', 'local', 'status', 'localizacao'
+        ]
+        labels = {
+            'numero_serie': 'Número de Série',
+            'fabricante': 'Fabricante',
+            'modelo': 'Modelo',
+            'patrimonio': 'Patrimônio',
+            'estabelecimento': 'Estabelecimento',
+            'local': 'Local',
+            'status': 'Status',
+            'localizacao': "Localização"
+        }
 
+    def __init__(self, *args, **kwargs):
+        super(MonitorForm, self).__init__(*args, **kwargs)
+        # Aplicando a classe 'form-control' para estilizar com Bootstrap
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
 class AcoesProntuarioForm(forms.ModelForm):
     class Meta:
         model = AcoesProntuario
@@ -140,3 +163,52 @@ class AcoesProntuarioForm(forms.ModelForm):
             'acao': 'Ação',
             'tipo': 'Tipo de Ação',
         }
+
+
+class ProntuarioCelularForm(forms.ModelForm):
+    class Meta:
+        model = ProntuarioCelular
+        fields = ['usuario', 'data', 'motivo_ocorrencia', 'acao', 'unidade_destino', 'local']
+        labels = {
+            'usuario': 'Usuário',
+            'data': 'Data',
+            'motivo_ocorrencia': 'Motivo da Ocorrência',
+            'acao': 'Ação',
+            'unidade_destino': 'Unidade de Destino',
+            'local': 'Local',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(ProntuarioCelularForm, self).__init__(*args, **kwargs)
+        # Configurações adicionais, se necessário
+        self.fields['usuario'].widget.attrs['class'] = 'form-control'
+        self.fields['data'].widget.attrs['class'] = 'form-control'
+        self.fields['motivo_ocorrencia'].widget.attrs['class'] = 'form-control'
+        self.fields['acao'].widget.attrs['class'] = 'form-control'
+        self.fields['unidade_destino'].widget.attrs['class'] = 'form-control'
+        self.fields['local'].widget.attrs['class'] = 'form-control'
+
+
+class ProntuarioMonitorForm(forms.ModelForm):
+    class Meta:
+        model = ProntuarioMonitor
+        fields = ['usuario', 'data', 'motivo_ocorrencia', 'acao', 'unidade_destino', 'local', 'localizacao_destino']
+        labels = {
+            'usuario': 'Usuário',
+            'data': 'Data',
+            'motivo_ocorrencia': 'Motivo da Ocorrência',
+            'acao': 'Ação',
+            'unidade_destino': 'Unidade de Destino (Estabelecimento)',
+            'local': 'Centro de Custo (Local)',
+            'localizacao_destino': 'Localização de Destino'
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(ProntuarioMonitorForm, self).__init__(*args, **kwargs)
+        self.fields['usuario'].widget.attrs['class'] = 'form-control'
+        self.fields['data'].widget.attrs['class'] = 'form-control'
+        self.fields['motivo_ocorrencia'].widget.attrs['class'] = 'form-control'
+        self.fields['acao'].widget.attrs['class'] = 'form-control'
+        self.fields['unidade_destino'].widget.attrs['class'] = 'form-control'
+        self.fields['local'].widget.attrs['class'] = 'form-control'
+        self.fields['localizacao_destino'].widget.attrs['class'] = 'form-control'

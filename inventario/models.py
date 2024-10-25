@@ -3,33 +3,7 @@ from django.db import models
 from dashboard.models import BiCentroCusto, BiEstabelecimento, BiFuncionariosCombio
 from datetime import timedelta
 
-# -----------------------------
-# Tabelas relacionadas a Monitores
-# -----------------------------
-class Monitor(models.Model):
-    numero_serie = models.CharField(max_length=100)
-    fabricante = models.CharField(max_length=100)
-    modelo = models.CharField(max_length=100)
-    patrimonio = models.CharField(max_length=100)
-    unidade = models.CharField(max_length=100)
-    local = models.CharField(max_length=100)
-    status = models.CharField(max_length=100)
 
-    def __str__(self):
-        return f'{self.modelo} ({self.numero_serie})'
-
-class ProntuarioMonitor(models.Model):
-    monitor = models.ForeignKey(Monitor, on_delete=models.CASCADE)
-    usuario = models.CharField(max_length=100)
-    data = models.DateField()
-    motivo_ocorrencia = models.TextField()
-    unidade_destino = models.CharField(max_length=100)
-    local_destino = models.CharField(max_length=100)
-    status = models.CharField(max_length=100)
-    observacao = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f'Prontuário de {self.monitor.modelo} - {self.data}'
 
 
 
@@ -325,3 +299,33 @@ class ControleFones(models.Model):
 
     def __str__(self):
         return f'{self.usuario} - {self.modelo}'
+    
+
+    # -----------------------------
+# Tabelas relacionadas a Monitores
+# -----------------------------
+class Monitor(models.Model):
+    numero_serie = models.CharField(max_length=100)
+    fabricante = models.CharField(max_length=100)
+    modelo = models.CharField(max_length=100)
+    patrimonio = models.CharField(max_length=100)
+    estabelecimento = models.CharField(max_length=100)
+    local = models.CharField(max_length=100)
+    status = models.ForeignKey(Status, on_delete=models.PROTECT)  
+    localizacao = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'{self.modelo} ({self.numero_serie})'
+
+class ProntuarioMonitor(models.Model):
+    monitor = models.ForeignKey(Monitor, on_delete=models.CASCADE)
+    usuario = models.CharField(max_length=100)
+    data = models.DateField()
+    motivo_ocorrencia = models.TextField()
+    acao = models.ForeignKey(AcoesProntuario, on_delete=models.PROTECT)  
+    unidade_destino = models.CharField(max_length=100)
+    local = models.CharField(max_length=100)
+    localizacao_destino = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'Prontuário de {self.celular.modelo} - {self.data}'

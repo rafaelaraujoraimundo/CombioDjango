@@ -1,9 +1,11 @@
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.shortcuts import get_object_or_404, redirect, render
 from dashboard.models import BiCentroCusto, BiEstabelecimento, BiFuncionariosCombio
-from .models import Controlekit, Estoque, Status, TipoItem, ControleFones, Celular, AcoesProntuario
-from .forms import ControleFonesForm, ControlekitForm, EstoqueForm, StatusForm, TipoItemForm, CelularForm, AcoesProntuarioForm
+from .models import (AcoesProntuario, Celular, ControleFones, Controlekit, Estoque,
+    ProntuarioCelular, ProntuarioMonitor, Status, TipoItem, Monitor)
+from .forms import (AcoesProntuarioForm, CelularForm, ControleFonesForm, ControlekitForm,
+    EstoqueForm, ProntuarioCelularForm, ProntuarioMonitorForm, StatusForm, TipoItemForm, MonitorForm)
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
@@ -442,3 +444,293 @@ def acoesprontuario_delete(request, acoesprontuario_id):
         return redirect('acoesprontuario_list')
 
     return redirect('acoesprontuario_list')
+
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ProntuarioCelularListView(ListView):
+    model = ProntuarioCelular
+    template_name = 'inventario/celular/prontuario_celular_list.html'
+    context_object_name = 'prontuarios'
+
+    def get_queryset(self):
+        self.celular = get_object_or_404(Celular, id=self.kwargs['celular_id'])
+        return ProntuarioCelular.objects.filter(celular=self.celular)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['celular'] = self.celular
+        context['activegroup'] = 'inventario'
+        context['title'] = f'Prontuário de {self.celular.fabricante} - {self.celular.modelo} - IMEI: {self.celular.imei}'
+        return context
+
+# View para adicionar um novo registro de ação ao prontuário do celular
+
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ProntuarioCelularCreate(CreateView):
+    model = ProntuarioCelular
+    form_class = ProntuarioCelularForm
+    template_name = 'inventario/celular/prontuario_celular_form.html'
+
+    def form_valid(self, form):
+        form.instance.celular_id = self.kwargs['celular_id']
+        
+        # Verifica se a ação é do tipo 2 (Transferência)
+        if form.cleaned_data['acao'].tipo == 2:
+            celular = form.instance.celular
+            # Atualiza o estabelecimento e o centro de custo do celular
+            celular.estabelecimento = form.cleaned_data['unidade_destino']
+            celular.centro_custo = form.cleaned_data['local']
+            celular.save()  # Salva as alterações no celular
+
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        # Adiciona mensagem de erro quando o formulário é inválido
+        messages.error(self.request, "Houve um erro ao tentar salvar o formulário. Verifique os campos e tente novamente.")
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        celular = get_object_or_404(Celular, pk=self.kwargs['celular_id'])
+        context['title'] = 'Edição de Ações no Prontuário'
+        context['activegroup'] = 'inventario'
+        context['celular'] = celular
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(mes=now().month, ano=now().year).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values('estabelecimento', 'sigla_unidade')
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('prontuario_celular_list', kwargs={'celular_id': self.kwargs['celular_id']})
+
+# View para editar um registro de ação no prontuário do celular
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ProntuarioCelularUpdate(UpdateView):
+    model = ProntuarioCelular
+    form_class = ProntuarioCelularForm
+    template_name = 'inventario/celular/prontuario_celular_edit.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('prontuario_celular_list', kwargs={'celular_id': self.object.celular.id})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Incluindo o objeto celular no contexto
+        context['celular'] = self.object.celular
+        context['title'] = 'Edição de Ações no Prontuário'
+        context['activegroup'] = 'inventario'
+
+        # Incluindo as listas necessárias para os datalists
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(mes=now().month, ano=now().year).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values('estabelecimento', 'sigla_unidade')
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
+
+        return context
+
+# View para excluir um registro de ação do prontuário do celular
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ProntuarioCelularDelete(DeleteView):
+    model = ProntuarioCelular
+    template_name = 'inventario/celular/prontuario_celular_confirm_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('prontuario_celular_list', kwargs={'celular_id': self.object.celular.id})
+    
+
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+class ProntuarioMonitorListView(ListView):
+    model = ProntuarioMonitor
+    template_name = 'inventario/monitor/prontuario_monitor_list.html'
+    context_object_name = 'prontuarios'
+
+    def get_queryset(self):
+        self.monitor = get_object_or_404(Monitor, id=self.kwargs['monitor_id'])
+        return ProntuarioMonitor.objects.filter(monitor=self.monitor)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['monitor'] = self.monitor
+        context['activegroup'] = 'inventario'
+        context['title'] = f'Prontuário de {self.monitor.fabricante} - {self.monitor.modelo} - Série: {self.monitor.numero_serie}'
+        return context
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ProntuarioMonitorCreate(CreateView):
+    model = ProntuarioMonitor
+    form_class = ProntuarioMonitorForm
+    template_name = 'inventario/monitor/prontuario_monitor_form.html'
+
+    def form_valid(self, form):
+        form.instance.monitor_id = self.kwargs['monitor_id']
+        
+        # Verifica se a ação é do tipo 2 (Transferência)
+        if form.cleaned_data['acao'].tipo == 2:
+            monitor = form.instance.monitor
+            # Atualiza o estabelecimento e o centro de custo (local) do monitor
+            monitor.estabelecimento = form.cleaned_data['unidade_destino']
+            monitor.local = form.cleaned_data['local']
+            monitor.localizacao = form.cleaned_data['localizacao_destino']
+            monitor.save()  # Salva as alterações no monitor
+
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        # Adiciona mensagem de erro quando o formulário é inválido
+        messages.error(self.request, "Houve um erro ao tentar salvar o formulário. Verifique os campos e tente novamente.")
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        monitor = get_object_or_404(Monitor, pk=self.kwargs['monitor_id'])
+        context['monitor'] = monitor
+        context['activegroup'] = 'inventario'
+        context['title'] = 'Adicionar Ação no Prontuário do Monitor'
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(mes=now().month, ano=now().year).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values('estabelecimento', 'sigla_unidade')
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('prontuario_monitor_list', kwargs={'monitor_id': self.kwargs['monitor_id']})
+
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ProntuarioMonitorUpdate(UpdateView):
+    model = ProntuarioMonitor
+    form_class = ProntuarioMonitorForm
+    template_name = 'inventario/monitor/prontuario_monitor_edit.html'
+    
+    def form_valid(self, form):
+        # Verifica se a ação é do tipo 2 (Transferência)
+        if form.cleaned_data['acao'].tipo == 2:
+            monitor = form.instance.monitor
+            # Atualiza o estabelecimento e o centro de custo do monitor
+            monitor.estabelecimento = form.cleaned_data['unidade_destino']
+            monitor.local = form.cleaned_data['local']
+            monitor.localizacao = form.cleaned_data['localizacao_destino']
+            monitor.save()  # Salva as alterações no monitor
+        
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        # Adiciona mensagem de erro quando o formulário é inválido
+        messages.error(self.request, "Houve um erro ao tentar salvar o formulário. Verifique os campos e tente novamente.")
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Inclui o objeto monitor no contexto
+        context['monitor'] = self.object.monitor
+        context['title'] = 'Editar Ação do Prontuário'
+        context['activegroup'] = 'inventario'
+
+        # Inclui as listas necessárias para os datalists
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(mes=now().month, ano=now().year).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values('estabelecimento', 'sigla_unidade')
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
+        
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('prontuario_monitor_list', kwargs={'monitor_id': self.object.monitor.id})
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ProntuarioMonitorDelete(DeleteView):
+    model = ProntuarioMonitor
+    template_name = 'inventario/monitor/prontuario_monitor_confirm_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('prontuario_monitor_list', kwargs={'monitor_id': self.object.monitor.id})
+    
+
+
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+class MonitorList(ListView):
+    model = Monitor
+    template_name = 'inventario/monitor/monitor_list.html'
+    context_object_name = 'monitores'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Lista de Monitores'
+        context['activegroup'] = 'inventario'
+        return context
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class MonitorCreate(CreateView):
+    model = Monitor
+    form_class = MonitorForm
+    template_name = 'inventario/monitor/monitor_form.html'
+    success_url = reverse_lazy('monitor_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Inclusão de Monitores'
+        context['activegroup'] = 'inventario'
+        
+        # Listas para autocomplete
+        context['status_list'] = Status.objects.all()
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(
+            mes=now().month, ano=now().year
+        ).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values(
+            'estabelecimento', 'sigla_unidade'
+        )
+        
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values(
+            'centrocusto', 'descricaocusto'
+        )
+        
+        return context
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class MonitorUpdate(UpdateView):
+    model = Monitor
+    form_class = MonitorForm
+    template_name = 'inventario/monitor/monitor_edit.html'
+    success_url = reverse_lazy('monitor_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Listas para preencher os campos de datalist
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(
+            mes=now().month, ano=now().year
+        ).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values(
+            'estabelecimento', 'sigla_unidade'
+        )
+        
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values(
+            'centrocusto', 'descricaocusto'
+        )
+        
+        context['status_list'] = Status.objects.all()  # Para o campo de status
+        
+        context['title'] = 'Edição de Monitor'
+        context['activegroup'] = 'inventario'
+        return context
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+def monitor_delete(request, monitor_id):
+    monitor = get_object_or_404(Monitor, pk=monitor_id)
+    if request.method == "POST":
+        monitor.delete()
+        messages.success(request, 'Monitor excluído com sucesso.')
+        return redirect('monitor_list')
+    return redirect('monitor_list')

@@ -1,0 +1,73 @@
+<!-- Primeira linha: Modelo, Fabricante, Número de Série -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="{{ form.modelo.id_for_label }}">Modelo</label>
+            <input type="text" class="form-control" id="{{ form.modelo.id_for_label }}" name="{{ form.modelo.name }}" value="{{ form.modelo.value|default_if_none:'' }}">
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="{{ form.fabricante.id_for_label }}">Fabricante</label>
+            <input type="text" class="form-control" id="{{ form.fabricante.id_for_label }}" name="{{ form.fabricante.name }}" value="{{ form.fabricante.value|default_if_none:'' }}">
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="{{ form.numero_serie.id_for_label }}">Número de Série</label>
+            <input type="text" class="form-control" id="{{ form.numero_serie.id_for_label }}" name="{{ form.numero_serie.name }}" value="{{ form.numero_serie.value|default_if_none:'' }}">
+        </div>
+    </div>
+</div>
+
+<!-- Segunda linha: Estabelecimento, Patrimônio, Local (usando regra do Centro de Custo) -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="estabelecimentoInput">Estabelecimento</label>
+            <input class="form-control" list="estabelecimentos" id="estabelecimentoInput" name="estabelecimento" autocomplete="off" value="{{ form.estabelecimento.value|default_if_none:'' }}">
+            <datalist id="estabelecimentos">
+                {% for est in estabelecimentos_list %}
+                    <option value="{{ est.estabelecimento }} - {{ est.sigla_unidade }}" data-value="{{ est.estabelecimento }}">
+                {% endfor %}
+            </datalist>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="{{ form.patrimonio.id_for_label }}">Patrimônio</label>
+            <input type="text" class="form-control" id="{{ form.patrimonio.id_for_label }}" name="{{ form.patrimonio.name }}" value="{{ form.patrimonio.value|default_if_none:'' }}">
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="centroCustoInput">Centro de Custo (Local)</label>
+            <input class="form-control" list="centros_custo" id="centroCustoInput" name="local" autocomplete="off" value="{{ form.local.value|default_if_none:'' }}">
+            <datalist id="centros_custo">
+                {% for cc in centros_custo_list %}
+                    <option value="{{ cc.centrocusto }} - {{ cc.descricaocusto }}" data-value="{{ cc.descricaocusto }}">
+                {% endfor %}
+            </datalist>
+        </div>
+    </div>
+</div>
+
+<!-- Terceira linha: Status, Localização -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="{{ form.status.id_for_label }}">Status</label>
+            <select class="form-control" id="{{ form.status.id_for_label }}" name="{{ form.status.name }}">
+                {% for choice in status_list %}
+                    <option value="{{ choice.id }}" {% if choice.id == form.status.value %}selected{% endif %}>{{ choice.nome_status }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="{{ form.localizacao.id_for_label }}">Localização</label>
+            <input type="text" class="form-control" id="{{ form.localizacao.id_for_label }}" name="{{ form.localizacao.name }}" value="{{ form.localizacao.value|default_if_none:'' }}">
+        </div>
+    </div>
+</div>

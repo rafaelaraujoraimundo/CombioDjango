@@ -1,0 +1,16 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2>Editar Ação no Prontuário</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Campos do prontuário monitor (conforme ProntuarioMonitorForm) -->
+        {% include "inventario/monitor/prontuario_form_fields.html" %}
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'prontuario_monitor_list' monitor.id %}" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2>Adicionar Monitor</h2>
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Formulário monitor (campos com base no MonitorForm) -->
+        {% include "inventario/monitor/monitor_form_fields.html" %}
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'monitor_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

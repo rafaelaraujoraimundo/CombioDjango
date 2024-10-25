@@ -1,0 +1,13 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2>Confirmar Exclusão</h2>
+    <p>Tem certeza de que deseja excluir o registro de prontuário de {{ object.monitor.modelo }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a href="{% url 'prontuario_monitor_list' monitor.id %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

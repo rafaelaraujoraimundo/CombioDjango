@@ -1,40 +1,56 @@
 {% extends "menu/index.html" %}
+
 {% block content %}
 <div class="container-fluid">
-    <a href="{% url 'celular_create' %}" class="btn btn-primary mb-4">Adicionar Celular</a>
+
+    <!-- Detalhes do Celular (somente leitura) -->
+    <h2>Detalhes do Celular</h2>
+    <div class="row">
+        <div class="col-md-4"><strong>Modelo:</strong> {{ celular.modelo }}</div>
+        <div class="col-md-4"><strong>Fabricante:</strong> {{ celular.fabricante }}</div>
+        <div class="col-md-4"><strong>Número de Série:</strong> {{ celular.numero_serie }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-4"><strong>IMEI:</strong> {{ celular.imei }}</div>
+        <div class="col-md-4"><strong>Número da Linha:</strong> {{ celular.numero_linha }}</div>
+        <div class="col-md-4"><strong>Status:</strong> {{ celular.status }}</div>
+    </div>
+    <div class="mb-4 mt-4">
+        <a href="{% url 'celular_list' %}" class="btn btn-secondary">Voltar para Lista de Celulares</a>
+    </div>
+    <hr>
+
+    <!-- Botão para voltar à lista de celulares -->
+    
+
+    <!-- Tabela de Ações do Prontuário -->
+    <h2>Ações do Prontuário</h2>
+    <hr>
+    <a href="{% url 'prontuario_celular_create' celular.id %}" class="btn btn-primary mb-3">Adicionar Ação</a>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Modelo</th>
-                <th>Fabricante</th>
-                <th>Número de Série</th>
-                <th>IMEI</th>
-                <th>Número da Linha</th>
+                <th>Data</th>
                 <th>Usuário</th>
-                <th>Status</th>
-                <th>Estabelecimento</th>
-                <th>Centro de Custo</th>
+                <th>Motivo da Ocorrência</th>
+                <th>Ação</th>
+                <th>Unidade de Destino</th>
+                <th>Local</th>
                 <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            {% for celular in object_list %}
+            {% for prontuario in prontuarios %}
             <tr>
-                <td>{{ celular.id }}</td>
-                <td>{{ celular.modelo }}</td>
-                <td>{{ celular.fabricante }}</td>
-                <td>{{ celular.numero_serie }}</td>
-                <td>{{ celular.imei }}</td>
-                <td>{{ celular.numero_linha }}</td>
-                <td>{{ celular.usuario }}</td>
-                <td>{{ celular.status.nome_status }}</td>
-                <td>{{ celular.estabelecimento }}</td>
-                <td>{{ celular.centro_custo }}</td>
+                <td>{{ prontuario.data }}</td>
+                <td>{{ prontuario.usuario }}</td>
+                <td>{{ prontuario.motivo_ocorrencia }}</td>
+                <td>{{ prontuario.acao }}</td>
+                <td>{{ prontuario.unidade_destino }}</td>
+                <td>{{ prontuario.local }}</td>
                 <td>
-                    <a href="{% url 'celular_edit' celular.id %}" class="btn btn-sm btn-warning">Editar</a>
-                    <a href="{% url 'prontuario_celular_list' celular.id %}" class="btn btn-sm btn-info">Prontuário</a>
-                    <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ celular.id }}" data-item="{{ celular.modelo }}">Excluir</a>
+                    <a href="{% url 'prontuario_celular_edit' prontuario.id %}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ prontuario.id }}" data-item="{{ prontuario.acao }}">Excluir</a>
                 </td>
             </tr>
             {% endfor %}
@@ -73,11 +89,12 @@
                     const itemId = this.getAttribute('data-id');
                     const itemName = this.getAttribute('data-item');
                     document.getElementById('deleteItemName').textContent = itemName;
-                    document.getElementById('deleteForm').action = `/inventario/celular/delete/${itemId}/`;
+                    document.getElementById('deleteForm').action = `/inventario/prontuario/${itemId}/excluir/`;
                     $('#confirmDeleteModal').modal('show');
                 });
             });
         });
     </script>
+
 </div>
 {% endblock %}

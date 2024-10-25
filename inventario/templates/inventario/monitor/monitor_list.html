@@ -1,40 +1,37 @@
 {% extends "menu/index.html" %}
+
 {% block content %}
 <div class="container-fluid">
-    <a href="{% url 'celular_create' %}" class="btn btn-primary mb-4">Adicionar Celular</a>
+    <a href="{% url 'monitor_create' %}" class="btn btn-primary mb-4">Adicionar Monitor</a>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Modelo</th>
-                <th>Fabricante</th>
                 <th>Número de Série</th>
-                <th>IMEI</th>
-                <th>Número da Linha</th>
-                <th>Usuário</th>
-                <th>Status</th>
+                <th>Fabricante</th>
+                <th>Modelo</th>
+                <th>Patrimônio</th>
                 <th>Estabelecimento</th>
-                <th>Centro de Custo</th>
+                <th>Local</th>
+                <th>Status</th>
+                <th>Localização</th>
                 <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            {% for celular in object_list %}
+            {% for monitor in object_list %}
             <tr>
-                <td>{{ celular.id }}</td>
-                <td>{{ celular.modelo }}</td>
-                <td>{{ celular.fabricante }}</td>
-                <td>{{ celular.numero_serie }}</td>
-                <td>{{ celular.imei }}</td>
-                <td>{{ celular.numero_linha }}</td>
-                <td>{{ celular.usuario }}</td>
-                <td>{{ celular.status.nome_status }}</td>
-                <td>{{ celular.estabelecimento }}</td>
-                <td>{{ celular.centro_custo }}</td>
+                <td>{{ monitor.numero_serie }}</td>
+                <td>{{ monitor.fabricante }}</td>
+                <td>{{ monitor.modelo }}</td>
+                <td>{{ monitor.patrimonio }}</td>
+                <td>{{ monitor.estabelecimento }}</td>
+                <td>{{ monitor.local }}</td>
+                <td>{{ monitor.status.nome_status }}</td>
+                <td>{{ monitor.localizacao }}</td>
                 <td>
-                    <a href="{% url 'celular_edit' celular.id %}" class="btn btn-sm btn-warning">Editar</a>
-                    <a href="{% url 'prontuario_celular_list' celular.id %}" class="btn btn-sm btn-info">Prontuário</a>
-                    <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ celular.id }}" data-item="{{ celular.modelo }}">Excluir</a>
+                    <a href="{% url 'prontuario_monitor_list' monitor.id %}" class="btn btn-sm btn-info">Prontuário</a>
+                    <a href="{% url 'monitor_edit' monitor.id %}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ monitor.id }}" data-item="{{ monitor.modelo }}">Excluir</a>
                 </td>
             </tr>
             {% endfor %}
@@ -73,7 +70,7 @@
                     const itemId = this.getAttribute('data-id');
                     const itemName = this.getAttribute('data-item');
                     document.getElementById('deleteItemName').textContent = itemName;
-                    document.getElementById('deleteForm').action = `/inventario/celular/delete/${itemId}/`;
+                    document.getElementById('deleteForm').action = `/inventario/monitores/delete/${itemId}/`;
                     $('#confirmDeleteModal').modal('show');
                 });
             });

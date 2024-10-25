@@ -101,10 +101,6 @@ PySocks==1.7.1
 python-crontab==3.0.0
 python-dateutil==2.8.2
 python-decouple==3.8
-python-dotenv==1.0.0
-python3-openid==3.2.0
-pytz==2023.3
-pywin32==308
 PyYAML==6.0.1
 pyzmq==26.2.0
 redis==3.5.3

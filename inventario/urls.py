@@ -1,9 +1,13 @@
 from django.urls import path
-from .views import (celular_delete, CelularCreate, CelularList, CelularUpdate,
+from .views import (acoesprontuario_delete, acoesprontuario_edit, AcoesProntuarioCreate,
+    AcoesProntuarioList, celular_delete, CelularCreate, CelularList, CelularUpdate,
     controlefones_delete, ControleFonesCreate, ControleFonesList, ControleFonesUpdate,
     controlekit_delete, ControlekitCreate, ControlekitList, ControlekitUpdate, estoque_delete,
-    estoque_edit, EstoqueCreate, EstoqueList, status_delete, status_edit, StatusCreate, StatusList,
-    tipoItem_delete, TipoItem_edit, TipoItemCreate, TipoItemList, AcoesProntuarioList, AcoesProntuarioCreate, acoesprontuario_edit,acoesprontuario_delete )
+    estoque_edit, EstoqueCreate, EstoqueList, monitor_delete, MonitorCreate, MonitorList,
+    MonitorUpdate, ProntuarioCelularCreate, ProntuarioCelularDelete, ProntuarioCelularListView,
+    ProntuarioCelularUpdate, ProntuarioMonitorCreate, ProntuarioMonitorDelete,
+    ProntuarioMonitorListView, ProntuarioMonitorUpdate, status_delete, status_edit, StatusCreate,
+    StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate, TipoItemList)
 
 urlpatterns = [
     path('tipoitem/', TipoItemList.as_view(), name='tipoitem_list'),
@@ -41,4 +45,19 @@ urlpatterns = [
     path('acoesprontuario/new/', AcoesProntuarioCreate.as_view(), name='acoesprontuario_new'),
     path('acoesprontuario/edit/<int:acoesprontuario_id>/', acoesprontuario_edit, name='acoesprontuario_edit'),
     path('acoesprontuario/delete/<int:acoesprontuario_id>/', acoesprontuario_delete, name='acoesprontuario_delete'),
+
+    path('celular/<int:celular_id>/prontuario/', ProntuarioCelularListView.as_view(), name='prontuario_celular_list'),
+    path('celular/<int:celular_id>/prontuario/novo/', ProntuarioCelularCreate.as_view(), name='prontuario_celular_create'),
+    path('prontuario/<int:pk>/editar/', ProntuarioCelularUpdate.as_view(), name='prontuario_celular_edit'),
+    path('prontuario/<int:pk>/excluir/', ProntuarioCelularDelete.as_view(), name='prontuario_celular_delete'),
+
+    path('monitores/', MonitorList.as_view(), name='monitor_list'),
+    path('monitores/novo/', MonitorCreate.as_view(), name='monitor_create'),
+    path('monitores/<int:pk>/editar/', MonitorUpdate.as_view(), name='monitor_edit'),
+    path('monitores/delete/<int:monitor_id>/', monitor_delete, name='monitor_delete'),
+    
+    path('monitores/<int:monitor_id>/prontuario/',ProntuarioMonitorListView.as_view(), name='prontuario_monitor_list'),
+    path('monitores/<int:monitor_id>/prontuario/novo/', ProntuarioMonitorCreate.as_view(), name='prontuario_monitor_create'),
+    path('monitores/prontuario/<int:pk>/editar/', ProntuarioMonitorUpdate.as_view(), name='prontuario_monitor_edit'),
+    path('monitores/prontuario/<int:pk>/delete/', ProntuarioMonitorDelete.as_view(), name='prontuario_monitor_delete'),
 ]
