@@ -1,0 +1,160 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <!-- Exibir erros gerais de validação no topo do formulário -->
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Primeira linha: Nome do Usuário -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="usuarioInput">Nome do Usuário</label>
+                    <input class="form-control" list="usuarios" id="usuarioInput" name="usuario" autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
+                    <datalist id="usuarios">
+                        {% for user in usuarios_list %}
+                            <option value="{{ user.nom_funcionario }}" data-cdn-funcionario="{{ user.cdn_funcionario }}" data-cdn-estab="{{ user.cdn_estab }}">
+                        {% endfor %}
+                    </datalist>
+                    <input type="hidden" id="usuarioCode" name="matricula" value="{{ form.matricula.value|default_if_none:'' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Segunda linha: Data de Entrega e Data Final -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.data_entrega.id_for_label }}">Data de Entrega</label>
+                    <input type="date" class="form-control {% if form.data_entrega.errors %}is-invalid{% endif %}" id="dataEntrega" name="{{ form.data_entrega.name }}" value="{{ form.data_entrega.value|default_if_none:'' }}">
+                    {% for error in form.data_entrega.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.data_final.id_for_label }}">Data Final</label>
+                    <input type="date" class="form-control {% if form.data_final.errors %}is-invalid{% endif %}" id="dataFinal" name="{{ form.data_final.name }}" value="{{ form.data_final.value|date:'Y-m-d'|default_if_none:'' }}" readonly>
+                    {% for error in form.data_final.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Terceira linha: Modelo e Série -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.modelo.id_for_label }}">Modelo</label>
+                    <input type="text" class="form-control {% if form.modelo.errors %}is-invalid{% endif %}" id="{{ form.modelo.id_for_label }}" name="{{ form.modelo.name }}" value="{{ form.modelo.value|default_if_none:'' }}">
+                    {% for error in form.modelo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.serie.id_for_label }}">Série</label>
+                    <input type="text" class="form-control {% if form.serie.errors %}is-invalid{% endif %}" id="{{ form.serie.id_for_label }}" name="{{ form.serie.name }}" value="{{ form.serie.value|default_if_none:'' }}">
+                    {% for error in form.serie.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quarta linha: Estabelecimento (Filial) e Centro de Custo -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="estabelecimentoInput">Estabelecimento (Filial)</label>
+                    <input class="form-control" list="estabelecimentos" id="estabelecimentoInput" name="estabelecimento" autocomplete="off" value="{{ form.estabelecimento.value|default_if_none:'' }}">
+                    <datalist id="estabelecimentos">
+                        {% for est in estabelecimentos_list %}
+                            <option value="{{ est.estabelecimento }} - {{ est.sigla_unidade }}" data-value="{{ est.estabelecimento }}">
+                        {% endfor %}
+                    </datalist>
+                    <input type="hidden" id="estabelecimentoCode" name="estabelecimento" value="{{ form.estabelecimento.value|default_if_none:'' }}">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="centroCustoInput">Centro de Custo</label>
+                    <input class="form-control" list="centros_custo" id="centroCustoInput" name="centro_custo" autocomplete="off" value="{{ form.centro_custo.value|default_if_none:'' }}">
+                    <datalist id="centros_custo">
+                        {% for cc in centros_custo_list %}
+                            <option value="{{ cc.centrocusto }} - {{ cc.descricaocusto }}" data-value="{{ cc.descricaocusto }}">
+                        {% endfor %}
+                    </datalist>
+                    <input type="hidden" id="centroCustoCode" name="centro_custo" value="{{ form.centro_custo.value|default_if_none:'' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="row">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="{% url 'controlefones_list' %}" class="btn btn-secondary">Voltar</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Script para associar os valores dos datalists -->
+<script>
+    function setUsuarioCode() {
+        const usuarioInput = document.getElementById('usuarioInput');
+        const selectedOption = document.querySelector(`#usuarios option[value="${usuarioInput.value}"]`);
+        if (selectedOption) {
+            const cdnFuncionario = selectedOption.getAttribute('data-cdn-funcionario');
+            const cdnEstab = selectedOption.getAttribute('data-cdn-estab');
+            document.getElementById('usuarioCode').value = `${cdnEstab}-${cdnFuncionario}`;
+        }
+    }
+
+    function setEstabelecimentoCode() {
+        const estabelecimentoInput = document.getElementById('estabelecimentoInput');
+        const selectedOption = document.querySelector(`#estabelecimentos option[value="${estabelecimentoInput.value}"]`);
+        if (selectedOption) {
+            document.getElementById('estabelecimentoCode').value = selectedOption.getAttribute('data-value');
+        }
+    }
+
+    function setCentroCustoCode() {
+        const centroCustoInput = document.getElementById('centroCustoInput');
+        const selectedOption = document.querySelector(`#centros_custo option[value="${centroCustoInput.value}"]`);
+        if (selectedOption) {
+            document.getElementById('centroCustoCode').value = selectedOption.getAttribute('data-value');
+        }
+    }
+
+    document.getElementById('usuarioInput').addEventListener('input', setUsuarioCode);
+    document.getElementById('estabelecimentoInput').addEventListener('input', setEstabelecimentoCode);
+    document.getElementById('centroCustoInput').addEventListener('input', setCentroCustoCode);
+
+    function setDataFinal() {
+        const dataEntregaInput = document.getElementById('dataEntrega').value;
+        if (dataEntregaInput) {
+            const dataEntrega = new Date(dataEntregaInput);
+            const dataFinal = new Date(dataEntrega.setFullYear(dataEntrega.getFullYear() + 2));
+            document.getElementById('dataFinal').value = dataFinal.toISOString().split('T')[0];
+        }
+    }
+
+    document.getElementById('dataEntrega').addEventListener('change', setDataFinal);
+</script>
+{% endblock %}

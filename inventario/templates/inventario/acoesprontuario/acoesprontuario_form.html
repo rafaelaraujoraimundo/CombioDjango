@@ -1,0 +1,34 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Campo Nome da Ação -->
+        <div class="form-group">
+            <label for="{{ form.acao.id_for_label }}">Nome da Ação</label>
+            <input type="text" class="form-control {% if form.acao.errors %}is-invalid{% endif %}" id="{{ form.acao.id_for_label }}" name="{{ form.acao.name }}" value="{{ form.acao.value|default_if_none:'' }}">
+            {% for error in form.acao.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        
+        <!-- Campo Tipo de Ação -->
+        <div class="form-group">
+            <label for="{{ form.tipo.id_for_label }}">Tipo de Ação</label>
+            <select class="form-control {% if form.tipo.errors %}is-invalid{% endif %}" id="{{ form.tipo.id_for_label }}" name="{{ form.tipo.name }}">
+                {% for choice_value, choice_label in form.tipo.field.choices %}
+                    <option value="{{ choice_value }}" {% if choice_value == form.tipo.value %}selected{% endif %}>{{ choice_label }}</option>
+                {% endfor %}
+            </select>
+            {% for error in form.tipo.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'acoesprontuario_list' %}" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+{% endblock %}

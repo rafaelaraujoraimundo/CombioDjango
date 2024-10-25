@@ -1,0 +1,68 @@
+{% extends "menu/index.html" %}
+{% block content %}
+<div class="container-fluid">
+    <a href="{% url 'acoesprontuario_new' %}" class="btn btn-primary mb-4">Adicionar Ação de Prontuário</a>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ação</th>
+                <th>Tipo</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for acoesprontuario in object_list %}
+            <tr>
+                <td>{{ acoesprontuario.id }}</td>
+                <td>{{ acoesprontuario.acao }}</td>
+                <td>{{ acoesprontuario.get_tipo_display }}</td>
+                <td>
+                    <a href="{% url 'acoesprontuario_edit' acoesprontuario.id %}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ acoesprontuario.id }}" data-item="{{ acoesprontuario.acao }}">Excluir</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal de Exclusão -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Tem certeza de que deseja excluir <strong id="deleteItemName"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <form method="post" id="deleteForm">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteTriggers = document.querySelectorAll('.delete-trigger');
+            deleteTriggers.forEach(trigger => {
+                trigger.addEventListener('click', function () {
+                    const itemId = this.getAttribute('data-id');
+                    const itemName = this.getAttribute('data-item');
+                    document.getElementById('deleteItemName').textContent = itemName;
+                    document.getElementById('deleteForm').action = `/inventario/acoesprontuario/delete/${itemId}/`;
+                    $('#confirmDeleteModal').modal('show');
+                });
+            });
+        });
+    </script>
+</div>
+{% endblock %}

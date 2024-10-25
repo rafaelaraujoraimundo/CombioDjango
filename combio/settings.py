@@ -62,7 +62,7 @@ INSTALLED_APPS += [
     "allauth.socialaccount.providers.google",
     "global_permissions",
     "chartkick.django",
-  
+    "corsheaders",
     "django_extensions",
     "ninja_extra",
     "django_celery_results",
@@ -86,6 +86,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 SITE_ID = 1
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -97,6 +98,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'combio.urls'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",
+]
 
 TEMPLATES = [
     {

@@ -3,10 +3,10 @@
 :root {
   --iq-title-text: #3f414d;
   --iq-body-text: #777d74;
-  --iq-body-bg: #fbfbfb;
+  --iq-body-bg: #ffffff; /*- #fbfbfb;-*/
   --iq-primary: #116533;
   --iq-secondary: #399444;
-  --iq-success: #65f9b3;
+  --iq-success: #1C361F; /*- #0e4f29;-*/
   --iq-warning: #ffbf43;
   --iq-danger: #fe517e;
   --iq-info: #9267ff;
@@ -23,12 +23,12 @@
   --iq-light-dark: #f0efef;
   --iq-primary-hover: #399444;
   --iq-secondary-hover: #116533;
-  --iq-success-hover: #8defc0;
+  --iq-success-hover: #116533;
   --iq-danger-hover: #ff6a6a;
   --iq-warning-hover: #fae837;
   --iq-info-hover: #fff1e0;
   --iq-dark-hover: #3948e8;
-  --iq-border-light: #f1f1f1;
+  --iq-border-light: #6FCF97;
   --iq-light-card: #ffffff;
   --iq-primary-rgb: 100, 114, 248;
   /* color for customizer*/

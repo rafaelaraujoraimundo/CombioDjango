@@ -1,0 +1,82 @@
+{% extends "menu/index.html" %}
+{% block content %}
+<div class="container-fluid">
+    <a href="{% url 'celular_create' %}" class="btn btn-primary mb-4">Adicionar Celular</a>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Modelo</th>
+                <th>Fabricante</th>
+                <th>Número de Série</th>
+                <th>IMEI</th>
+                <th>Número da Linha</th>
+                <th>Usuário</th>
+                <th>Status</th>
+                <th>Estabelecimento</th>
+                <th>Centro de Custo</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for celular in object_list %}
+            <tr>
+                <td>{{ celular.id }}</td>
+                <td>{{ celular.modelo }}</td>
+                <td>{{ celular.fabricante }}</td>
+                <td>{{ celular.numero_serie }}</td>
+                <td>{{ celular.imei }}</td>
+                <td>{{ celular.numero_linha }}</td>
+                <td>{{ celular.usuario }}</td>
+                <td>{{ celular.status.nome_status }}</td>
+                <td>{{ celular.estabelecimento }}</td>
+                <td>{{ celular.centro_custo }}</td>
+                <td>
+                    <a href="{% url 'celular_edit' celular.id %}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ celular.id }}" data-item="{{ celular.modelo }}">Excluir</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal de Exclusão -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Tem certeza de que deseja excluir <strong id="deleteItemName"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <form method="post" id="deleteForm">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteTriggers = document.querySelectorAll('.delete-trigger');
+            deleteTriggers.forEach(trigger => {
+                trigger.addEventListener('click', function () {
+                    const itemId = this.getAttribute('data-id');
+                    const itemName = this.getAttribute('data-item');
+                    document.getElementById('deleteItemName').textContent = itemName;
+                    document.getElementById('deleteForm').action = `/inventario/celular/delete/${itemId}/`;
+                    $('#confirmDeleteModal').modal('show');
+                });
+            });
+        });
+    </script>
+</div>
+{% endblock %}

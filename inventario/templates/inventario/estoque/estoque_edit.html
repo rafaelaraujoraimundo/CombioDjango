@@ -1,0 +1,67 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+        <!-- Campo Tipo de Item -->
+        <div class="form-group">
+            <label for="{{ form.tipo_item.id_for_label }}">Tipo de Item</label>
+            <select class="form-control" id="{{ form.tipo_item.id_for_label }}" name="{{ form.tipo_item.name }}">
+                {% for option in form.tipo_item.field.queryset %}
+                    <option value="{{ option.pk }}" {% if form.tipo_item.value == option.pk %}selected{% endif %}>{{ option.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Campo Modelo -->
+        <div class="form-group">
+            <label for="{{ form.modelo.id_for_label }}">Modelo</label>
+            <input type="text" class="form-control {% if form.modelo.errors %}is-invalid{% endif %}" id="{{ form.modelo.id_for_label }}" name="{{ form.modelo.name }}" value="{{ form.modelo.value|default_if_none:'' }}">
+            {% for error in form.modelo.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campo Fabricante -->
+        <div class="form-group">
+            <label for="{{ form.fabricante.id_for_label }}">Fabricante</label>
+            <input type="text" class="form-control {% if form.fabricante.errors %}is-invalid{% endif %}" id="{{ form.fabricante.id_for_label }}" name="{{ form.fabricante.name }}" value="{{ form.fabricante.value|default_if_none:'' }}">
+            {% for error in form.fabricante.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campo Status -->
+        <div class="form-group">
+            <label for="{{ form.status.id_for_label }}">Status</label>
+            <select class="form-control" id="{{ form.status.id_for_label }}" name="{{ form.status.name }}">
+                {% for option in form.status.field.queryset %}
+                    <option value="{{ option.pk }}" {% if form.status.value == option.pk %}selected{% endif %}>{{ option.nome_status }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Campo Observação -->
+        <div class="form-group">
+            <label for="{{ form.observacao.id_for_label }}">Observação</label>
+            <textarea class="form-control {% if form.observacao.errors %}is-invalid{% endif %}" id="{{ form.observacao.id_for_label }}" name="{{ form.observacao.name }}">{{ form.observacao.value }}</textarea>
+            {% for error in form.observacao.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Campo Local -->
+        <div class="form-group">
+            <label for="{{ form.local.id_for_label }}">Local</label>
+            <input type="text" class="form-control {% if form.local.errors %}is-invalid{% endif %}" id="{{ form.local.id_for_label }}" name="{{ form.local.name }}" value="{{ form.local.value|default_if_none:'' }}">
+            {% for error in form.local.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'estoque_list' %}" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+{% endblock %}

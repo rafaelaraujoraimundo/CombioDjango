@@ -1,0 +1,158 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2>{{ title }}</h2>
+
+    <!-- Exibir erros gerais de validação no topo do formulário -->
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Primeira linha: Nome do Usuário -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="usuarioInput">Nome do Usuário</label>
+                    <input class="form-control" list="usuarios" id="usuarioInput" name="usuario" autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
+                    <datalist id="usuarios">
+                        {% for user in usuarios_list %}
+                            <option value="{{ user.nom_funcionario }}" data-cdn-funcionario="{{ user.cdn_funcionario }}" data-cdn-estab="{{ user.cdn_estab }}">
+                        {% endfor %}
+                    </datalist>
+                    <input type="hidden" id="usuarioCode" name="matricula" value="{{ form.matricula.value|default_if_none:'' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Segunda linha: Modelo e Fabricante -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.modelo.id_for_label }}">Modelo</label>
+                    <input type="text" class="form-control {% if form.modelo.errors %}is-invalid{% endif %}" id="{{ form.modelo.id_for_label }}" name="{{ form.modelo.name }}" value="{{ form.modelo.value|default_if_none:'' }}">
+                    {% for error in form.modelo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.fabricante.id_for_label }}">Fabricante</label>
+                    <input type="text" class="form-control {% if form.fabricante.errors %}is-invalid{% endif %}" id="{{ form.fabricante.id_for_label }}" name="{{ form.fabricante.name }}" value="{{ form.fabricante.value|default_if_none:'' }}">
+                    {% for error in form.fabricante.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Terceira linha: Número de Série e IMEI -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.numero_serie.id_for_label }}">Número de Série</label>
+                    <input type="text" class="form-control {% if form.numero_serie.errors %}is-invalid{% endif %}" id="{{ form.numero_serie.id_for_label }}" name="{{ form.numero_serie.name }}" value="{{ form.numero_serie.value|default_if_none:'' }}">
+                    {% for error in form.numero_serie.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.imei.id_for_label }}">IMEI</label>
+                    <input type="text" class="form-control {% if form.imei.errors %}is-invalid{% endif %}" id="{{ form.imei.id_for_label }}" name="{{ form.imei.name }}" value="{{ form.imei.value|default_if_none:'' }}">
+                    {% for error in form.imei.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quarta linha: Número da Linha e Unidade -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.numero_linha.id_for_label }}">Número da Linha</label>
+                    <input type="text" class="form-control {% if form.numero_linha.errors %}is-invalid{% endif %}" id="{{ form.numero_linha.id_for_label }}" name="{{ form.numero_linha.name }}" value="{{ form.numero_linha.value|default_if_none:'' }}">
+                    {% for error in form.numero_linha.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.unidade.id_for_label }}">Unidade</label>
+                    <input type="text" class="form-control {% if form.unidade.errors %}is-invalid{% endif %}" id="{{ form.unidade.id_for_label }}" name="{{ form.unidade.name }}" value="{{ form.unidade.value|default_if_none:'' }}">
+                    {% for error in form.unidade.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quinta linha: Status -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.status.id_for_label }}">Status</label>
+                    <select class="form-control {% if form.status.errors %}is-invalid{% endif %}" id="{{ form.status.id_for_label }}" name="{{ form.status.name }}">
+                        {% for status in status_list %}
+                            <option value="{{ status.id }}" {% if form.status.value == status.id %}selected{% endif %}>{{ status.nome_status }}</option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.status.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="row">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="{% url 'celular_list' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function setUsuarioCode() {
+        const usuarioInput = document.getElementById('usuarioInput');
+        const selectedOption = document.querySelector(`#usuarios option[value="${usuarioInput.value}"]`);
+        if (selectedOption) {
+            const cdnFuncionario = selectedOption.getAttribute('data-cdn-funcionario');
+            const cdnEstab = selectedOption.getAttribute('data-cdn-estab');
+            document.getElementById('usuarioCode').value = `${cdnEstab}-${cdnFuncionario}`;
+        }
+    }
+
+    document.getElementById('usuarioInput').addEventListener('input', setUsuarioCode);
+
+    function setEstabelecimentoCode() {
+        const estabelecimentoInput = document.getElementById('estabelecimentoInput');
+        const selectedOption = document.querySelector(`#estabelecimentos option[value="${estabelecimentoInput.value}"]`);
+        if (selectedOption) {
+            document.getElementById('estabelecimentoCode').value = selectedOption.getAttribute('data-value');
+        }
+    }
+
+    function setCentroCustoCode() {
+        const centroCustoInput = document.getElementById('centroCustoInput');
+        const selectedOption = document.querySelector(`#centros_custo option[value="${centroCustoInput.value}"]`);
+        if (selectedOption) {
+            document.getElementById('centroCustoCode').value = selectedOption.getAttribute('data-value');
+        }
+    }
+
+    document.getElementById('estabelecimentoInput').addEventListener('input', setEstabelecimentoCode);
+    document.getElementById('centroCustoInput').addEventListener('input', setCentroCustoCode);
+</script>
+{% endblock %}

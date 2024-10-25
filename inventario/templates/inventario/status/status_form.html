@@ -1,0 +1,20 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+        <!-- Campo Nome do Status -->
+        <div class="form-group">
+            <label for="{{ form.nome_status.id_for_label }}">Nome do Status</label>
+            <input type="text" class="form-control {% if form.nome_status.errors %}is-invalid{% endif %}" id="{{ form.nome_status.id_for_label }}" name="{{ form.nome_status.name }}" value="{{ form.nome_status.value|default_if_none:'' }}">
+            {% for error in form.nome_status.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'status_list' %}" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+{% endblock %}

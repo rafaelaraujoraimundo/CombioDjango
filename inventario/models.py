@@ -1,4 +1,7 @@
+import datetime
 from django.db import models
+from dashboard.models import BiCentroCusto, BiEstabelecimento, BiFuncionariosCombio
+from datetime import timedelta
 
 # -----------------------------
 # Tabelas relacionadas a Monitores
@@ -29,33 +32,6 @@ class ProntuarioMonitor(models.Model):
         return f'Prontuário de {self.monitor.modelo} - {self.data}'
 
 
-# -----------------------------
-# Tabelas relacionadas a Celulares
-# -----------------------------
-class Celular(models.Model):
-    modelo = models.CharField(max_length=100)
-    fabricante = models.CharField(max_length=100)
-    numero_serie = models.CharField(max_length=100)
-    imei = models.CharField(max_length=100)
-    numero_linha = models.CharField(max_length=100)
-    usuario = models.CharField(max_length=100)
-    status = models.CharField(max_length=100)
-    unidade = models.CharField(max_length=100)
-
-    def __str__(self):
-        return f'{self.modelo} ({self.imei})'
-
-class ProntuarioCelular(models.Model):
-    celular = models.ForeignKey(Celular, on_delete=models.CASCADE)
-    usuario = models.CharField(max_length=100)
-    data = models.DateField()
-    motivo_ocorrencia = models.TextField()
-    status = models.CharField(max_length=100)
-    unidade_destino = models.CharField(max_length=100)
-    local = models.CharField(max_length=100)
-
-    def __str__(self):
-        return f'Prontuário de {self.celular.modelo} - {self.data}'
 
 
 # -----------------------------
@@ -93,20 +69,76 @@ class ProntuarioComputador(models.Model):
     def __str__(self):
         return f'Prontuário de {self.computador.hostname} - {self.data}'
 
+class TipoItem(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
 
+    def __str__(self):
+        return self.nome
+    
+
+class Status(models.Model):
+    nome_status = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.nome_status
+    
+
+class AcoesProntuario(models.Model):
+    TIPO_CHOICES = [
+        (1, 'Manutenção'),
+        (2, 'Transferência'),
+        (3, 'Apontamento'),
+    ]
+
+    acao = models.CharField(max_length=100, unique=True)
+    tipo = models.IntegerField(choices=TIPO_CHOICES)
+
+    def __str__(self):
+        return self.acao
 # -----------------------------
 # Tabelas relacionadas a Estoque
 # -----------------------------
 class Estoque(models.Model):
-    tipo_item = models.CharField(max_length=100)
+    tipo_item = models.ForeignKey(TipoItem, on_delete=models.PROTECT)  # Usando o modelo de TipoItem
     modelo = models.CharField(max_length=100)
     fabricante = models.CharField(max_length=100)
-    status = models.CharField(max_length=100)
+    status = models.ForeignKey(Status, on_delete=models.PROTECT)  # Usando o modelo Status como chave estrangeira
     observacao = models.TextField(blank=True, null=True)
     local = models.CharField(max_length=100)
 
     def __str__(self):
-        return f'{self.tipo_item} - {self.modelo}'
+        return f'{self.tipo_item.nome} - {self.modelo}'
+
+
+
+# -----------------------------
+# Tabelas relacionadas a Celulares
+# -----------------------------
+class Celular(models.Model):
+    modelo = models.CharField(max_length=100)
+    fabricante = models.CharField(max_length=100)
+    numero_serie = models.CharField(max_length=100)
+    imei = models.CharField(max_length=100)
+    numero_linha = models.CharField(max_length=100)
+    usuario = models.CharField(max_length=100)
+    status = models.ForeignKey(Status, on_delete=models.PROTECT)  
+    estabelecimento = models.CharField(max_length=100)
+    centro_custo = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'{self.modelo} ({self.imei})'
+
+class ProntuarioCelular(models.Model):
+    celular = models.ForeignKey(Celular, on_delete=models.CASCADE)
+    usuario = models.CharField(max_length=100)
+    data = models.DateField()
+    motivo_ocorrencia = models.TextField()
+    acao = models.ForeignKey(AcoesProntuario, on_delete=models.PROTECT)  
+    unidade_destino = models.CharField(max_length=100)
+    local = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'Prontuário de {self.celular.modelo} - {self.data}'
 
 
 # -----------------------------
@@ -255,3 +287,41 @@ class AccountInfo(models.Model):
 
     def __str__(self):
         return f'AccountInfo {self.tag}'
+
+
+class Controlekit(models.Model):
+    matricula = models.CharField(max_length=100)  # Novo campo 'matricula' para armazenar o código do usuário
+    usuario = models.CharField(max_length=100)  # O nome do usuário será salvo aqui
+    data_entrega = models.DateField()
+    modelo = models.CharField(max_length=100)
+    estabelecimento = models.CharField(max_length=100)
+    centro_custo = models.CharField(max_length=100)
+    serie = models.CharField(max_length=50, blank=True, null=True)
+    data_final = models.DateField()
+
+    def save(self, *args, **kwargs):
+        # Calcular data final automaticamente (data_entrega + 2 anos)
+        self.data_final = self.data_entrega + timedelta(days=365*2)
+        super(Controlekit, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.usuario} - {self.modelo}'
+    
+
+class ControleFones(models.Model):
+    matricula = models.CharField(max_length=100)  # Campo 'matricula' para armazenar o código do usuário
+    usuario = models.CharField(max_length=100)  # O nome do usuário será salvo aqui
+    data_entrega = models.DateField()
+    modelo = models.CharField(max_length=100)
+    estabelecimento = models.CharField(max_length=100)
+    centro_custo = models.CharField(max_length=100)
+    serie = models.CharField(max_length=50, blank=True, null=True)
+    data_final = models.DateField()
+
+    def save(self, *args, **kwargs):
+        # Calcular data final automaticamente (data_entrega + 2 anos)
+        self.data_final = self.data_entrega + timedelta(days=365*2)
+        super(ControleFones, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.usuario} - {self.modelo}'

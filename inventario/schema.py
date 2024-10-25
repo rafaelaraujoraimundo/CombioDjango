@@ -2,6 +2,7 @@ from ninja import Schema
 from typing import List, Optional
 from datetime import datetime
 from datetime import date
+from pydantic import BaseModel
 # Schemas para os dados relacionados
 class AccountInfoSchema(Schema):
     tag: Optional[str]
@@ -196,3 +197,157 @@ class ProntuarioMonitorCreateSchema(Schema):
     local_destino: str
     status: str
     observacao: str = None
+
+class ProntuarioCelularSchema(BaseModel):
+    id: int
+    celular: int  # O ID do celular relacionado
+    usuario: Optional[str] = None
+    data: Optional[date] = None
+    motivo_ocorrencia: Optional[str] = None
+    status: Optional[str] = None
+    unidade_destino: Optional[str] = None
+    local: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+# Schema para exibir prontuário de celular (resposta de dados)
+class ProntuarioCelularCreateSchema(BaseModel):
+    celular: int  # O ID do celular relacionado
+    usuario: str
+    data: date
+    motivo_ocorrencia: str
+    status: str
+    unidade_destino: str
+    local: str
+
+class CelularSchema(BaseModel):
+    id: Optional[int] = None  # Para o POST, o ID é opcional
+    modelo: str
+    fabricante: str
+    numero_serie: str
+    imei: str
+    numero_linha: str
+    usuario: str
+    status: str
+    unidade: str
+
+    class Config:
+        from_attributes = True
+
+
+class TipoItemSchema(BaseModel):
+    id: Optional[int] = None
+    nome: str
+
+    class Config:
+        from_attributes = True
+
+class StatusSchema(BaseModel):
+    id: Optional[int] = None
+    nome_status: str
+
+    class Config:
+        from_attributes = True
+
+class EstoqueSchema(BaseModel):
+    id: int
+    tipo_item: TipoItemSchema  # Usando o ID do TipoItem
+    modelo: str
+    fabricante: str
+    status: StatusSchema  # Agora retorna o objeto Status completo
+    observacao: Optional[str] = None
+    local: str
+
+    class Config:
+        from_attributes = True
+
+class EstoqueCreateSchema(BaseModel):
+    tipo_item: int  # Passa o ID do TipoItem no payload
+    modelo: str
+    fabricante: str
+    status: int  # Passa o ID do Status no payload
+    observacao: Optional[str] = None
+    local: str
+
+    class Config:
+        from_attributes = True
+
+class ComputadorSchema(BaseModel):
+    id: int
+    patrimonio: str
+    hostname: str
+    numero_serie: str
+    fabricante: str
+    modelo: str
+    processador: str
+    memoria: str
+    hd: str
+    usuario: str
+    departamento: str
+    unidade: str
+    cargo: str
+    numero_nota_fiscal: str
+    fornecedor: str
+    sistema_operacional: str
+    status: str
+    hardware: int  # Usamos o ID da ForeignKey aqui
+
+    class Config:
+        from_attributes = True
+
+class ComputadorCreateSchema(BaseModel):
+    patrimonio: str
+    hostname: str
+    numero_serie: str
+    fabricante: str
+    modelo: str
+    processador: str
+    memoria: str
+    hd: str
+    usuario: str
+    departamento: str
+    unidade: str
+    cargo: str
+    numero_nota_fiscal: str
+    fornecedor: str
+    sistema_operacional: str
+    status: str
+    hardware: int  # Enviar o ID do hardware no payload
+
+class BiEstabelecimentoCcustoSchema(BaseModel):
+    cod_empresa: str
+    cod_estab: str
+    nom_abrev: str
+    cod_ccusto: str
+    des_tit_ctbl: str
+
+    class Config:
+        from_attributes = True
+
+
+class BiEstabelecimentoSchema(BaseModel):
+    estabelecimento: Optional[str] = None
+    sigla_unidade: Optional[str] = None
+    nome_unidade: Optional[str] = None
+    endereco: Optional[str] = None
+    bairro: Optional[str] = None
+    cidade: Optional[str] = None
+    estado: Optional[str] = None
+    pais: Optional[str] = None
+    regional: Optional[str] = None
+    ie: Optional[str] = None
+    nome_fantasia: Optional[str] = None
+    cnpj: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class EsCentroCustoSchema(BaseModel):
+    centrocusto: Optional[str] = None
+    descricaocusto: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+        # Desativa a validação de um campo "id"
