@@ -1,13 +1,16 @@
 from django.urls import path
 from .views import (acoesprontuario_delete, acoesprontuario_edit, AcoesProntuarioCreate,
     AcoesProntuarioList, celular_delete, CelularCreate, CelularList, CelularUpdate,
-    controlefones_delete, ControleFonesCreate, ControleFonesList, ControleFonesUpdate,
-    controlekit_delete, ControlekitCreate, ControlekitList, ControlekitUpdate, estoque_delete,
-    estoque_edit, EstoqueCreate, EstoqueList, monitor_delete, MonitorCreate, MonitorList,
-    MonitorUpdate, ProntuarioCelularCreate, ProntuarioCelularDelete, ProntuarioCelularListView,
-    ProntuarioCelularUpdate, ProntuarioMonitorCreate, ProntuarioMonitorDelete,
-    ProntuarioMonitorListView, ProntuarioMonitorUpdate, status_delete, status_edit, StatusCreate,
-    StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate, TipoItemList)
+    computador_delete, ComputadorCreate, ComputadorList, ComputadorUpdate, controlefones_delete,
+    ControleFonesCreate, ControleFonesList, ControleFonesUpdate, controlekit_delete,
+    ControlekitCreate, ControlekitList, ControlekitUpdate, estoque_delete, estoque_edit,
+    EstoqueCreate, EstoqueList, monitor_delete, MonitorCreate, MonitorList, MonitorUpdate,
+    prontuario_computador_delete, ProntuarioCelularCreate, ProntuarioCelularDelete,
+    ProntuarioCelularListView, ProntuarioCelularUpdate, ProntuarioComputadorCreate,
+    ProntuarioComputadorListView, ProntuarioComputadorUpdate, ProntuarioMonitorCreate,
+    ProntuarioMonitorDelete, ProntuarioMonitorListView, ProntuarioMonitorUpdate, status_delete,
+    status_edit, StatusCreate, StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate,
+    TipoItemList)
 
 urlpatterns = [
     path('tipoitem/', TipoItemList.as_view(), name='tipoitem_list'),
@@ -60,4 +63,14 @@ urlpatterns = [
     path('monitores/<int:monitor_id>/prontuario/novo/', ProntuarioMonitorCreate.as_view(), name='prontuario_monitor_create'),
     path('monitores/prontuario/<int:pk>/editar/', ProntuarioMonitorUpdate.as_view(), name='prontuario_monitor_edit'),
     path('monitores/prontuario/<int:pk>/delete/', ProntuarioMonitorDelete.as_view(), name='prontuario_monitor_delete'),
+
+    path('computador/', ComputadorList.as_view(), name='computador_list'),
+    path('computador/new/', ComputadorCreate.as_view(), name='computador_create'),
+    path('computador/edit/<int:pk>/', ComputadorUpdate.as_view(), name='computador_edit'),
+    path('computador/delete/<int:pk>/', computador_delete, name='computador_delete'),
+
+        path('computador/<int:computador_id>/prontuario/', ProntuarioComputadorListView.as_view(), name='prontuario_computador_list'),
+    path('computador/<int:computador_id>/prontuario/new/', ProntuarioComputadorCreate.as_view(), name='prontuario_computador_create'),
+    path('prontuario/computador/edit/<int:pk>/', ProntuarioComputadorUpdate.as_view(), name='prontuario_computador_edit'),
+    path('prontuario/computador/delete/<int:pk>/', prontuario_computador_delete, name='prontuario_computador_delete'),
 ]

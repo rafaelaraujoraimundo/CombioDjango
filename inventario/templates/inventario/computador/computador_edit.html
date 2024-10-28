@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Editar Computador</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    
+    <div class="form-group">
+        <label for="{{ form.arquivo_computador.id_for_label }}">Upload de Arquivo</label>
+        <input type="file" class="form-control-file {% if form.arquivo_computador.errors %}is-invalid{% endif %}" 
+               id="{{ form.arquivo_computador.id_for_label }}" name="{{ form.arquivo_computador.name }}">
+        {% for error in form.arquivo_computador.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a href="{% url 'computador_list' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

@@ -4,47 +4,49 @@
 <div class="container-fluid">
     <form method="get" action="" class="mb-4">
         <div class="input-group">
-            <input type="text" name="search" placeholder="Pesquisar celulares..." class="form-control" value="{{ request.GET.search }}">
+            <input type="text" name="search" placeholder="Pesquisar computadores..." class="form-control" value="{{ request.GET.search }}">
             <div class="input-group-append">
                 <button type="submit" class="btn btn-primary">Pesquisar</button>
             </div>
         </div>
     </form>
 
-    <a href="{% url 'celular_create' %}" class="btn btn-primary mb-4">Adicionar Celular</a>
+    <a href="{% url 'computador_create' %}" class="btn btn-primary mb-4">Adicionar Computador</a>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Modelo</th>
+                <th>Hostname</th>
+                <th>Patrimônio</th>
                 <th>Fabricante</th>
-                <th>Número de Série</th>
-                <th>IMEI</th>
-                <th>Número da Linha</th>
+                <th>Modelo</th>
+                <th>Processador</th>
+                <th>Memória</th>
+                <th>HD</th>
                 <th>Usuário</th>
-                <th>Status</th>
                 <th>Estabelecimento</th>
                 <th>Centro de Custo</th>
                 <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            {% for celular in object_list %}
+            {% for computador in object_list %}
             <tr>
-                <td>{{ celular.id }}</td>
-                <td>{{ celular.modelo }}</td>
-                <td>{{ celular.fabricante }}</td>
-                <td>{{ celular.numero_serie }}</td>
-                <td>{{ celular.imei }}</td>
-                <td>{{ celular.numero_linha }}</td>
-                <td>{{ celular.usuario }}</td>
-                <td>{{ celular.status.nome_status }}</td>
-                <td>{{ celular.estabelecimento }}</td>
-                <td>{{ celular.centro_custo }}</td>
+                <td>{{ computador.id }}</td>
+                <td>{{ computador.hostname }}</td>
+                <td>{{ computador.patrimonio }}</td>
+                <td>{{ computador.fabricante }}</td>
+                <td>{{ computador.modelo }}</td>
+                <td>{{ computador.processador }}</td>
+                <td>{{ computador.memoria }}</td>
+                <td>{{ computador.hd }}</td>
+                <td>{{ computador.usuario }}</td>
+                <td>{{ computador.Estabelecimento }}</td>
+                <td>{{ computador.centro_custo }}</td>
                 <td>
-                    <a href="{% url 'celular_edit' celular.id %}" class="btn btn-sm btn-warning">Editar</a>
-                    <a href="{% url 'prontuario_celular_list' celular.id %}" class="btn btn-sm btn-info">Prontuário</a>
-                    <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ celular.id }}" data-item="{{ celular.modelo }}">Excluir</a>
+                    <a href="{% url 'computador_edit' computador.id %}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="{% url 'prontuario_computador_list' computador.id %}" class="btn btn-sm btn-info">Prontuário</a>
+                    <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ computador.id }}" data-item="{{ computador.hostname }}">Excluir</a>
                 </td>
             </tr>
             {% endfor %}
@@ -83,7 +85,7 @@
                     const itemId = this.getAttribute('data-id');
                     const itemName = this.getAttribute('data-item');
                     document.getElementById('deleteItemName').textContent = itemName;
-                    document.getElementById('deleteForm').action = `/inventario/celular/delete/${itemId}/`;
+                    document.getElementById('deleteForm').action = `/inventario/computador/delete/${itemId}/`;
                     $('#confirmDeleteModal').modal('show');
                 });
             });

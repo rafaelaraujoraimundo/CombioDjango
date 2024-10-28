@@ -10,7 +10,7 @@
         </div>
     {% endif %}
 
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <!-- Primeira linha: Nome do Usuário -->
@@ -89,7 +89,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="{{ form.imei.id_for_label }}">IMEI</label>
-                    <input type="text" class="form-control {% if form.imei.errors %}is-invalid{% endif %}" id="{{ form.imei.id_for_label }}" name="{{ form.imei.name }}" value="{{ form.imei.value|default_if_none:'' }}">
+                    <input type="text" class="form-control {% if form.imei.errors %}is-invalid{% endif %}" id="{{ form.imei.id_for_label }}" name="{{ form.imei.name }}" maxlength="15" value="{{ form.imei.value|default_if_none:'' }}">
                     {% for error in form.imei.errors %}
                         <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
@@ -112,7 +112,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="{{ form.numero_linha.id_for_label }}">Número da Linha</label>
-                    <input type="text" class="form-control {% if form.numero_linha.errors %}is-invalid{% endif %}" id="{{ form.numero_linha.id_for_label }}" name="{{ form.numero_linha.name }}" value="{{ form.numero_linha.value|default_if_none:'' }}">
+                    <input type="text" class="form-control {% if form.numero_linha.errors %}is-invalid{% endif %}" id="{{ form.numero_linha.id_for_label }}" name="{{ form.numero_linha.name }}" maxlength="15" value="{{ form.numero_linha.value|default_if_none:'' }}">
                     {% for error in form.numero_linha.errors %}
                         <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
@@ -131,6 +131,15 @@
                     {% endfor %}
                 </div>
             </div>
+        </div>
+
+        <!-- Campo de Upload de Arquivo -->
+        <div class="form-group">
+            <label for="{{ form.arquivo_celular.id_for_label }}">Upload de Arquivo</label>
+            <input type="file" class="form-control-file {% if form.arquivo_celular.errors %}is-invalid{% endif %}" id="{{ form.arquivo_celular.id_for_label }}" name="{{ form.arquivo_celular.name }}">
+            {% for error in form.arquivo_celular.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
         </div>
 
         <!-- Botões -->

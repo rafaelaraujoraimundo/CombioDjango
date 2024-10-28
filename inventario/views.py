@@ -1,11 +1,14 @@
 from django.urls import reverse_lazy
+from django.db.models import Sum
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.shortcuts import get_object_or_404, redirect, render
 from dashboard.models import BiCentroCusto, BiEstabelecimento, BiFuncionariosCombio
-from .models import (AcoesProntuario, Celular, ControleFones, Controlekit, Estoque,
-    ProntuarioCelular, ProntuarioMonitor, Status, TipoItem, Monitor)
-from .forms import (AcoesProntuarioForm, CelularForm, ControleFonesForm, ControlekitForm,
-    EstoqueForm, ProntuarioCelularForm, ProntuarioMonitorForm, StatusForm, TipoItemForm, MonitorForm)
+from .models import (AcoesProntuario, Celular, Computador, ControleFones, Controlekit, Estoque,
+    Hardware, Monitor, ProntuarioCelular, ProntuarioComputador, ProntuarioMonitor, Status,
+    TipoItem, Storage, BIOS)
+from .forms import (AcoesProntuarioForm, CelularForm, ComputadorForm, ControleFonesForm,
+    ControlekitForm, EstoqueForm, MonitorForm, ProntuarioCelularForm, ProntuarioComputadorForm,
+    ProntuarioMonitorForm, StatusForm, TipoItemForm)
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
@@ -322,10 +325,27 @@ class CelularList(ListView):
     model = Celular
     template_name = 'inventario/celular/celular_list.html'
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(modelo__icontains=search_query) |
+                Q(fabricante__icontains=search_query) |
+                Q(numero_serie__icontains=search_query) |
+                Q(imei__icontains=search_query) |
+                Q(numero_linha__icontains=search_query) |
+                Q(usuario__icontains=search_query) |
+                Q(estabelecimento__icontains=search_query) |
+                Q(centro_custo__icontains=search_query)
+            )
+        return queryset
+
     def get_context_data(self, **kwargs):
         context = super(CelularList, self).get_context_data(**kwargs)
         context['title'] = 'Lista de Celulares'
         context['activegroup'] = 'inventario'
+        context['search'] = self.request.GET.get('search', '')
         return context
 
 
@@ -654,7 +674,7 @@ class ProntuarioMonitorDelete(DeleteView):
     
 
 
-
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 class MonitorList(ListView):
     model = Monitor
@@ -735,3 +755,156 @@ def monitor_delete(request, monitor_id):
         messages.success(request, 'Monitor excluído com sucesso.')
         return redirect('monitor_list')
     return redirect('monitor_list')
+
+
+@method_decorator(login_required, name='dispatch')
+class ComputadorList(ListView):
+    model = Computador
+    template_name = 'inventario/computador/computador_list.html'
+    context_object_name = 'computadores'
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(patrimonio__icontains=search_query) |
+                Q(hostname__icontains=search_query) |
+                Q(numero_serie__icontains=search_query) |
+                Q(fabricante__icontains=search_query) |
+                Q(modelo__icontains=search_query) |
+                Q(processador__icontains=search_query) |
+                Q(memoria__icontains=search_query) |
+                Q(hd__icontains=search_query) |
+                Q(usuario__icontains=search_query) |
+                Q(centro_custo__icontains=search_query) |
+                Q(Estabelecimento__icontains=search_query) |
+                Q(cargo__icontains=search_query) |
+                Q(numero_nota_fiscal__icontains=search_query) |
+                Q(fornecedor__icontains=search_query) |
+                Q(sistema_operacional__icontains=search_query) |
+                Q(status__icontains=search_query)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Lista de Computadores'
+        context['activegroup'] = 'inventario'
+        context['search'] = self.request.GET.get('search', '')
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+class ComputadorCreate(CreateView):
+    model = Computador
+    form_class = ComputadorForm
+    template_name = 'inventario/computador/computador_form.html'
+    success_url = reverse_lazy('computador_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Inclusão de Computador'
+        context['activegroup'] = 'inventario'
+
+        # Obter lista de hardware com os campos necessários e incluir dados da BIOS
+        hardware_data = []
+        for hardware in Hardware.objects.all():
+            # Soma total do HD de cada hardware no InventarioStorage
+            total_hd = Storage.objects.filter(hardware_id=hardware.id).aggregate(total_hd=Sum('disk_size'))['total_hd'] or 0
+            
+            # Dados de BIOS relacionados
+            bios = hardware.bios.first()  # Assumimos que há apenas uma entrada BIOS por hardware
+
+            hardware_data.append({
+                'id': hardware.id,
+                'name': hardware.name,
+                'device_id': hardware.device_id,
+                'memory': hardware.memory,
+                'processor_t': hardware.processor_t,
+                'os_name': hardware.os_name,
+                'total_hd': total_hd,
+                'bios_mmodel': bios.mmanufacturer if bios else '',
+                'bios_smodel': bios.smodel if bios else '',
+                'bios_ssn': bios.ssn if bios else ''
+            })
+        
+        context['hardware_list'] = hardware_data  # Passa todos os dados de hardware necessários
+        context['status_list'] = Status.objects.all()
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(
+            mes=now().month, ano=now().year
+        ).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values(
+            'estabelecimento', 'sigla_unidade'
+        )
+        
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values(
+            'centrocusto', 'descricaocusto'
+        )
+
+        return context
+
+# View para editar computador existente
+@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+class ComputadorUpdate(UpdateView):
+    model = Computador
+    form_class = ComputadorForm
+    template_name = 'inventario/computador/computador_edit.html'
+    success_url = reverse_lazy('computador_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Edição de Computador'
+        context['activegroup'] = 'inventario'
+        return context
+
+# View para excluir um computador
+@login_required
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def computador_delete(request, pk):
+    computador = get_object_or_404(Computador, pk=pk)
+    if request.method == "POST":
+        computador.delete()
+        messages.success(request, 'Computador excluído com sucesso.')
+        return redirect('computador_list')
+    return render(request, 'inventario/computador/computador_confirm_delete.html', {'computador': computador})
+
+# Views para ProntuarioComputador
+@method_decorator(login_required, name='dispatch')
+class ProntuarioComputadorListView(ListView):
+    model = ProntuarioComputador
+    template_name = 'inventario/computador/prontuario_computador_list.html'
+
+    def get_queryset(self):
+        self.computador = get_object_or_404(Computador, id=self.kwargs['computador_id'])
+        return ProntuarioComputador.objects.filter(computador=self.computador)
+
+@method_decorator(login_required, name='dispatch')
+class ProntuarioComputadorCreate(CreateView):
+    model = ProntuarioComputador
+    form_class = ProntuarioComputadorForm
+    template_name = 'inventario/computador/prontuario_computador_form.html'
+
+    def form_valid(self, form):
+        form.instance.computador_id = self.kwargs['computador_id']
+        return super().form_valid(form)
+
+@method_decorator(login_required, name='dispatch')
+class ProntuarioComputadorUpdate(UpdateView):
+    model = ProntuarioComputador
+    form_class = ProntuarioComputadorForm
+    template_name = 'inventario/computador/prontuario_computador_edit.html'
+
+@login_required
+def prontuario_computador_delete(request, pk):
+    prontuario = get_object_or_404(ProntuarioComputador, pk=pk)
+    if request.method == "POST":
+        prontuario.delete()
+        messages.success(request, 'Registro de prontuário excluído com sucesso.')
+        return redirect('prontuario_computador_list', computador_id=prontuario.computador.id)
+    return render(request, 'inventario/computador/prontuario_computador_confirm_delete.html', {'prontuario': prontuario})
+
+

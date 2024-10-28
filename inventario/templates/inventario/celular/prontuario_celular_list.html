@@ -3,25 +3,35 @@
 {% block content %}
 <div class="container-fluid">
 
-    <!-- Detalhes do Celular (somente leitura) -->
+    <!-- Detalhes do Celular e Imagem -->
     <h2>Detalhes do Celular</h2>
-    <div class="row">
-        <div class="col-md-4"><strong>Modelo:</strong> {{ celular.modelo }}</div>
-        <div class="col-md-4"><strong>Fabricante:</strong> {{ celular.fabricante }}</div>
-        <div class="col-md-4"><strong>Número de Série:</strong> {{ celular.numero_serie }}</div>
-    </div>
-    <div class="row">
-        <div class="col-md-4"><strong>IMEI:</strong> {{ celular.imei }}</div>
-        <div class="col-md-4"><strong>Número da Linha:</strong> {{ celular.numero_linha }}</div>
-        <div class="col-md-4"><strong>Status:</strong> {{ celular.status }}</div>
-    </div>
-    <div class="mb-4 mt-4">
-        <a href="{% url 'celular_list' %}" class="btn btn-secondary">Voltar para Lista de Celulares</a>
+    <div class="row align-items-start">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-4"><strong>Modelo:</strong> {{ celular.modelo }}</div>
+                <div class="col-md-4"><strong>Fabricante:</strong> {{ celular.fabricante }}</div>
+                <div class="col-md-4"><strong>Número de Série:</strong> {{ celular.numero_serie }}</div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-4"><strong>IMEI:</strong> {{ celular.imei }}</div>
+                <div class="col-md-4"><strong>Número da Linha:</strong> {{ celular.numero_linha }}</div>
+                <div class="col-md-4"><strong>Status:</strong> {{ celular.status }}</div>
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'celular_list' %}" class="btn btn-secondary">Voltar para Lista de Celulares</a>
+            </div>
+        </div>
+        
+        <!-- Imagem do Celular -->
+        <div class="col-md-4 text-right">
+            {% if celular.arquivo_celular %}
+                <img src="{{ celular.arquivo_celular.url }}" alt="Foto do Celular" class="img-fluid" style="max-height: 200px; border: 1px solid #ddd;">
+            {% else %}
+                <p class="text-muted">Sem imagem disponível</p>
+            {% endif %}
+        </div>
     </div>
     <hr>
-
-    <!-- Botão para voltar à lista de celulares -->
-    
 
     <!-- Tabela de Ações do Prontuário -->
     <h2>Ações do Prontuário</h2>

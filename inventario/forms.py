@@ -1,6 +1,6 @@
 from django import forms
-from .models import (AcoesProntuario, Celular, ControleFones, Controlekit, Estoque, Monitor,
-    ProntuarioCelular, ProntuarioMonitor, Status, TipoItem)
+from .models import (AcoesProntuario, Celular, Computador, ControleFones, Controlekit, Estoque,
+    Monitor, ProntuarioCelular, ProntuarioComputador, ProntuarioMonitor, Status, TipoItem)
 from dashboard.models import BiFuncionariosCombio
 from django.utils.timezone import now
 
@@ -111,7 +111,7 @@ class CelularForm(forms.ModelForm):
         model = Celular
         fields = [
             'modelo', 'fabricante', 'numero_serie', 'imei', 'numero_linha',
-            'usuario', 'status', 'estabelecimento', 'centro_custo'
+            'usuario', 'status', 'estabelecimento', 'centro_custo', 'arquivo_celular'
         ]
         labels = {
             'modelo': 'Modelo',
@@ -122,15 +122,12 @@ class CelularForm(forms.ModelForm):
             'usuario': 'Nome do Usuário',
             'status': 'Status',
             'estabelecimento': 'Estabelecimento',
-            'centro_custo': 'Centro de Custo'
+            'centro_custo': 'Centro de Custo',
+            'arquivo_celular': 'Upload de Arquivo'
         }
-
-    def __init__(self, *args, **kwargs):
-        super(CelularForm, self).__init__(*args, **kwargs)
-        self.fields['usuario'].widget.attrs.update({'list': 'usuarios'})
-        self.fields['estabelecimento'].widget.attrs.update({'list': 'estabelecimentos'})
-        self.fields['centro_custo'].widget.attrs.update({'list': 'centros_custo'})
-
+        widgets = {
+            'arquivo_celular': forms.FileInput(attrs={'class': 'form-control-file'})
+        }
 
 class MonitorForm(forms.ModelForm):
     class Meta:
@@ -212,3 +209,45 @@ class ProntuarioMonitorForm(forms.ModelForm):
         self.fields['unidade_destino'].widget.attrs['class'] = 'form-control'
         self.fields['local'].widget.attrs['class'] = 'form-control'
         self.fields['localizacao_destino'].widget.attrs['class'] = 'form-control'
+
+
+class ComputadorForm(forms.ModelForm):
+    class Meta:
+        model = Computador
+        fields = [
+            'patrimonio', 'hostname', 'numero_serie', 'fabricante', 'modelo', 
+            'processador', 'memoria', 'hd', 'usuario', 'centro_custo', 'estabelecimento', 
+            'cargo', 'numero_nota_fiscal', 'fornecedor', 'sistema_operacional', 'status', 'hardware'
+        ]
+        labels = {
+            'patrimonio': 'Patrimônio',
+            'hostname': 'Hostname',
+            'numero_serie': 'Número de Série',
+            'fabricante': 'Fabricante',
+            'modelo': 'Modelo',
+            'processador': 'Processador',
+            'memoria': 'Memória',
+            'hd': 'HD',
+            'usuario': 'Usuário',
+            'centro_custo': 'Centro de Custo',
+            'estabelecimento': 'Estabelecimento',
+            'cargo': 'Cargo',
+            'numero_nota_fiscal': 'Número da Nota Fiscal',
+            'fornecedor': 'Fornecedor',
+            'sistema_operacional': 'Sistema Operacional',
+            'status': 'Status',
+            'hardware': 'Hardware'
+        }
+
+class ProntuarioComputadorForm(forms.ModelForm):
+    class Meta:
+        model = ProntuarioComputador
+        fields = ['usuario', 'data', 'motivo_ocorrencia', 'acao', 'unidade_destino', 'local']
+        labels = {
+            'usuario': 'Usuário',
+            'data': 'Data',
+            'motivo_ocorrencia': 'Motivo da Ocorrência',
+            'acao': 'Ação',
+            'unidade_destino': 'Unidade de Destino',
+            'local': 'Local',
+        }
