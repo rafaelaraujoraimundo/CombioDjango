@@ -5,12 +5,12 @@ from .views import (acoesprontuario_delete, acoesprontuario_edit, AcoesProntuari
     ControleFonesCreate, ControleFonesList, ControleFonesUpdate, controlekit_delete,
     ControlekitCreate, ControlekitList, ControlekitUpdate, estoque_delete, estoque_edit,
     EstoqueCreate, EstoqueList, monitor_delete, MonitorCreate, MonitorList, MonitorUpdate,
-    prontuario_computador_delete, ProntuarioCelularCreate, ProntuarioCelularDelete,
+    ProntuarioComputadorDelete, ProntuarioCelularCreate, ProntuarioCelularDelete,
     ProntuarioCelularListView, ProntuarioCelularUpdate, ProntuarioComputadorCreate,
     ProntuarioComputadorListView, ProntuarioComputadorUpdate, ProntuarioMonitorCreate,
     ProntuarioMonitorDelete, ProntuarioMonitorListView, ProntuarioMonitorUpdate, status_delete,
     status_edit, StatusCreate, StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate,
-    TipoItemList)
+    TipoItemList, ComputadorDetailView)
 
 urlpatterns = [
     path('tipoitem/', TipoItemList.as_view(), name='tipoitem_list'),
@@ -69,8 +69,10 @@ urlpatterns = [
     path('computador/edit/<int:pk>/', ComputadorUpdate.as_view(), name='computador_edit'),
     path('computador/delete/<int:pk>/', computador_delete, name='computador_delete'),
 
-        path('computador/<int:computador_id>/prontuario/', ProntuarioComputadorListView.as_view(), name='prontuario_computador_list'),
+    path('computador/<int:computador_id>/prontuario/', ProntuarioComputadorListView.as_view(), name='prontuario_computador_list'),
     path('computador/<int:computador_id>/prontuario/new/', ProntuarioComputadorCreate.as_view(), name='prontuario_computador_create'),
     path('prontuario/computador/edit/<int:pk>/', ProntuarioComputadorUpdate.as_view(), name='prontuario_computador_edit'),
-    path('prontuario/computador/delete/<int:pk>/', prontuario_computador_delete, name='prontuario_computador_delete'),
+    path('prontuario/computador/delete/<int:pk>/', ProntuarioComputadorDelete.as_view(), name='prontuario_computador_delete'),
+
+    path('computador/details/<int:pk>/', ComputadorDetailView.as_view(), name='computador-detail'),
 ]

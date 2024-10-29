@@ -1,0 +1,34 @@
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Version</th>
+                <th scope="col">Install Date</th>
+                <th scope="col">GUID</th>
+                <th scope="col">Filename</th>
+                <th scope="col">Folder</th>
+              
+            </tr>
+        </thead>
+        <tbody>
+        {% for software in softwares %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ software.name_id }}</td>
+                <td>{{ software.version_id }}</td>
+                <td>{{ software.install_date|date:"Y-m-d" }}</td>
+                <td>{{ software.guid }}</td>
+                <td>{{ software.filename }}</td>
+                <td>{{ software.folder }}</td>
+              
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="10">No software information available.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+

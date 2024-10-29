@@ -1,0 +1,63 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <h2>Detalhes do Computador</h2>
+    <div class="row align-items-start">
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-4"><strong>Modelo:</strong> {{ computador.modelo }}</div>
+                <div class="col-md-4"><strong>Fabricante:</strong> {{ computador.fabricante }}</div>
+                <div class="col-md-4"><strong>Número de Série:</strong> {{ computador.numero_serie }}</div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-4"><strong>Hostname:</strong> {{ computador.hostname }}</div>
+                <div class="col-md-4"><strong>Usuário:</strong> {{ computador.usuario }}</div>
+                <div class="col-md-4"><strong>Status:</strong> {{ computador.status.nome_status }}</div>
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'computador_list' %}" class="btn btn-secondary">Voltar para Lista de Computadores</a>
+            </div>
+        </div>
+        
+        <!-- Imagem do Computador, se houver -->
+        <div class="col-md-4 text-right">
+            {% if computador.arquivo_computador %}
+                <img src="{{ computador.arquivo_computador.url }}" alt="Foto do Computador" class="img-fluid" style="max-height: 200px; border: 1px solid #ddd;">
+            {% else %}
+                <p class="text-muted">Sem imagem disponível</p>
+            {% endif %}
+        </div>
+    </div>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="computerDetailsTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="prontuario-tab" data-toggle="tab" href="#prontuario" role="tab" aria-controls="prontuario" aria-selected="true">Prontuário</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="hardware-tab" data-toggle="tab" href="#hardware" role="tab" aria-controls="hardware" aria-selected="false">Hardware</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="software-tab" data-toggle="tab" href="#software" role="tab" aria-controls="software" aria-selected="false">Software</a>
+        </li>
+
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content">
+        <div class="tab-pane fade" id="hardware" role="tabpanel" aria-labelledby="hardware-tab">
+            <!-- Inclua os detalhes de hardware aqui -->
+            {% include 'inventario/computador/details/tab_hardware.html' %}
+        </div>
+        <div class="tab-pane fade" id="software" role="tabpanel" aria-labelledby="software-tab">
+            <!-- Inclua os detalhes de software aqui -->
+            {% include 'inventario/computador/details/tab_software.html' %}
+        </div>
+        <div class="tab-pane fade show active" id="prontuario" role="tabpanel" aria-labelledby="prontuario-tab">
+            <!-- Conteúdo existente de prontuário_computador_list.html aqui -->
+            {% include 'inventario/computador/prontuario_computador_list.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,11 +1,12 @@
 from django.urls import reverse_lazy
-from django.db.models import Sum
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.db.models import Sum, Q
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.shortcuts import get_object_or_404, redirect, render
 from dashboard.models import BiCentroCusto, BiEstabelecimento, BiFuncionariosCombio
-from .models import (AcoesProntuario, Celular, Computador, ControleFones, Controlekit, Estoque,
-    Hardware, Monitor, ProntuarioCelular, ProntuarioComputador, ProntuarioMonitor, Status,
-    TipoItem, Storage, BIOS)
+from api_v1.schema import Memory
+from .models import (AccountInfo, AcoesProntuario, BIOS, Celular, Computador, ControleFones,
+    Controlekit, CPU, Estoque, Hardware, Monitor, ProntuarioCelular, ProntuarioComputador,
+    ProntuarioMonitor, Software, Status, Storage, TipoItem)
 from .forms import (AcoesProntuarioForm, CelularForm, ComputadorForm, ControleFonesForm,
     ControlekitForm, EstoqueForm, MonitorForm, ProntuarioCelularForm, ProntuarioComputadorForm,
     ProntuarioMonitorForm, StatusForm, TipoItemForm)
@@ -778,12 +779,11 @@ class ComputadorList(ListView):
                 Q(hd__icontains=search_query) |
                 Q(usuario__icontains=search_query) |
                 Q(centro_custo__icontains=search_query) |
-                Q(Estabelecimento__icontains=search_query) |
+                Q(estabelecimento__icontains=search_query) |
                 Q(cargo__icontains=search_query) |
                 Q(numero_nota_fiscal__icontains=search_query) |
                 Q(fornecedor__icontains=search_query) |
-                Q(sistema_operacional__icontains=search_query) |
-                Q(status__icontains=search_query)
+                Q(sistema_operacional__icontains=search_query) 
             )
         return queryset
 
@@ -859,6 +859,41 @@ class ComputadorUpdate(UpdateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Edição de Computador'
         context['activegroup'] = 'inventario'
+        hardware_data = []
+        for hardware in Hardware.objects.all():
+            # Soma total do HD de cada hardware no InventarioStorage
+            total_hd = Storage.objects.filter(hardware_id=hardware.id).aggregate(total_hd=Sum('disk_size'))['total_hd'] or 0
+            
+            # Dados de BIOS relacionados
+            bios = hardware.bios.first()  # Assumimos que há apenas uma entrada BIOS por hardware
+
+            hardware_data.append({
+                'id': hardware.id,
+                'name': hardware.name,
+                'device_id': hardware.device_id,
+                'memory': hardware.memory,
+                'processor_t': hardware.processor_t,
+                'os_name': hardware.os_name,
+                'total_hd': total_hd,
+                'bios_mmodel': bios.mmanufacturer if bios else '',
+                'bios_smodel': bios.smodel if bios else '',
+                'bios_ssn': bios.ssn if bios else ''
+            })
+        
+        context['hardware_list'] = hardware_data  # Passa todos os dados de hardware necessários
+        context['status_list'] = Status.objects.all()
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(
+            mes=now().month, ano=now().year
+        ).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values(
+            'estabelecimento', 'sigla_unidade'
+        )
+        
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values(
+            'centrocusto', 'descricaocusto'
+        )
+
         return context
 
 # View para excluir um computador
@@ -873,16 +908,35 @@ def computador_delete(request, pk):
     return render(request, 'inventario/computador/computador_confirm_delete.html', {'computador': computador})
 
 # Views para ProntuarioComputador
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioComputadorListView(ListView):
     model = ProntuarioComputador
-    template_name = 'inventario/computador/prontuario_computador_list.html'
+   
+    template_name = 'inventario/computador/details/computador_details.html'
+    context_object_name = 'prontuarios'
 
     def get_queryset(self):
+        # Assume 'computador_id' is passed as a URL kwarg
         self.computador = get_object_or_404(Computador, id=self.kwargs['computador_id'])
         return ProntuarioComputador.objects.filter(computador=self.computador)
 
-@method_decorator(login_required, name='dispatch')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['computador'] = self.computador
+        context['hardware'] = self.computador.hardware
+        context['bios'] = self.computador.hardware.bios.all()
+        context['cpus'] = self.computador.hardware.cpus.all()
+        context['memories'] = self.computador.hardware.memories.all()
+        context['softwares'] = self.computador.hardware.software.all()
+        context['storages'] = self.computador.hardware.storages.all()
+        context['accountinfo'] = self.computador.hardware.accountinfo.all()
+        context['activegroup'] = 'inventario'
+        context['title'] = f'Prontuário de {self.computador.modelo} - {self.computador.fabricante} - {self.computador.numero_serie}'
+        return context
+        
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioComputadorCreate(CreateView):
     model = ProntuarioComputador
     form_class = ProntuarioComputadorForm
@@ -890,21 +944,102 @@ class ProntuarioComputadorCreate(CreateView):
 
     def form_valid(self, form):
         form.instance.computador_id = self.kwargs['computador_id']
+       
+        # Atualiza o estabelecimento e o centro de custo do computador se a ação é do tipo 2 (Transferência)
+        if form.cleaned_data['acao'].tipo == 2:
+            computador = form.instance.computador
+            computador.estabelecimento = form.cleaned_data['unidade_destino']
+            computador.centro_custo = form.cleaned_data['local']
+            computador.save()  # Salva as alterações no computador
+
         return super().form_valid(form)
 
-@method_decorator(login_required, name='dispatch')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        computador = get_object_or_404(Computador, pk=self.kwargs['computador_id'])
+        context.update({
+            'title': 'Adicionar Ação ao Prontuário',
+            'computador': computador,
+            'usuarios_list': BiFuncionariosCombio.objects.all().values('cdn_funcionario', 'nom_funcionario', 'cdn_estab'),
+            'estabelecimentos_list': BiEstabelecimento.objects.all().values('estabelecimento', 'sigla_unidade'),
+            'centros_custo_list': BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
+        })
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('prontuario_computador_list', kwargs={'computador_id': self.kwargs['computador_id']})
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioComputadorUpdate(UpdateView):
     model = ProntuarioComputador
     form_class = ProntuarioComputadorForm
     template_name = 'inventario/computador/prontuario_computador_edit.html'
 
-@login_required
-def prontuario_computador_delete(request, pk):
-    prontuario = get_object_or_404(ProntuarioComputador, pk=pk)
-    if request.method == "POST":
-        prontuario.delete()
-        messages.success(request, 'Registro de prontuário excluído com sucesso.')
-        return redirect('prontuario_computador_list', computador_id=prontuario.computador.id)
-    return render(request, 'inventario/computador/prontuario_computador_confirm_delete.html', {'prontuario': prontuario})
+    def form_valid(self, form):
+        print("Ação Tipo:", form.cleaned_data['acao'].tipo)
+        # Atualiza o estabelecimento e o centro de custo do computador se a ação é do tipo 2 (Transferência)
+        if form.cleaned_data['acao'].tipo == 2:
+            computador = form.instance.computador
+            computador.estabelecimento = form.cleaned_data['unidade_destino']
+            computador.centro_custo = form.cleaned_data['local']
+            print(computador.centro_custo)
+            computador.save()  # Salva as alterações no computador
 
+        return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        computador = self.object.computador
+        context.update({
+            'title': 'Editar Ação no Prontuário',
+            'computador': computador,
+            'usuarios_list': BiFuncionariosCombio.objects.all().values('cdn_funcionario', 'nom_funcionario', 'cdn_estab'),
+            'estabelecimentos_list': BiEstabelecimento.objects.all().values('estabelecimento', 'sigla_unidade'),
+            'centros_custo_list': BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
+        })
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('prontuario_computador_list', kwargs={'computador_id': self.object.computador.id})
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+class ProntuarioComputadorDelete(DeleteView):
+    model = ProntuarioComputador
+    template_name = 'inventario/computador/prontuario_computador_confirm_delete.html'
+
+    def get_success_url(self):
+        return reverse_lazy('prontuario_computador_list', kwargs={'computador_id': self.object.computador.id})
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+class ComputadorDetailView(DetailView):
+    model = Computador
+    template_name = 'inventario/computador/details/computador_details.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        computador_id = self.kwargs.get('pk')  # Assumindo que a chave primária é passada como 'pk'
+
+        # Obtenha o objeto Computador com prefetch e select_related para otimizar as consultas ao banco de dados
+        computador = Computador.objects.select_related('hardware').prefetch_related(
+            'hardware__bios',
+            'hardware__cpus',
+            'hardware__memories',
+            'hardware__software',
+            'hardware__storages',
+            'hardware__accountinfo'
+        ).get(pk=computador_id)
+
+        # Adicionando ao contexto
+        context['computador'] = computador
+        context['hardware'] = computador.hardware
+        context['bios'] = computador.hardware.bios.all()
+        context['cpus'] = computador.hardware.cpus.all()
+        context['memories'] = computador.hardware.memories.all()
+        context['softwares'] = computador.hardware.software.all()
+        context['storages'] = computador.hardware.storages.all()
+        context['accountinfo'] = computador.hardware.accountinfo.all()
+
+        return context

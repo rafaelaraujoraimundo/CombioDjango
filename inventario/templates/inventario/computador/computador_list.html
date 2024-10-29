@@ -12,12 +12,10 @@
     </form>
 
     <a href="{% url 'computador_create' %}" class="btn btn-primary mb-4">Adicionar Computador</a>
-    <table class="table table-bordered table-striped">
+    <table class="table table-bordered table-sm table-striped">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Hostname</th>
-                <th>Patrimônio</th>
+                 <th>Hostname</th>
                 <th>Fabricante</th>
                 <th>Modelo</th>
                 <th>Processador</th>
@@ -32,16 +30,14 @@
         <tbody>
             {% for computador in object_list %}
             <tr>
-                <td>{{ computador.id }}</td>
-                <td>{{ computador.hostname }}</td>
-                <td>{{ computador.patrimonio }}</td>
+                 <td>{{ computador.hostname }}</td>
                 <td>{{ computador.fabricante }}</td>
                 <td>{{ computador.modelo }}</td>
                 <td>{{ computador.processador }}</td>
                 <td>{{ computador.memoria }}</td>
                 <td>{{ computador.hd }}</td>
                 <td>{{ computador.usuario }}</td>
-                <td>{{ computador.Estabelecimento }}</td>
+                <td>{{ computador.estabelecimento }}</td>
                 <td>{{ computador.centro_custo }}</td>
                 <td>
                     <a href="{% url 'computador_edit' computador.id %}" class="btn btn-sm btn-warning">Editar</a>

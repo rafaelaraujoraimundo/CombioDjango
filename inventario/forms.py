@@ -217,7 +217,7 @@ class ComputadorForm(forms.ModelForm):
         fields = [
             'patrimonio', 'hostname', 'numero_serie', 'fabricante', 'modelo', 
             'processador', 'memoria', 'hd', 'usuario', 'centro_custo', 'estabelecimento', 
-            'cargo', 'numero_nota_fiscal', 'fornecedor', 'sistema_operacional', 'status', 'hardware'
+            'cargo', 'numero_nota_fiscal', 'fornecedor', 'sistema_operacional', 'status', 'hardware', 'arquivo_computador'
         ]
         labels = {
             'patrimonio': 'Patrimônio',
@@ -236,7 +236,8 @@ class ComputadorForm(forms.ModelForm):
             'fornecedor': 'Fornecedor',
             'sistema_operacional': 'Sistema Operacional',
             'status': 'Status',
-            'hardware': 'Hardware'
+            'hardware': 'Hardware',
+            'arquivo_computador': 'Upload de Arquivos'
         }
 
 class ProntuarioComputadorForm(forms.ModelForm):

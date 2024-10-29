@@ -1,21 +1,312 @@
-{% extends "base.html" %}
+
+{% extends "menu/index.html" %}
+
 {% block content %}
-<h2>Editar Computador</h2>
-
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    
-    <div class="form-group">
-        <label for="{{ form.arquivo_computador.id_for_label }}">Upload de Arquivo</label>
-        <input type="file" class="form-control-file {% if form.arquivo_computador.errors %}is-invalid{% endif %}" 
-               id="{{ form.arquivo_computador.id_for_label }}" name="{{ form.arquivo_computador.name }}">
-        {% for error in form.arquivo_computador.errors %}
-            <div class="invalid-feedback">{{ error }}</div>
-        {% endfor %}
+<div class="container-fluid">
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for field, errors in form.errors.items %}
+                <li>{{ field }}: {{ errors|join:", " }}</li>
+            {% endfor %}
+        </ul>
     </div>
+    {% endif %}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
 
-    <button type="submit" class="btn btn-primary">Salvar</button>
-    <a href="{% url 'computador_list' %}" class="btn btn-secondary">Cancelar</a>
-</form>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Linha 1: Estabelecimento, Centro de Custo, Usuário e Cargo -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="estabelecimentoInput">Estabelecimento (Filial)</label>
+                    <input class="form-control {% if form.estabelecimento.errors %}is-invalid{% endif %}" list="estabelecimentos" id="estabelecimentoInput" name="estabelecimento" autocomplete="off" value="{{ form.estabelecimento.value|default_if_none:'' }}">
+                    <datalist id="estabelecimentos">
+                        {% for est in estabelecimentos_list %}
+                            <option value="{{ est.estabelecimento }} - {{ est.sigla_unidade }}" data-value="{{ est.estabelecimento }}">
+                        {% endfor %}
+                    </datalist>
+                    <input type="hidden" id="estabelecimentoCode" name="estabelecimento" value="{{ form.estabelecimento.value|default_if_none:'' }}">
+                    {% for error in form.estabelecimento.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="centroCustoInput">Centro de Custo</label>
+                    <input class="form-control {% if form.centro_custo.errors %}is-invalid{% endif %}" list="centros_custo" id="centroCustoInput" name="centro_custo" autocomplete="off" value="{{ form.centro_custo.value|default_if_none:'' }}">
+                    <datalist id="centros_custo">
+                        {% for cc in centros_custo_list %}
+                            <option value="{{ cc.centrocusto }} - {{ cc.descricaocusto }}" data-value="{{ cc.descricaocusto }}">
+                        {% endfor %}
+                    </datalist>
+                    <input type="hidden" id="centroCustoCode" name="centro_custo" value="{{ form.centro_custo.value|default_if_none:'' }}">
+                    {% for error in form.centro_custo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="usuarioInput">Nome do Usuário</label>
+                    <input class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" list="usuarios" id="usuarioInput" name="usuario" autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
+                    <datalist id="usuarios">
+                        {% for user in usuarios_list %}
+                            <option value="{{ user.nom_funcionario }}" data-cdn-funcionario="{{ user.cdn_funcionario }}" data-cdn-estab="{{ user.cdn_estab }}">
+                        {% endfor %}
+                    </datalist>
+                    <input type="hidden" id="usuarioCode" name="matricula" value="{{ form.matricula.value|default_if_none:'' }}">
+                    {% for error in form.usuario.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.cargo.id_for_label }}">Cargo</label>
+                    <input type="text" class="form-control {% if form.cargo.errors %}is-invalid{% endif %}" id="{{ form.cargo.id_for_label }}" name="{{ form.cargo.name }}" value="{{ form.cargo.value|default_if_none:'' }}">
+                    {% for error in form.cargo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Linha 2: Status e Hostname -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.status.id_for_label }}">Status</label>
+                    <select class="form-control {% if form.status.errors %}is-invalid{% endif %}" id="{{ form.status.id_for_label }}" name="{{ form.status.name }}">
+                        {% for status in status_list %}
+                            <option value="{{ status.id }}" {% if form.status.value == status.id %}selected{% endif %}>{{ status.nome_status }}</option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.status.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.hostname.id_for_label }}">Hostname</label>
+                    <input type="text" class="form-control {% if form.hostname.errors %}is-invalid{% endif %}" id="{{ form.hostname.id_for_label }}" name="{{ form.hostname.name }}" value="{{ form.hostname.value|default_if_none:'' }}">
+                    {% for error in form.hostname.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <!-- Linha 4: Hardware, Fabricante, Modelo, Sistema Operacional -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="hardwareInput">Hardware</label>
+                    <input class="form-control {% if form.hardware.errors %}is-invalid{% endif %}" list="hardwareList" id="hardwareInput" name="hardware" autocomplete="off" value="{{ form.hardware.value|default_if_none:'' }}">
+                    <datalist id="hardwareList">
+                        {% for hw in hardware_list %}
+                            <option 
+                                value="{{ hw.name }} - {{ hw.device_id }}" 
+                                data-id="{{ hw.id }}" 
+                                data-memory="{{ hw.memory }}"
+                                data-processor="{{ hw.processor_t }}"
+                                data-hd="{{ hw.total_hd }}"
+                                data-os="{{ hw.os_name }}"
+                                data-bios-mmanufacturer="{{ hw.bios_mmodel }}"
+                                data-bios-model="{{ hw.bios_mmodel }} {{ hw.bios_smodel }}"
+                                data-bios-serial="{{ hw.bios_ssn }}">
+                        {% endfor %}
+                    </datalist>
+                    <input type="hidden" id="hardwareCode" name="hardware" value="{{ form.hardware.value|default_if_none:'' }}">
+                    {% for error in form.hardware.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.fabricante.id_for_label }}">Fabricante</label>
+                    <input type="text" class="form-control {% if form.fabricante.errors %}is-invalid{% endif %}" id="{{ form.fabricante.id_for_label }}" name="{{ form.fabricante.name }}" value="{{ form.fabricante.value|default_if_none:'' }}">
+                    {% for error in form.fabricante.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.modelo.id_for_label }}">Modelo</label>
+                    <input type="text" class="form-control {% if form.modelo.errors %}is-invalid{% endif %}" id="{{ form.modelo.id_for_label }}" name="{{ form.modelo.name }}" value="{{ form.modelo.value|default_if_none:'' }}">
+                    {% for error in form.modelo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.sistema_operacional.id_for_label }}">Sistema Operacional</label>
+                    <input type="text" class="form-control {% if form.sistema_operacional.errors %}is-invalid{% endif %}" id="{{ form.sistema_operacional.id_for_label }}" name="{{ form.sistema_operacional.name }}" value="{{ form.sistema_operacional.value|default_if_none:'' }}">
+                    {% for error in form.sistema_operacional.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Linha 5: Processador, Memória, HD -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="{{ form.processador.id_for_label }}">Processador</label>
+                    <input type="text" class="form-control {% if form.processador.errors %}is-invalid{% endif %}" id="{{ form.processador.id_for_label }}" name="{{ form.processador.name }}" value="{{ form.processador.value|default_if_none:'' }}">
+                    {% for error in form.processador.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="{{ form.memoria.id_for_label }}">Memória</label>
+                    <input type="text" class="form-control {% if form.memoria.errors %}is-invalid{% endif %}" id="{{ form.memoria.id_for_label }}" name="{{ form.memoria.name }}" value="{{ form.memoria.value|default_if_none:'' }}">
+                    {% for error in form.memoria.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="{{ form.hd.id_for_label }}">HD</label>
+                    <input type="text" class="form-control {% if form.hd.errors %}is-invalid{% endif %}" id="{{ form.hd.id_for_label }}" name="{{ form.hd.name }}" value="{{ form.hd.value|default_if_none:'' }}">
+                    {% for error in form.hd.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Linha 6: Número da Nota Fiscal e Fornecedor -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.patrimonio.id_for_label }}">Patrimônio</label>
+                    <input type="text" class="form-control {% if form.patrimonio.errors %}is-invalid{% endif %}" id="{{ form.patrimonio.id_for_label }}" name="{{ form.patrimonio.name }}" value="{{ form.patrimonio.value|default_if_none:'' }}">
+                    {% for error in form.patrimonio.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.numero_serie.id_for_label }}">Número de Série</label>
+                    <input type="text" class="form-control {% if form.numero_serie.errors %}is-invalid{% endif %}" id="{{ form.numero_serie.id_for_label }}" name="{{ form.numero_serie.name }}" value="{{ form.numero_serie.value|default_if_none:'' }}">
+                    {% for error in form.numero_serie.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.numero_nota_fiscal.id_for_label }}">Número da Nota Fiscal</label>
+                    <input type="text" class="form-control {% if form.numero_nota_fiscal.errors %}is-invalid{% endif %}" id="{{ form.numero_nota_fiscal.id_for_label }}" name="{{ form.numero_nota_fiscal.name }}" value="{{ form.numero_nota_fiscal.value|default_if_none:'' }}">
+                    {% for error in form.numero_nota_fiscal.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.fornecedor.id_for_label }}">Fornecedor</label>
+                    <input type="text" class="form-control {% if form.fornecedor.errors %}is-invalid{% endif %}" id="{{ form.fornecedor.id_for_label }}" name="{{ form.fornecedor.name }}" value="{{ form.fornecedor.value|default_if_none:'' }}">
+                    {% for error in form.fornecedor.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Campo de Upload de Arquivo -->
+        <div class="form-group">
+            <label for="{{ form.arquivo_computador.id_for_label }}">Upload de Arquivo</label>
+            <input type="file" class="form-control-file {% if form.arquivo_computador.errors %}is-invalid{% endif %}" id="{{ form.arquivo_computador.id_for_label }}" name="{{ form.arquivo_computador.name }}">
+            
+            {% if form.instance.arquivo_computador %}
+            <p>
+                <h5><a href="{{ form.instance.arquivo_computador.url }}" target="_blank">Imagem atual</a><h5>
+            </p>
+        {% endif %}
+            {% for error in form.arquivo_computador.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Botões -->
+        <div class="row mt-2">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="{% url 'computador_list' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+
+
+    function setHardwareDetails() {
+        const hardwareInput = document.getElementById('hardwareInput');
+        const selectedOption = document.querySelector(`#hardwareList option[value="${hardwareInput.value}"]`);
+        console.log(selectedOption)
+        if (selectedOption) {
+            document.getElementById('hardwareCode').value = selectedOption.getAttribute('data-id');
+            document.getElementById('{{ form.fabricante.id_for_label }}').value = selectedOption.getAttribute('data-bios-mmanufacturer');
+            document.getElementById('{{ form.processador.id_for_label }}').value = selectedOption.getAttribute('data-processor');
+            document.getElementById('{{ form.memoria.id_for_label }}').value = selectedOption.getAttribute('data-memory');
+            document.getElementById('{{ form.hd.id_for_label }}').value = selectedOption.getAttribute('data-hd');
+            document.getElementById('{{ form.sistema_operacional.id_for_label }}').value = selectedOption.getAttribute('data-os');
+            document.getElementById('{{ form.modelo.id_for_label }}').value = selectedOption.getAttribute('data-bios-model');
+            document.getElementById('{{ form.numero_serie.id_for_label }}').value = selectedOption.getAttribute('data-bios-serial');
+            document.getElementById('{{ form.hostname.id_for_label }}').value = selectedOption.getAttribute('value').split(' ')[0];
+        }
+    }
+
+    function setUsuarioCode() {
+        const usuarioInput = document.getElementById('usuarioInput');
+        const selectedOption = document.querySelector(`#usuarios option[value="${usuarioInput.value}"]`);
+        if (selectedOption) {
+            const cdnFuncionario = selectedOption.getAttribute('data-cdn-funcionario');
+            const cdnEstab = selectedOption.getAttribute('data-cdn-estab');
+            document.getElementById('usuarioCode').value = `${cdnEstab}-${cdnFuncionario}`;
+        }
+    }
+
+    function setEstabelecimentoCode() {
+        const estabelecimentoInput = document.getElementById('estabelecimentoInput');
+        const selectedOption = document.querySelector(`#estabelecimentos option[value="${estabelecimentoInput.value}"]`);
+        if (selectedOption) {
+            document.getElementById('estabelecimentoCode').value = selectedOption.getAttribute('data-value');
+        }
+    }
+
+    function setCentroCustoCode() {
+        const centroCustoInput = document.getElementById('centroCustoInput');
+        const selectedOption = document.querySelector(`#centros_custo option[value="${centroCustoInput.value}"]`);
+        if (selectedOption) {
+            document.getElementById('centroCustoCode').value = selectedOption.getAttribute('data-value');
+        }
+    }
+  
+    document.getElementById('hardwareInput').addEventListener('input', setHardwareDetails);
+    document.getElementById('usuarioInput').addEventListener('input', setUsuarioCode);
+    document.getElementById('estabelecimentoInput').addEventListener('input', setEstabelecimentoCode);
+    document.getElementById('centroCustoInput').addEventListener('input', setCentroCustoCode);
+</script>
 {% endblock %}

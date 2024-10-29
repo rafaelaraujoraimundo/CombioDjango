@@ -43,49 +43,7 @@ class AcoesProntuario(models.Model):
     def __str__(self):
         return self.acao
 
-def upload_to(instance, filename):
-    return f'computador/{instance.pk}/{filename}'
 
-class Computador(models.Model):
-    patrimonio = models.CharField(max_length=100)
-    hostname = models.CharField(max_length=100)
-    numero_serie = models.CharField(max_length=100)
-    fabricante = models.CharField(max_length=100)
-    modelo = models.CharField(max_length=100)
-    processador = models.CharField(max_length=100)
-    memoria = models.CharField(max_length=100)
-    hd = models.CharField(max_length=100)
-    usuario = models.CharField(max_length=100)
-    centro_custo = models.CharField(max_length=100)
-    estabelecimento = models.CharField(max_length=100)
-    cargo = models.CharField(max_length=100)
-    numero_nota_fiscal = models.CharField(max_length=100)
-    fornecedor = models.CharField(max_length=100)
-    sistema_operacional = models.CharField(max_length=100)
-    status = models.ForeignKey(Status, on_delete=models.PROTECT)
-    hardware = models.ForeignKey('Hardware', on_delete=models.CASCADE)
-    arquivo_computador = models.FileField(upload_to=upload_to, blank=True, null=True)
-
-    def __str__(self):
-        return f'{self.hostname} ({self.patrimonio})'
-
-    def save(self, *args, **kwargs):
-        temp_arquivo = self.arquivo_computador
-        self.arquivo_computador = None  # Salvar sem o arquivo para obter o ID
-        super().save(*args, **kwargs)
-
-        # Atualizar o caminho do arquivo após obter o ID
-        if temp_arquivo:
-            temp_arquivo.name = os.path.join(f'computador/{self.pk}', f'arquivo{os.path.splitext(temp_arquivo.name)[1]}')
-            self.arquivo_computador = temp_arquivo
-            super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.arquivo_computador:
-            file_path = Path(self.arquivo_computador.path)
-            if file_path.exists():
-                file_path.unlink()  # Deletar o arquivo ao excluir a instância
-        super().delete(*args, **kwargs)
 
 # -----------------------------
 # Tabelas relacionadas a Estoque
@@ -130,14 +88,18 @@ class Celular(models.Model):
 
     def save(self, *args, **kwargs):
         temp_arquivo = self.arquivo_celular
-        self.arquivo_celular = None  # Salvar sem o arquivo para obter o ID
-        super().save(*args, **kwargs)
+        if self.pk:
+            previous = Celular.objects.get(pk=self.pk)
+            if not self.arquivo_celular:
+                # Mantém o arquivo existente se nenhum novo for carregado
+                self.arquivo_celular = previous.arquivo_celular
 
         # Atualizar o caminho do arquivo após obter o ID
         if temp_arquivo:
             temp_arquivo.name = os.path.join(f'celular/{self.pk}', f'arquivo{os.path.splitext(temp_arquivo.name)[1]}')
             self.arquivo_celular = temp_arquivo
             super().save(*args, **kwargs)
+
 
     def delete(self, *args, **kwargs):
         if self.arquivo_celular:
@@ -374,6 +336,58 @@ class ProntuarioMonitor(models.Model):
     def __str__(self):
         return f'Prontuário de {self.monitor.modelo} - {self.data}'
     
+
+
+
+
+class Computador(models.Model):
+    patrimonio = models.CharField(max_length=100)
+    hostname = models.CharField(max_length=100)
+    numero_serie = models.CharField(max_length=100)
+    fabricante = models.CharField(max_length=100)
+    modelo = models.CharField(max_length=100)
+    processador = models.CharField(max_length=100)
+    memoria = models.CharField(max_length=100)
+    hd = models.CharField(max_length=100)
+    usuario = models.CharField(max_length=100)
+    centro_custo = models.CharField(max_length=100)
+    estabelecimento = models.CharField(max_length=100)
+    cargo = models.CharField(max_length=100)
+    numero_nota_fiscal = models.CharField(max_length=100)
+    fornecedor = models.CharField(max_length=100)
+    sistema_operacional = models.CharField(max_length=100)
+    status = models.ForeignKey(Status, on_delete=models.PROTECT)
+    hardware = models.ForeignKey('Hardware', on_delete=models.CASCADE)
+    arquivo_computador = models.FileField(upload_to=upload_to, blank=True, null=True)
+
+    def __str__(self):
+        return f'{self.hostname} ({self.patrimonio})'
+
+    def save(self, *args, **kwargs):
+        print("Save method called")
+        temp_arquivo = self.arquivo_computador
+        if self.pk:
+            previous = Computador.objects.get(pk=self.pk)
+            if not self.arquivo_computador:
+                # Mantém o arquivo existente se nenhum novo for carregado
+                self.arquivo_computador = previous.arquivo_computador
+
+        # Sempre salvar, independentemente do arquivo
+        super().save(*args, **kwargs)  # Movido para garantir que sempre seja chamado
+
+    # Atualizar o caminho do arquivo após obter o ID
+        if temp_arquivo:
+            temp_arquivo.name = os.path.join(f'computador/{self.pk}', f'arquivo{os.path.splitext(temp_arquivo.name)[1]}')
+            self.arquivo_computador = temp_arquivo
+        
+    def delete(self, *args, **kwargs):
+        if self.arquivo_computador:
+            file_path = Path(self.arquivo_computador.path)
+            if file_path.exists():
+                file_path.unlink()  # Deletar o arquivo ao excluir a instância
+        super().delete(*args, **kwargs)
+
+
 
 class ProntuarioComputador(models.Model):
     computador = models.ForeignKey(Computador, on_delete=models.CASCADE)

@@ -1,0 +1,259 @@
+    {% if hardware %}
+    
+        <div class="row">
+            <!-- Card de Rede -->
+            <div class="col-sm-3">
+                <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                    <div class="iq-card-body iq-box-relative">
+                        <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-danger">
+                            <i class="ri-global-line"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Rede</h4>
+                            <p class="card-text"><strong>Gateway Padrão:</strong> {{ hardware.default_gateway }}</p>
+                            <p class="card-text"><strong>Endereço IP:</strong> {{ hardware.ipaddr }}</p>
+                            <p class="card-text"><strong>Fonte IP:</strong> {{ hardware.ipsrc }}</p>
+                            <p class="card-text"><strong>DNS:</strong> {{ hardware.dns }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Card de Windows -->
+            <div class="col-sm-3">
+                <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                    <div class="iq-card-body iq-box-relative">
+                        <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-primary">
+                            <i class="ri-windows-fill"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Windows</h4>
+                            <p class="card-text"><strong>Nome SO:</strong> {{ hardware.os_name }}</p>
+                            <p class="card-text"><strong>Versão SO:</strong> {{ hardware.os_version }}</p>
+                            <p class="card-text"><strong>ID do Produto:</strong> {{ hardware.win_prod_id }}</p>
+                            <p class="card-text"><strong>Chave do Produto:</strong> {{ hardware.win_prod_key }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Card de Hardware Geral -->
+            <div class="col-sm-3">
+                <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                    <div class="iq-card-body iq-box-relative">
+                        <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-success">
+                            <i class="ri-cpu-fill"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Hardware Geral</h4>
+                            <p class="card-text"><strong>Arquitetura:</strong> {{ hardware.arch }}</p>
+                            <p class="card-text"><strong>UUID:</strong> {{ hardware.uuid }}</p>
+                            <p class="card-text"><strong>Descrição:</strong> {{ hardware.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Card de Processador -->
+            <div class="col-sm-3">
+                <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                    <div class="iq-card-body iq-box-relative">
+                        <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-warning">
+                            <i class="ri-honour-fill"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Processador</h4>
+                            <p class="card-text"><strong>Número de Processadores:</strong> {{ hardware.processor_n }}</p>
+                            <p class="card-text"><strong>Clock do Processador:</strong> {{ hardware.processors }}</p>
+                            <p class="card-text"><strong>Tipo de Processador:</strong> {{ hardware.processor_t }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+    <p>No hardware registered.</p>
+    {% endif %}
+
+
+    {% if accountinfo %}
+        {% for account in accountinfo %}
+        <div class="row">
+            <div class="col-md-3">
+                <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                    <div class="iq-card-body iq-box-relative">
+                        <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-info">
+                            <i class="ri-account-circle-fill"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">Account Details</h4>
+                            <p class="card-text"><strong>Patrimônio:</strong> {{ account.tag }}</p>
+                            <p class="card-text"><strong>Estabelecimento:</strong> {{ account.fields_3 }}</p>
+                            <p class="card-text"><strong>Tipo:</strong> {{ account.fields_4 }}</p>
+                            <p class="card-text"><strong>Setor:</strong> {{ account.fields_5 }}</p>
+                            <p class="card-text"><strong>Colaborador:</strong> {{ account.fields_7 }}</p>
+                            <p class="card-text"><strong>Cargo:</strong> {{ account.fields_8 }}</p>
+                            <p class="card-text"><strong>Localização:</strong> {{ account.fields_9 }}</p>
+                            <p class="card-text"><strong>Nota Fiscal:</strong> {{ account.fields_14 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No account information available.</p>
+    {% endif %}
+
+    
+    {% if cpus %}
+            {% for cpu in cpus %}
+                <div class="col-md-3">
+                    <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                        <div class="iq-card-body iq-box-relative">
+                            <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-primary">
+                                <i class="ri-cpu-line"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4 class="card-title">CPU #{{ forloop.counter }}</h4>
+                                <p class="card-text"><strong>Manufacturer:</strong> {{ cpu.manufacturer }}</p>
+                                <p class="card-text"><strong>Speed:</strong> {{ cpu.speed }}</p>
+                                <p class="card-text"><strong>Cores:</strong> {{ cpu.cores }}</p>
+                                <p class="card-text"><strong>Logical CPUs:</strong> {{ cpu.logical_cpus }}</p>
+                                <p class="card-text"><strong>Architecture:</strong> {{ cpu.cpu_arch }}</p>
+                                <p class="card-text"><strong>Socket:</strong> {{ cpu.socket }}</p>
+                                <p class="card-text"><strong>L2 Cache Size:</strong> {{ cpu.l2_cache_size }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if not forloop.last %}<div class="w-100"></div>{% endif %}
+            {% endfor %}
+       
+    {% else %}
+        <p>No CPU information available.</p>
+    {% endif %}
+    {% if memories %}
+        <div class="col-md-3">
+            <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                <div class="iq-card-body iq-box-relative">
+                    <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-primary">
+                        <i class="las la-memory"></i>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title">Memory Details</h4>
+                        <table class="table table-sm ">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Slots Used</th>
+                                    <th scope="col">Capacity (MB)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for memory in memories %}
+                                <tr>
+                                    <td>{{ memory.num_slots }}</td>
+                                    <td>
+                                        {% if memory.capacity == 0 %}
+                                            Sem memória
+                                        {% else %}
+                                            {{ memory.capacity }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <p>No memory information available.</p>
+    {% endif %}
+    {% if storages %}
+<div class="col-md-3">
+    <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+        <div class="iq-card-body iq-box-relative">
+            <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-primary">
+                <i class="ri-hard-drive-fill"></i>
+            </div>
+            <div class="card-content">
+                <h4 class="card-title">Storage Details</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Capacity (MB)</th>
+                            <th scope="col">Firmware</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for storage in storages %}
+                        <tr>
+                            <td>{{ storage.name }}</td>
+                            <td>{{ storage.disk_size }}</td>
+                            <td>{{ storage.firmware }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% else %}
+<p>No storage information available.</p>
+{% endif %}
+    {% if hardware.bios.all %}
+    {% for bios in hardware.bios.all %}
+        <!-- Primeiro Cartão: Dados básicos da BIOS -->
+         <div class="row">
+        <div class="col-sm-3">
+            <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                <div class="iq-card-body iq-box-relative">
+                    <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-primary">
+                        <i class="ri-information-fill"></i>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title">BIOS Basic Info</h4>
+                        <p class="card-text"><strong>Asset Tag:</strong> {{ bios.asset_tag }}</p>
+                        <p class="card-text"><strong>BIOS Date:</strong> {{ bios.bdate }}</p>
+                        <p class="card-text"><strong>Manufacturer:</strong> {{ bios.bmanufacturer }}</p>
+                        <p class="card-text"><strong>BIOS Version:</strong> {{ bios.bversion }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Segundo Cartão: Dados da Placa-Mãe -->
+        <div class="col-sm-3">
+            <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                <div class="iq-card-body iq-box-relative">
+                    <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-success">
+                        <i class="ri-server-fill"></i>
+                    </div>
+                    <div class="card-content">
+                        <h4 class="card-title">Motherboard Info</h4>
+                        <p class="card-text"><strong>Manufacturer:</strong> {{ bios.mmanufacturer }}</p>
+                        <p class="card-text"><strong>Model:</strong> {{ bios.mmodel }}</p>
+                        <p class="card-text"><strong>System Model:</strong> {{ bios.smodel }}</p>
+                        <p class="card-text"><strong>Serial Number:</strong> {{ bios.msn }}</p>
+                        <p class="card-text"><strong>System Manufacturer:</strong> {{ bios.smanufacturer }}</p>
+                        <p class="card-text"><strong>Type:</strong> {{ bios.type }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Terceiro Cartão: Informações Adicionais do Sistema -->
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No BIOS information available.</p>
+{% endif %}
+
+
+
+
+
