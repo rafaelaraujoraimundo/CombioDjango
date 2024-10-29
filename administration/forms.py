@@ -74,7 +74,7 @@ class ItensMenuForm(forms.ModelForm):
     )
     class Meta:
         model = ItensMenu
-        fields = ['codigo', 'item', 'grupo_id', 'icon_item', 'url', 'permission']
+        fields = ['codigo', 'item', 'grupo_id', 'icon_item', 'url', 'permission', 'order']
 
 
 
