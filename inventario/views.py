@@ -16,7 +16,9 @@ from django.contrib import messages
 from django.utils.timezone import now
 from django.http import HttpResponse
 from openpyxl import Workbook
-# View para listagem dos tipos de itens
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
 class TipoItemList(ListView):
     model = TipoItem
     queryset = TipoItem.objects.all()
@@ -1060,7 +1062,10 @@ class ComputadorDetailView(DetailView):
         context['activegroup'] = 'inventario'
 
         return context
-    
+
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def estabelecimento_chart(request):
     data_computadores = Computador.objects.values('estabelecimento').annotate(total=Count('id')).order_by('estabelecimento')
     computadores_estabelecimentos = [data['estabelecimento'] for data in data_computadores]
@@ -1132,7 +1137,8 @@ def estabelecimento_chart(request):
    
     return render(request, 'inventario/dashboard/principal.html', context)
 
-
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def export_computadores_excel(request):
     # Obter o termo de pesquisa do request
     search_query = request.GET.get('search', '')
