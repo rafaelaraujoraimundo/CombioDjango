@@ -35,29 +35,29 @@
         <li class="nav-item">
             <a class="nav-link active" id="prontuario-tab" data-toggle="tab" href="#prontuario" role="tab" aria-controls="prontuario" aria-selected="true">Prontuário</a>
         </li>
+        {% if hardware %} <!-- Verifica se hardware existe -->
         <li class="nav-item">
             <a class="nav-link" id="hardware-tab" data-toggle="tab" href="#hardware" role="tab" aria-controls="hardware" aria-selected="false">Hardware</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="software-tab" data-toggle="tab" href="#software" role="tab" aria-controls="software" aria-selected="false">Software</a>
         </li>
-
+        {% endif %}
     </ul>
-
-    <!-- Tab content -->
+    
     <div class="tab-content">
+        <div class="tab-pane fade show active" id="prontuario" role="tabpanel" aria-labelledby="prontuario-tab">
+            {% include 'inventario/computador/prontuario_computador_list.html' %}
+        </div>
+    
+        {% if hardware %}
         <div class="tab-pane fade" id="hardware" role="tabpanel" aria-labelledby="hardware-tab">
-            <!-- Inclua os detalhes de hardware aqui -->
             {% include 'inventario/computador/details/tab_hardware.html' %}
         </div>
         <div class="tab-pane fade" id="software" role="tabpanel" aria-labelledby="software-tab">
-            <!-- Inclua os detalhes de software aqui -->
             {% include 'inventario/computador/details/tab_software.html' %}
         </div>
-        <div class="tab-pane fade show active" id="prontuario" role="tabpanel" aria-labelledby="prontuario-tab">
-            <!-- Conteúdo existente de prontuário_computador_list.html aqui -->
-            {% include 'inventario/computador/prontuario_computador_list.html' %}
-        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

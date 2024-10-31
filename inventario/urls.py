@@ -1,16 +1,16 @@
 from django.urls import path
 from .views import (acoesprontuario_delete, acoesprontuario_edit, AcoesProntuarioCreate,
     AcoesProntuarioList, celular_delete, CelularCreate, CelularList, CelularUpdate,
-    computador_delete, ComputadorCreate, ComputadorList, ComputadorUpdate, controlefones_delete,
-    ControleFonesCreate, ControleFonesList, ControleFonesUpdate, controlekit_delete,
-    ControlekitCreate, ControlekitList, ControlekitUpdate, estoque_delete, estoque_edit,
-    EstoqueCreate, EstoqueList, monitor_delete, MonitorCreate, MonitorList, MonitorUpdate,
-    ProntuarioComputadorDelete, ProntuarioCelularCreate, ProntuarioCelularDelete,
-    ProntuarioCelularListView, ProntuarioCelularUpdate, ProntuarioComputadorCreate,
-    ProntuarioComputadorListView, ProntuarioComputadorUpdate, ProntuarioMonitorCreate,
-    ProntuarioMonitorDelete, ProntuarioMonitorListView, ProntuarioMonitorUpdate, status_delete,
-    status_edit, StatusCreate, StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate,
-    TipoItemList, ComputadorDetailView)
+    computador_delete, ComputadorCreate, ComputadorDetailView, ComputadorList, ComputadorUpdate,
+    controlefones_delete, ControleFonesCreate, ControleFonesList, ControleFonesUpdate,
+    controlekit_delete, ControlekitCreate, ControlekitList, ControlekitUpdate,
+    estabelecimento_chart, estoque_delete, estoque_edit, EstoqueCreate, EstoqueList,
+    monitor_delete, MonitorCreate, MonitorList, MonitorUpdate, ProntuarioCelularCreate,
+    ProntuarioCelularDelete, ProntuarioCelularListView, ProntuarioCelularUpdate,
+    ProntuarioComputadorCreate, ProntuarioComputadorDelete, ProntuarioComputadorListView,
+    ProntuarioComputadorUpdate, ProntuarioMonitorCreate, ProntuarioMonitorDelete,
+    ProntuarioMonitorListView, ProntuarioMonitorUpdate, status_delete, status_edit, StatusCreate,
+    StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate, TipoItemList, export_computadores_excel)
 
 urlpatterns = [
     path('tipoitem/', TipoItemList.as_view(), name='tipoitem_list'),
@@ -75,4 +75,6 @@ urlpatterns = [
     path('prontuario/computador/delete/<int:pk>/', ProntuarioComputadorDelete.as_view(), name='prontuario_computador_delete'),
 
     path('computador/details/<int:pk>/', ComputadorDetailView.as_view(), name='computador-detail'),
+    path('dashboard/', estabelecimento_chart, name='estabelecimento_chart'),
+    path('computador/export', export_computadores_excel, name='export_computadores_excel'),
 ]

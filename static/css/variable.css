@@ -34,22 +34,26 @@
   /* color for customizer*/
   --iq-color1: #116533;
   --iq-color2: #02d871;
-  --iq-color3: #309cf3;
-  --iq-color4: #ff00ff;
-  --iq-color5: #fb1f4c;
-  --iq-color6: #00ced1;
-  --iq-color7: #f35f3b;
-  --iq-color8: #fde117;
-  --iq-color9: #ff0000;
-  --iq-color10: #88028c;
-  --iq-color11: #00d5ab;
-  --iq-color12: #ce9252;
-  --iq-color13: #f9ae02;
-  --iq-color14: #1e7fe4;
-  --iq-color15: #006400;
-  --iq-color16: #fa7c04;
-  --iq-color17: #81bf02;
-  --iq-color18: #99a7ca;
-  --iq-color19: #3d2a26;
-  --iq-color20: #a0746b;
+  --iq-color3: #1C361F;  /* Verde Terra ComBio */
+  --iq-color4: #5D513A;  /* Marrom Biomassa ComBio */
+  --iq-color5: #AB3434;  /* Vermelho Terra ComBio */
+  --iq-color6: #BF882D;  /* Amarelo Terra ComBio */
+  --iq-color7: #76858E;  /* Azul Terra ComBio */
+
+  /* Ajustando as cores de apoio baseadas nas cores principais */
+  --iq-color8: #163428;  /* Verde Terra escurecido */
+  --iq-color9: #483D34;  /* Marrom Biomassa escurecido */
+  --iq-color10: #8A2A2A; /* Vermelho Terra escurecido */
+  --iq-color11: #A07822; /* Amarelo Terra escurecido */
+  --iq-color12: #56636E; /* Azul Terra escurecido */
+
+  --iq-color13: #2E5037; /* Verde Terra com mais saturação */
+  --iq-color14: #70634A; /* Marrom Biomassa com mais saturação */
+  --iq-color15: #C44747; /* Vermelho Terra com mais saturação */
+  --iq-color16: #D69B47; /* Amarelo Terra com mais saturação */
+  --iq-color17: #849CAE; /* Azul Terra com mais saturação */
+
+  --iq-color18: #1E2D20; /* Verde Terra muito escurecido */
+  --iq-color19: #3C3529; /* Marrom Biomassa muito escurecido */
+  --iq-color20: #6E2222; /* Vermelho Terra muito escurecido */
 }

@@ -1,0 +1,389 @@
+{% extends "menu/index.html" %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+    <!-- Linha para Computadores -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <h4 class="card-title">Computadores por Estabelecimento</h4>
+                </div>
+                <div class="iq-card-body">
+                    <div id="computador-chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <h4 class="card-title">Computadores por Sistema Operacional</h4>
+                </div>
+                <div class="iq-card-body">
+                    <div id="sistema-operacional-chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <h4 class="card-title">Computadores por Status</h4>
+                </div>
+                <div class="iq-card-body">
+                    <div id="statuscomputador-chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Linha para Celulares -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <h4 class="card-title">Celulares por Estabelecimento</h4>
+                </div>
+                <div class="iq-card-body">
+                    <div id="celular-chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <h4 class="card-title">Celulares por Fabricante</h4>
+                </div>
+                <div class="iq-card-body">
+                    <div id="celular-fabricante-chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <h4 class="card-title">Celulares por Status</h4>
+                </div>
+                <div class="iq-card-body">
+                    <div id="celular-status-chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Linha para Monitores -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <h4 class="card-title">Monitores por Estabelecimento</h4>
+                </div>
+                <div class="iq-card-body">
+                    <div id="monitor-chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <h4 class="card-title">Monitores por Fabricante</h4>
+                </div>
+                <div class="iq-card-body">
+                    <div id="monitor-fabricante-chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <h4 class="card-title">Monitores por Status</h4>
+                </div>
+                <div class="iq-card-body">
+                    <div id="monitor-status-chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var rootStyle = getComputedStyle(document.documentElement);
+            color1 = rootStyle.getPropertyValue('--iq-color1');
+    var colors = [
+        rootStyle.getPropertyValue('--iq-color1'),
+        rootStyle.getPropertyValue('--iq-color2'),
+        rootStyle.getPropertyValue('--iq-color3'),
+        rootStyle.getPropertyValue('--iq-color4'),
+        rootStyle.getPropertyValue('--iq-color5'),
+        rootStyle.getPropertyValue('--iq-color6'),
+        rootStyle.getPropertyValue('--iq-color7'),
+        rootStyle.getPropertyValue('--iq-color8'),
+        rootStyle.getPropertyValue('--iq-color9'),
+        rootStyle.getPropertyValue('--iq-color10'),
+        rootStyle.getPropertyValue('--iq-color11'),
+        rootStyle.getPropertyValue('--iq-color12'),
+        rootStyle.getPropertyValue('--iq-color13'),
+        rootStyle.getPropertyValue('--iq-color14'),
+        rootStyle.getPropertyValue('--iq-color15'),
+        rootStyle.getPropertyValue('--iq-color16'),
+        rootStyle.getPropertyValue('--iq-color17'),
+        rootStyle.getPropertyValue('--iq-color18'),
+        rootStyle.getPropertyValue('--iq-color19'),
+        rootStyle.getPropertyValue('--iq-color20')
+    ];
+
+
+            // Dados para Computadores por Estabelecimento
+            var computadorChartOptions = {
+                series: [{
+                    name: 'Computadores',
+                    data: {{ computadores_totals|safe }}
+                }],
+                chart: {
+                    height: 350,
+                    type: 'bar',
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 10,
+                    }
+                },
+                colors: [color1],
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: {{ computadores_estabelecimentos|safe }},
+                }
+            };
+    
+            // Dados para Celulares por Estabelecimento
+            var celularChartOptions = {
+                series: [{
+                    name: 'Celulares',
+                    data: {{ celulares_totals|safe }}
+                }],
+                chart: {
+                    height: 350,
+                    type: 'bar',
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 10,
+                    }
+                },
+                colors: [color1],
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: {{ celulares_estabelecimentos|safe }},
+                }
+            };
+    
+            // Dados para Monitores por Estabelecimento
+            var monitorChartOptions = {
+                series: [{
+                    name: 'Monitores',
+                    data: {{ monitores_totals|safe }}
+                }],
+                chart: {
+                    height: 350,
+                    type: 'bar',
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 10,
+                    }
+                },
+                colors: [color1],
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: {{ monitores_estabelecimentos|safe }},
+                }
+            };
+
+            
+             
+            var statusNomes = {{ status_nomes|safe }};
+            var statusTotals = {{ status_totals|safe }};
+
+            var statusComputadorOptions = {
+                series: statusTotals,
+                chart: {
+                    width: 380,
+                    type: 'donut'
+                },
+                labels: statusNomes,
+                colors: colors.slice(0, statusNomes.length), // Ajuste para usar apenas tantas cores quantos são os itens
+                
+                legend: {
+                    show: false,
+                    position: 'right',
+                    offsetY: 0,
+                    height: 230
+                }
+            };
+
+            var celularFabricanteChartOptions = {
+                series: [{
+                    name: 'Fabricantes',
+                    data: {{ fabricantes_celular_totals|safe }}
+                }],
+                chart: {
+                    height: 350,
+                    type: 'bar',
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 10,
+                    }
+                },
+                colors: [color1],
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: {{ fabricantes_celular|safe }},
+                }
+            };
+        
+            var celularFabricanteChart = new ApexCharts(document.querySelector("#celular-fabricante-chart"), celularFabricanteChartOptions);
+            celularFabricanteChart.render();
+        
+            // Dados para Celulares por Status
+            var celularStatusChartOptions = {
+                series: [{
+                    name: 'Status',
+                    data: {{ status_celular_totals|safe }}
+                }],
+                chart: {
+                    height: 350,
+                    type: 'bar',
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 10,
+                    }
+                },
+                colors: [color1],
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: {{ status_celular|safe }},
+                }
+            };
+
+            var statusComputadorChart = new ApexCharts(document.querySelector("#statuscomputador-chart"), statusComputadorOptions);
+            statusComputadorChart.render();
+            var monitorFabricanteChartOptions = {
+                series: [{
+                    name: 'Fabricantes',
+                    data: {{ fabricantes_monitor_totals|safe }}
+                }],
+                chart: {
+                    height: 350,
+                    type: 'bar',
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 10,
+                    }
+                },
+                colors: [color1],
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: {{ fabricantes_monitor|safe }},
+                }
+            };
+        
+            var monitorFabricanteChart = new ApexCharts(document.querySelector("#monitor-fabricante-chart"), monitorFabricanteChartOptions);
+            monitorFabricanteChart.render();
+        
+            // Dados para Monitores por Status
+            var monitorStatusChartOptions = {
+                series: [{
+                    name: 'Status',
+                    data: {{ status_monitor_totals|safe }}
+                }],
+                chart: {
+                    height: 350,
+                    type: 'bar',
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 10,
+                    }
+                },
+                colors: [color1],
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: {{ status_monitor|safe }},
+                }
+            };
+        
+            var monitorStatusChart = new ApexCharts(document.querySelector("#monitor-status-chart"), monitorStatusChartOptions);
+            monitorStatusChart.render();
+        
+            var celularStatusChart = new ApexCharts(document.querySelector("#celular-status-chart"), celularStatusChartOptions);
+            celularStatusChart.render();
+    
+            
+    
+            
+    
+            // Renderizar os gráficos
+            var computadorChart = new ApexCharts(document.querySelector("#computador-chart"), computadorChartOptions);
+            computadorChart.render();
+            
+            var celularChart = new ApexCharts(document.querySelector("#celular-chart"), celularChartOptions);
+            celularChart.render();
+            
+            var monitorChart = new ApexCharts(document.querySelector("#monitor-chart"), monitorChartOptions);
+            monitorChart.render();
+
+
+            var sistemaOperacionalOptions = {
+                chart: {
+                    width: 380,
+                    type: "donut"
+                },
+                labels: {{ sistemas_operacionais|safe }},
+                series: {{ sistemas_totals|safe }},
+                colors: colors.slice(0, {{ sistemas_operacionais|safe }}.length),  // Ajuste para usar apenas tantas cores quantos são os itens
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 400
+                        },
+                        legend: {
+                            position: "top"
+                        }
+                    }
+                }],
+                
+                legend: {
+                    show: false,
+                    position: 'right',
+                    offsetY: 0,
+                    height: 230
+                }
+            };
+        
+            var sistemaOperacionalChart = new ApexCharts(document.querySelector("#sistema-operacional-chart"), sistemaOperacionalOptions);
+            sistemaOperacionalChart.render();
+        });
+
+        
+
+       
+    </script>
+    
+    {% endblock %}

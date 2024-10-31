@@ -1,5 +1,5 @@
 from django.urls import reverse_lazy
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Count
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.shortcuts import get_object_or_404, redirect, render
 from dashboard.models import BiCentroCusto, BiEstabelecimento, BiFuncionariosCombio
@@ -14,6 +14,8 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.utils.timezone import now
+from django.http import HttpResponse
+from openpyxl import Workbook
 # View para listagem dos tipos de itens
 class TipoItemList(ListView):
     model = TipoItem
@@ -912,25 +914,37 @@ def computador_delete(request, pk):
 @method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ProntuarioComputadorListView(ListView):
     model = ProntuarioComputador
-   
     template_name = 'inventario/computador/details/computador_details.html'
     context_object_name = 'prontuarios'
 
     def get_queryset(self):
-        # Assume 'computador_id' is passed as a URL kwarg
+        # Assume que 'computador_id' é passado como uma kwarg na URL
         self.computador = get_object_or_404(Computador, id=self.kwargs['computador_id'])
         return ProntuarioComputador.objects.filter(computador=self.computador)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['computador'] = self.computador
-        context['hardware'] = self.computador.hardware
-        context['bios'] = self.computador.hardware.bios.all()
-        context['cpus'] = self.computador.hardware.cpus.all()
-        context['memories'] = self.computador.hardware.memories.all()
-        context['softwares'] = self.computador.hardware.software.all()
-        context['storages'] = self.computador.hardware.storages.all()
-        context['accountinfo'] = self.computador.hardware.accountinfo.all()
+
+        # Verifica se o computador possui hardware associado antes de acessar os detalhes
+        if hasattr(self.computador, 'hardware') and self.computador.hardware:
+            context['hardware'] = self.computador.hardware
+            context['bios'] = self.computador.hardware.bios.all()
+            context['cpus'] = self.computador.hardware.cpus.all()
+            context['memories'] = self.computador.hardware.memories.all()
+            context['softwares'] = self.computador.hardware.software.all()
+            context['storages'] = self.computador.hardware.storages.all()
+            context['accountinfo'] = self.computador.hardware.accountinfo.all()
+        else:
+            # Define contextos vazios caso hardware não esteja associado
+            context['hardware'] = None
+            context['bios'] = []
+            context['cpus'] = []
+            context['memories'] = []
+            context['softwares'] = []
+            context['storages'] = []
+            context['accountinfo'] = []
+
         context['activegroup'] = 'inventario'
         context['title'] = f'Prontuário de {self.computador.modelo} - {self.computador.fabricante} - {self.computador.numero_serie}'
         return context
@@ -962,7 +976,8 @@ class ProntuarioComputadorCreate(CreateView):
             'computador': computador,
             'usuarios_list': BiFuncionariosCombio.objects.all().values('cdn_funcionario', 'nom_funcionario', 'cdn_estab'),
             'estabelecimentos_list': BiEstabelecimento.objects.all().values('estabelecimento', 'sigla_unidade'),
-            'centros_custo_list': BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
+            'centros_custo_list': BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto'),
+            'activegroup': 'inventario'
         })
         return context
 
@@ -996,7 +1011,8 @@ class ProntuarioComputadorUpdate(UpdateView):
             'computador': computador,
             'usuarios_list': BiFuncionariosCombio.objects.all().values('cdn_funcionario', 'nom_funcionario', 'cdn_estab'),
             'estabelecimentos_list': BiEstabelecimento.objects.all().values('estabelecimento', 'sigla_unidade'),
-            'centros_custo_list': BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
+            'centros_custo_list': BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto'),
+            'activegroup': 'inventario'
         })
         return context
 
@@ -1041,5 +1057,130 @@ class ComputadorDetailView(DetailView):
         context['softwares'] = computador.hardware.software.all()
         context['storages'] = computador.hardware.storages.all()
         context['accountinfo'] = computador.hardware.accountinfo.all()
+        context['activegroup'] = 'inventario'
 
         return context
+    
+def estabelecimento_chart(request):
+    data_computadores = Computador.objects.values('estabelecimento').annotate(total=Count('id')).order_by('estabelecimento')
+    computadores_estabelecimentos = [data['estabelecimento'] for data in data_computadores]
+    computadores_totals = [data['total'] for data in data_computadores]
+
+    # Celulares por estabelecimento
+    data_celulares = Celular.objects.values('estabelecimento').annotate(total=Count('id')).order_by('estabelecimento')
+    celulares_estabelecimentos = [data['estabelecimento'] for data in data_celulares]
+    celulares_totals = [data['total'] for data in data_celulares]
+
+    # Monitores por estabelecimento
+    data_monitores = Monitor.objects.values('estabelecimento').annotate(total=Count('id')).order_by('estabelecimento')
+    monitores_estabelecimentos = [data['estabelecimento'] for data in data_monitores]
+    monitores_totals = [data['total'] for data in data_monitores]
+
+    # Computadores por sistema operacional
+    data_sistemas = Computador.objects.values('sistema_operacional').annotate(total=Count('id')).order_by('sistema_operacional')
+    sistemas_operacionais = [data['sistema_operacional'] for data in data_sistemas]
+    sistemas_totals = [data['total'] for data in data_sistemas]
+    
+    # Computadores por Status
+    data_status = Computador.objects.values('status__nome_status').annotate(total=Count('id')).order_by('status__nome_status')
+    status_nomes = [data['status__nome_status'] for data in data_status]
+    status_totals = [data['total'] for data in data_status]
+
+        # Celulares por Fabricante
+    data_celulares_fabricante = Celular.objects.values('fabricante').annotate(total=Count('id')).order_by('fabricante')
+    fabricantes_celular = [data['fabricante'] for data in data_celulares_fabricante]
+    fabricantes_celular_totals = [data['total'] for data in data_celulares_fabricante]
+
+    # Celulares por Status
+    data_celulares_status = Celular.objects.values('status__nome_status').annotate(total=Count('id')).order_by('status__nome_status')
+    status_celular = [data['status__nome_status'] for data in data_celulares_status]
+    status_celular_totals = [data['total'] for data in data_celulares_status]
+
+    # Monitores por Fabricante
+    data_monitores_fabricante = Monitor.objects.values('fabricante').annotate(total=Count('id')).order_by('fabricante')
+    fabricantes_monitor = [data['fabricante'] for data in data_monitores_fabricante]
+    fabricantes_monitor_totals = [data['total'] for data in data_monitores_fabricante]
+
+    # Monitores por Status
+    data_monitores_status = Monitor.objects.values('status__nome_status').annotate(total=Count('id')).order_by('status__nome_status')
+    status_monitor = [data['status__nome_status'] for data in data_monitores_status]
+    status_monitor_totals = [data['total'] for data in data_monitores_status]
+
+
+    context = {
+        'computadores_estabelecimentos': computadores_estabelecimentos,
+        'computadores_totals': computadores_totals,
+        'celulares_estabelecimentos': celulares_estabelecimentos,
+        'celulares_totals': celulares_totals,
+        'monitores_estabelecimentos': monitores_estabelecimentos,
+        'monitores_totals': monitores_totals,
+        'sistemas_operacionais': sistemas_operacionais,
+        'sistemas_totals': sistemas_totals,
+        'status_nomes': status_nomes,
+        'status_totals': status_totals,
+        'fabricantes_celular': fabricantes_celular,
+        'fabricantes_celular_totals': fabricantes_celular_totals,
+        'status_celular': status_celular,
+        'status_celular_totals': status_celular_totals,
+        'fabricantes_monitor': fabricantes_monitor,
+        'fabricantes_monitor_totals': fabricantes_monitor_totals,
+        'status_monitor': status_monitor,
+        'status_monitor_totals': status_monitor_totals,
+        'activegroup': 'inventario',
+        'title': 'Dashboard Ativos'
+    }
+   
+    return render(request, 'inventario/dashboard/principal.html', context)
+
+
+def export_computadores_excel(request):
+    # Obter o termo de pesquisa do request
+    search_query = request.GET.get('search', '')
+
+    # Filtrar os computadores conforme a pesquisa
+    if search_query:
+        computadores = Computador.objects.filter(
+            Q(patrimonio__icontains=search_query) |
+            Q(hostname__icontains=search_query) |
+            Q(numero_serie__icontains=search_query) |
+            Q(fabricante__icontains=search_query) |
+            Q(modelo__icontains=search_query) |
+            Q(processador__icontains=search_query) |
+            Q(memoria__icontains=search_query) |
+            Q(hd__icontains=search_query) |
+            Q(usuario__icontains=search_query) |
+            Q(centro_custo__icontains=search_query) |
+            Q(estabelecimento__icontains=search_query) |
+            Q(cargo__icontains=search_query) |
+            Q(numero_nota_fiscal__icontains=search_query) |
+            Q(fornecedor__icontains=search_query) |
+            Q(sistema_operacional__icontains=search_query)
+        )
+    else:
+        computadores = Computador.objects.all()
+
+    # Criação de um novo workbook do Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Computadores'
+
+    # Adicionando cabeçalhos para as colunas
+    columns = ['Hostname', 'Fabricante', 'Modelo', 'Processador', 'Memória', 'HD', 'Usuário', 'Estabelecimento', 'Centro de Custo']
+    ws.append(columns)
+
+    # Preenchendo as linhas com os dados dos computadores
+    for computador in computadores:
+        ws.append([
+            computador.hostname, computador.fabricante, computador.modelo,
+            computador.processador, computador.memoria, computador.hd,
+            computador.usuario, computador.estabelecimento, computador.centro_custo
+        ])
+
+    # Preparando a resposta HTTP para enviar o arquivo
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="computadores.xlsx"'
+
+    # Salvar o arquivo Excel na resposta HTTP
+    wb.save(response)
+
+    return response

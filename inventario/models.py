@@ -357,7 +357,7 @@ class Computador(models.Model):
     fornecedor = models.CharField(max_length=100)
     sistema_operacional = models.CharField(max_length=100)
     status = models.ForeignKey(Status, on_delete=models.PROTECT)
-    hardware = models.ForeignKey('Hardware', on_delete=models.CASCADE)
+    hardware = models.ForeignKey('Hardware', on_delete=models.CASCADE, null=True, blank=True)
     arquivo_computador = models.FileField(upload_to=upload_to, blank=True, null=True)
 
     def __str__(self):

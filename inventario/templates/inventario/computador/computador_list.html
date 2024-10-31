@@ -12,6 +12,7 @@
     </form>
 
     <a href="{% url 'computador_create' %}" class="btn btn-primary mb-4">Adicionar Computador</a>
+    <a href="{% url 'export_computadores_excel' %}?search={{ request.GET.search }}" class="btn btn-success mb-4">Exportar para Excel</a>
     <table class="table table-bordered table-sm table-striped">
         <thead>
             <tr>
