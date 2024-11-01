@@ -2,7 +2,18 @@
 
 {% block content %}
 <div class="container-fluid">
+    <form method="get" action="" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="search" placeholder="Pesquisar Monitor..." class="form-control" value="{{ request.GET.search }}">
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Pesquisar</button>
+            </div>
+        </div>
+    </form>
     <a href="{% url 'monitor_create' %}" class="btn btn-primary mb-4">Adicionar Monitor</a>
+    <a href="{% url 'export_monitor_excel' %}?search={{ request.GET.search }}" class="btn btn-success mb-4">
+        Exportar Monitores para Excel
+    </a>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>

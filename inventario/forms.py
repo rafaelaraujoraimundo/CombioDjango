@@ -59,6 +59,10 @@ class ControlekitForm(forms.ModelForm):
             'serie': 'Série',
             'data_final': 'Data Final',
         }
+        widgets = {
+            'data_entrega': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
+            'data_final': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super(ControlekitForm, self).__init__(*args, **kwargs)
@@ -68,11 +72,19 @@ class ControlekitForm(forms.ModelForm):
         cleaned_data = super().clean()
         usuario = cleaned_data.get('usuario')
         data_entrega = cleaned_data.get('data_entrega')
-
-        # Verificar se o mesmo usuário já tem um registro com data_final maior ou igual à nova data de entrega
-        if Controlekit.objects.filter(usuario=usuario, data_final__gte=data_entrega).exists():
-            raise forms.ValidationError("Esse usuário já possui um kit com uma data final que se sobrepõe à nova data de entrega.")
-        
+    
+        if usuario and data_entrega:
+            # Obtenha o ID da instância atual, se houver (isto é, se estiver sendo editada)
+            current_id = self.instance.id if self.instance.id else None
+    
+            # Verificar se existe outra instância com o mesmo usuário e data_final futura, excluindo a instância atual
+            query = Controlekit.objects.filter(usuario=usuario, data_final__gte=data_entrega)
+            if current_id:
+                query = query.exclude(id=current_id)
+            
+            if query.exists():
+                raise forms.ValidationError("Esse usuário já possui um kit com uma data final que se sobrepõe à nova data de entrega.")
+    
         return cleaned_data
 
 
@@ -90,19 +102,26 @@ class ControleFonesForm(forms.ModelForm):
             'serie': 'Série',
             'data_final': 'Data Final',
         }
+        widgets = {
+            'data_entrega': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
+            'data_final': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super(ControleFonesForm, self).__init__(*args, **kwargs)
         self.fields['data_final'].widget.attrs['readonly'] = True
-
     def clean(self):
         cleaned_data = super().clean()
         usuario = cleaned_data.get('usuario')
         data_entrega = cleaned_data.get('data_entrega')
 
-        # Verificar se o mesmo usuário já tem um registro com data_final futura
-        if ControleFones.objects.filter(usuario=usuario, data_final__gte=data_entrega).exists():
-            raise forms.ValidationError("Esse usuário já possui um fone com data de entrega dentro do período de validade.")
+        if usuario and data_entrega:
+            # Obtenha o ID da instância atual, se houver (isto é, se estiver sendo editada)
+            current_id = self.instance.id if self.instance.id else None
+
+            # Verificar se existe outra instância com o mesmo usuário e data_final futura, excluindo a instância atual
+            if ControleFones.objects.filter(usuario=usuario, data_final__gte=data_entrega).exclude(id=current_id).exists():
+                raise forms.ValidationError("Esse usuário já possui um fone com data de entrega dentro do período de validade.")
 
         return cleaned_data
     

@@ -142,15 +142,29 @@ def status_delete(request, status_id):
 @method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class EstoqueList(ListView):
     model = Estoque
-    queryset = Estoque.objects.all()
     template_name = 'inventario/estoque/estoque_list.html'
+    context_object_name = 'itens_estoque'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(tipo_item__nome__icontains=search_query) |
+                Q(modelo__icontains=search_query) |
+                Q(fabricante__icontains=search_query) |
+                Q(status__nome_status__icontains=search_query) |
+                Q(observacao__icontains=search_query) |
+                Q(local__icontains=search_query)
+            )
+        return queryset
 
     def get_context_data(self, **kwargs):
-        context = super(EstoqueList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['activegroup'] = 'inventario'
         context['title'] = 'Lista de Itens de Estoque'
+        context['search'] = self.request.GET.get('search', '')
         return context
-
 # View para criação de novos itens de estoque
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
@@ -203,11 +217,27 @@ def estoque_delete(request, estoque_id):
 class ControlekitList(ListView):
     model = Controlekit
     template_name = 'inventario/controlekit/controlekit_list.html'
+    context_object_name = 'kits'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(matricula__icontains=search_query) |
+                Q(usuario__icontains=search_query) |
+                Q(modelo__icontains=search_query) |
+                Q(estabelecimento__icontains=search_query) |
+                Q(centro_custo__icontains=search_query) |
+                Q(serie__icontains=search_query)
+            )
+        return queryset
 
     def get_context_data(self, **kwargs):
-        context = super(ControlekitList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['title'] = 'Lista de Kits'
         context['activegroup'] = 'inventario'
+        context['search'] = self.request.GET.get('search', '')
         return context
 
 # View para criar novo kit
@@ -264,16 +294,32 @@ def controlekit_delete(request, controlekit_id):
         return redirect('controlekit_list')
     return redirect('controlekit_list')
 
-
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 class ControleFonesList(ListView):
     model = ControleFones
     template_name = 'inventario/controlefones/controlefones_list.html'
+    context_object_name = 'fones'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(matricula__icontains=search_query) |
+                Q(usuario__icontains=search_query) |
+                Q(modelo__icontains=search_query) |
+                Q(estabelecimento__icontains=search_query) |
+                Q(centro_custo__icontains=search_query) |
+                Q(serie__icontains=search_query)
+            )
+        return queryset
 
     def get_context_data(self, **kwargs):
-        context = super(ControleFonesList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['title'] = 'Lista de Fones'
         context['activegroup'] = 'inventario'
+        context['search'] = self.request.GET.get('search', '')
         return context
 
 # View para criar novo fone
@@ -686,10 +732,26 @@ class MonitorList(ListView):
     template_name = 'inventario/monitor/monitor_list.html'
     context_object_name = 'monitores'
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(numero_serie__icontains=search_query) |
+                Q(fabricante__icontains=search_query) |
+                Q(modelo__icontains=search_query) |
+                Q(patrimonio__icontains=search_query) |
+                Q(estabelecimento__icontains=search_query) |
+                Q(local__icontains=search_query) |
+                Q(localizacao__icontains=search_query)
+            )
+        return queryset
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Lista de Monitores'
         context['activegroup'] = 'inventario'
+        context['search'] = self.request.GET.get('search', '')
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
@@ -1065,7 +1127,6 @@ class ComputadorDetailView(DetailView):
 
 
 @login_required(login_url='account_login')
-@permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def estabelecimento_chart(request):
     data_computadores = Computador.objects.values('estabelecimento').annotate(total=Count('id')).order_by('estabelecimento')
     computadores_estabelecimentos = [data['estabelecimento'] for data in data_computadores]
@@ -1187,6 +1248,192 @@ def export_computadores_excel(request):
     response['Content-Disposition'] = 'attachment; filename="computadores.xlsx"'
 
     # Salvar o arquivo Excel na resposta HTTP
+    wb.save(response)
+
+    return response
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def export_estoque_excel(request):
+    search_query = request.GET.get('search', '')
+
+    if search_query:
+        itens_estoque = Estoque.objects.filter(
+            Q(tipo_item__nome__icontains=search_query) |
+            Q(modelo__icontains=search_query) |
+            Q(fabricante__icontains=search_query) |
+            Q(status__nome_status__icontains=search_query) |
+            Q(observacao__icontains=search_query) |
+            Q(local__icontains=search_query)
+        )
+    else:
+        itens_estoque = Estoque.objects.all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Itens de Estoque'
+
+    columns = ['Tipo de Item', 'Modelo', 'Fabricante', 'Status', 'Observação', 'Local']
+    ws.append(columns)
+
+    for item in itens_estoque:
+        ws.append([
+            item.tipo_item.nome, item.modelo, item.fabricante,
+            item.status.nome_status, item.observacao, item.local
+        ])
+
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="estoque.xlsx"'
+    wb.save(response)
+
+    return response
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def export_controlekit_excel(request):
+    search_query = request.GET.get('search', '')
+
+    if search_query:
+        kits = Controlekit.objects.filter(
+            Q(matricula__icontains=search_query) |
+            Q(usuario__icontains=search_query) |
+            Q(modelo__icontains=search_query) |
+            Q(estabelecimento__icontains=search_query) |
+            Q(centro_custo__icontains=search_query) |
+            Q(serie__icontains=search_query)
+        )
+    else:
+        kits = Controlekit.objects.all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Kits'
+
+    columns = ['Matrícula', 'Usuário', 'Modelo', 'Estabelecimento', 'Centro de Custo', 'Série', 'Data de Entrega', 'Data Final']
+    ws.append(columns)
+
+    for kit in kits:
+        ws.append([
+            kit.matricula, kit.usuario, kit.modelo, kit.estabelecimento,
+            kit.centro_custo, kit.serie, kit.data_entrega, kit.data_final
+        ])
+
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="controlekit.xlsx"'
+    wb.save(response)
+
+    return response
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def export_controlefones_excel(request):
+    search_query = request.GET.get('search', '')
+
+    if search_query:
+        fones = ControleFones.objects.filter(
+            Q(matricula__icontains=search_query) |
+            Q(usuario__icontains=search_query) |
+            Q(modelo__icontains=search_query) |
+            Q(estabelecimento__icontains=search_query) |
+            Q(centro_custo__icontains=search_query) |
+            Q(serie__icontains=search_query)
+        )
+    else:
+        fones = ControleFones.objects.all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Fones'
+
+    columns = ['Matrícula', 'Usuário', 'Modelo', 'Estabelecimento', 'Centro de Custo', 'Série', 'Data de Entrega', 'Data Final']
+    ws.append(columns)
+
+    for fone in fones:
+        ws.append([
+            fone.matricula, fone.usuario, fone.modelo, fone.estabelecimento,
+            fone.centro_custo, fone.serie, fone.data_entrega, fone.data_final
+        ])
+
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="controlefones.xlsx"'
+    wb.save(response)
+
+    return response
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def export_monitor_excel(request):
+    search_query = request.GET.get('search', '')
+
+    if search_query:
+        monitores = Monitor.objects.filter(
+            Q(numero_serie__icontains=search_query) |
+            Q(fabricante__icontains=search_query) |
+            Q(modelo__icontains=search_query) |
+            Q(patrimonio__icontains=search_query) |
+            Q(estabelecimento__icontains=search_query) |
+            Q(local__icontains=search_query) |
+            Q(localizacao__icontains=search_query)
+        )
+    else:
+        monitores = Monitor.objects.all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Monitores'
+
+    columns = ['Número de Série', 'Fabricante', 'Modelo', 'Patrimônio', 'Estabelecimento', 'Local', 'Localização']
+    ws.append(columns)
+
+    for monitor in monitores:
+        ws.append([
+            monitor.numero_serie, monitor.fabricante, monitor.modelo,
+            monitor.patrimonio, monitor.estabelecimento, monitor.local,
+            monitor.localizacao
+        ])
+
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="monitores.xlsx"'
+    wb.save(response)
+
+    return response
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def export_celular_excel(request):
+    search_query = request.GET.get('search', '')
+
+    if search_query:
+        celulares = Celular.objects.filter(
+            Q(modelo__icontains=search_query) |
+            Q(fabricante__icontains=search_query) |
+            Q(numero_serie__icontains=search_query) |
+            Q(imei__icontains=search_query) |
+            Q(numero_linha__icontains=search_query) |
+            Q(usuario__icontains=search_query) |
+            Q(status__nome_status__icontains=search_query) |
+            Q(estabelecimento__icontains=search_query) |
+            Q(centro_custo__icontains=search_query)
+        )
+    else:
+        celulares = Celular.objects.all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Celulares'
+
+    columns = ['Modelo', 'Fabricante', 'Número de Série', 'IMEI', 'Número da Linha', 'Usuário', 'Status', 'Estabelecimento', 'Centro de Custo']
+    ws.append(columns)
+
+    for celular in celulares:
+        ws.append([
+            celular.modelo, celular.fabricante, celular.numero_serie,
+            celular.imei, celular.numero_linha, celular.usuario,
+            celular.status.nome_status, celular.estabelecimento, celular.centro_custo
+        ])
+
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="celulares.xlsx"'
     wb.save(response)
 
     return response

@@ -12,6 +12,9 @@
     </form>
 
     <a href="{% url 'celular_create' %}" class="btn btn-primary mb-4">Adicionar Celular</a>
+    <a href="{% url 'export_celular_excel' %}?search={{ request.GET.search }}" class="btn btn-success mb-4">
+        Exportar Celulares para Excel
+    </a>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>

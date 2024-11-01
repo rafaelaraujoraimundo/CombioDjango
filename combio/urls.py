@@ -31,7 +31,7 @@ urlpatterns = [
     path('admin/', admin.site.urls, name="admin1"),
     #path("api/", api.urls),
     path("logout/",auth_views.LogoutView.as_view(template_name="login/logout.html"),name="logout"),
-    path('', RedirectView.as_view(url='/projetos/dashboard', permanent=True),name="index"),
+    path('', RedirectView.as_view(url='/inventario/dashboard', permanent=True),name="index"),
     #path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include('allauth.urls')),
     path('administration/', include('administration.urls')),

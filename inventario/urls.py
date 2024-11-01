@@ -10,7 +10,9 @@ from .views import (acoesprontuario_delete, acoesprontuario_edit, AcoesProntuari
     ProntuarioComputadorCreate, ProntuarioComputadorDelete, ProntuarioComputadorListView,
     ProntuarioComputadorUpdate, ProntuarioMonitorCreate, ProntuarioMonitorDelete,
     ProntuarioMonitorListView, ProntuarioMonitorUpdate, status_delete, status_edit, StatusCreate,
-    StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate, TipoItemList, export_computadores_excel)
+    StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate, TipoItemList, export_computadores_excel, export_estoque_excel,
+    export_controlekit_excel, export_controlefones_excel,
+    export_monitor_excel,export_celular_excel)
 
 urlpatterns = [
     path('tipoitem/', TipoItemList.as_view(), name='tipoitem_list'),
@@ -77,4 +79,9 @@ urlpatterns = [
     path('computador/details/<int:pk>/', ComputadorDetailView.as_view(), name='computador-detail'),
     path('dashboard/', estabelecimento_chart, name='estabelecimento_chart'),
     path('computador/export', export_computadores_excel, name='export_computadores_excel'),
+      path('estoque/export', export_estoque_excel, name='export_estoque_excel'),
+    path('controlekit/export', export_controlekit_excel, name='export_controlekit_excel'),
+    path('controlefones/export', export_controlefones_excel, name='export_controlefones_excel'),
+    path('monitor/export', export_monitor_excel, name='export_monitor_excel'),
+    path('celular/export', export_celular_excel, name='export_celular_excel'),
 ]

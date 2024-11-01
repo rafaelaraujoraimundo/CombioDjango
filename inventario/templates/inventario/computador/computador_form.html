@@ -3,15 +3,7 @@
 
 {% block content %}
 <div class="container-fluid">
-    {% if form.errors %}
-    <div class="alert alert-danger">
-        <ul>
-            {% for field, errors in form.errors.items %}
-                <li>{{ field }}: {{ errors|join:", " }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
+
     {% if form.non_field_errors %}
         <div class="alert alert-danger">
             {{ form.non_field_errors }}

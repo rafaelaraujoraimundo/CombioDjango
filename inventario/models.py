@@ -91,21 +91,20 @@ class Celular(models.Model):
         if self.pk:
             previous = Celular.objects.get(pk=self.pk)
             if not self.arquivo_celular:
-                # Mantém o arquivo existente se nenhum novo for carregado
                 self.arquivo_celular = previous.arquivo_celular
+        super().save(*args, **kwargs)  # Chamada do super() aqui garante que o ID seja atualizado antes de renomear o arquivo
 
-        # Atualizar o caminho do arquivo após obter o ID
         if temp_arquivo:
-            temp_arquivo.name = os.path.join(f'celular/{self.pk}', f'arquivo{os.path.splitext(temp_arquivo.name)[1]}')
-            self.arquivo_celular = temp_arquivo
-            super().save(*args, **kwargs)
-
+            # Renomear o arquivo para garantir que ele siga o formato desejado
+            new_name = os.path.join(f'celular/{self.pk}', f'arquivo{os.path.splitext(temp_arquivo.name)[1]}')
+            temp_arquivo.name = new_name
+            self.arquivo_celular.save(temp_arquivo.name, temp_arquivo, save=False)  # Atualizar o arquivo sem salvar novamente o modelo
 
     def delete(self, *args, **kwargs):
         if self.arquivo_celular:
             file_path = Path(self.arquivo_celular.path)
             if file_path.exists():
-                file_path.unlink()  # Deletar o arquivo ao excluir a instância
+                file_path.unlink()  # Deletar o arquivo físico se existir
         super().delete(*args, **kwargs)
 
 class ProntuarioCelular(models.Model):
