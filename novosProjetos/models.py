@@ -8,6 +8,8 @@ from django.conf import settings
 class Consultoria(models.Model):
     nome = models.CharField(max_length=100, null=False)
     valor_hora = models.DecimalField(max_digits=5, decimal_places=2, default=100)
+    total_horas_projetos_pagos = models.IntegerField(null=True)
+    horas_restantes_pagas=models.IntegerField(null=True)
 
     def __str__(self):
         return self.nome
@@ -26,6 +28,13 @@ def upload_to(instance, filename):
     return f'projetos/{instance.id}/{filename}'
 
 class Projeto(models.Model):
+
+    SIM_NAO_CHOICES = (
+        (1, 'Sim'),
+        (2, 'Não'),
+    )
+
+    utilizou_horas_pagas = models.IntegerField(choices=SIM_NAO_CHOICES, default=2)
     nome_projeto = models.CharField(max_length=255)
     data_entrega = models.DateField(default=now)
     horas_utilizadas = models.DecimalField(max_digits=5, decimal_places=2)
@@ -35,6 +44,8 @@ class Projeto(models.Model):
     anexo_escopo = models.FileField(upload_to=upload_to, blank=True, null=True)
     anexo_documentacao = models.FileField(upload_to=upload_to, blank=True, null=True)
     anexo_fontes = models.FileField(upload_to=upload_to, blank=True, null=True)
+    
+
 
     class Meta:
         db_table = 'projeto'
@@ -43,6 +54,13 @@ class Projeto(models.Model):
         return self.nome_projeto
 
     def save(self, *args, **kwargs):
+
+        if self.utilizou_horas_pagas == 1:  # Checa se as horas pagas foram utilizadas
+            if self.consultoria.horas_restantes_pagas is not None:
+                # Subtrai as horas utilizadas das horas restantes da consultoria
+                self.consultoria.horas_restantes_pagas -= float(self.horas_utilizadas)
+                self.consultoria.save() 
+                
         # Salvar temporariamente os arquivos
         temp_escopo = self.anexo_escopo
         temp_documentacao = self.anexo_documentacao

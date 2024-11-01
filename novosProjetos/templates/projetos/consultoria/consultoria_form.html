@@ -1,10 +1,10 @@
-{% extends "menu/index.html" %}  <!-- Substitua base_generic.html pelo seu template base -->
+{% extends "menu/index.html" %}  <!-- Substitua "menu/index.html" pelo seu template base -->
 
 {% block content %}
 <div class="container-fluid">
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <!-- Campo Codigo -->
+        <!-- Campo Nome da Consultoria -->
         <div class="form-group">
             <label for="{{ form.nome.id_for_label }}">Nome da Consultoria</label>
             <input type="text" class="form-control {% if form.nome.errors %}is-invalid{% endif %}" id="{{ form.nome.id_for_label }}" name="{{ form.nome.name }}" value="{{ form.nome.value|default_if_none:'' }}">
@@ -13,36 +13,35 @@
             {% endfor %}
         </div>
 
+        <!-- Campo Valor Hora -->
         <div class="form-group">
-         <label for="{{ form.valor_hora.id_for_label }}">Valor hora</label>
-         <input type="text" class="form-control {% if form.valor_hora.errors %}is-invalid{% endif %}" id="{{ form.valor_hora.id_for_label }}" name="{{ form.valor_hora.name }}" value="{{ form.valor_hora.value|default_if_none:'' }}">
-         {% for error in form.valor_hora.errors %}
-             <div class="invalid-feedback">{{ error }}</div>
-         {% endfor %}
-     </div>
+            <label for="{{ form.valor_hora.id_for_label }}">Valor por Hora</label>
+            <input type="text" class="form-control {% if form.valor_hora.errors %}is-invalid{% endif %}" id="{{ form.valor_hora.id_for_label }}" name="{{ form.valor_hora.name }}" value="{{ form.valor_hora.value|default_if_none:'' }}">
+            {% for error in form.valor_hora.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
 
+        <!-- Campo Total Horas Projetos Pagos -->
+        <div class="form-group">
+            <label for="{{ form.total_horas_projetos_pagos.id_for_label }}">Total Horas Projetos Pagos</label>
+            <input type="number" class="form-control {% if form.total_horas_projetos_pagos.errors %}is-invalid{% endif %}" id="{{ form.total_horas_projetos_pagos.id_for_label }}" name="{{ form.total_horas_projetos_pagos.name }}" value="{{ form.total_horas_projetos_pagos.value|default_if_none:'' }}">
+            {% for error in form.total_horas_projetos_pagos.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
 
+        <!-- Campo Horas Restantes Pagas -->
+        <div class="form-group">
+            <label for="{{ form.horas_restantes_pagas.id_for_label }}">Horas Restantes Pagas</label>
+            <input type="number" class="form-control {% if form.horas_restantes_pagas.errors %}is-invalid{% endif %}" id="{{ form.horas_restantes_pagas.id_for_label }}" name="{{ form.horas_restantes_pagas.name }}" value="{{ form.horas_restantes_pagas.value|default_if_none:'' }}">
+            {% for error in form.horas_restantes_pagas.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Botão de Salvar -->
         <button type="submit" class="btn btn-primary">Salvar</button>
     </form>
 </div>
-
-<div class="modal fade" id="Modal{{dataset.datasetid}}" tabindex="-1" role="dialog" aria-labelledby="Modal{{dataset.datasetid}}Title" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable" role="document">
-       <div class="modal-content">
-          <div class="modal-header">
-             <h5 class="modal-title" id="Modal{{dataset.datasetid}}Title">Detalhes da Sincronização: {{dataset.datasetid}} </h5>
-             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-             <span aria-hidden="true">&times;</span>
-             </button>
-          </div>
-          <div class="modal-body">
-             <p>{{dataset.syncdetails|linebreaksbr}}</p>
-             
-          </div>
-          <div class="modal-footer">
-             <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-          </div>
-       </div>
-    </div>
- </div>
 {% endblock %}

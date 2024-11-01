@@ -1,29 +1,61 @@
-{% extends "menu/index.html" %}  <!-- Substitua base_generic.html pelo seu template base -->
+{% extends "menu/index.html" %}  <!-- Substitua "menu/index.html" pelo seu template base -->
 
 {% block content %}
 <div class="container-fluid">
+    <h2>Edição de Consultoria</h2>
     <form method="post">
         {% csrf_token %}
-        <!-- Campo Codigo -->
+        <!-- Campo Nome da Consultoria -->
         <div class="form-group">
-            <label for="{{ form.nome.id_for_label }}">Nome</label>
-            <input type="text" class="form-control {% if form.nome.errors %}is-invalid{% endif %}" id="{{ form.nome.id_for_label }}" name="{{ form.nome.name }}" value="{{ form.nome.value|default_if_none:'' }}">
-            {% for error in form.codigo.errors %}
+            <label for="{{ form.nome.id_for_label }}">Nome da Consultoria</label>
+            <input type="text" class="form-control {% if form.nome.errors %}is-invalid{% endif %}" id="{{ form.nome.id_for_label }}" name="{{ form.nome.name }}" value="{{ form.nome.value|default_if_none:'' }}" required autofocus>
+            {% for error in form.nome.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}
         </div>
 
+        <!-- Campo Valor Hora -->
         <div class="form-group">
-            <label for="{{ form.valor_hora.id_for_label }}">Valor hora</label>
-            <input type="text" class="form-control {% if form.valor_hora.errors %}is-invalid{% endif %}" id="{{ form.valor_hora.id_for_label }}" name="{{ form.valor_hora.name }}" value="{{ form.valor_hora.value|default_if_none:'' }}">
+            <label for="{{ form.valor_hora.id_for_label }}">Valor por Hora (use ponto ou vírgula como separador decimal)</label>
+            <input type="text" class="form-control {% if form.valor_hora.errors %}is-invalid{% endif %}" id="{{ form.valor_hora.id_for_label }}" name="{{ form.valor_hora.name }}" value="{{ form.valor_hora.value|default_if_none:'' }}" required pattern="\d+([,\.]\d{1,2})?" title="Por favor, insira o valor com até duas casas decimais, usando ponto ou vírgula." placeholder="Exemplo: 100,00">
             {% for error in form.valor_hora.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}
         </div>
 
-      
+        <!-- Campo Total Horas Projetos Pagos -->
+        <div class="form-group">
+            <label for="{{ form.total_horas_projetos_pagos.id_for_label }}">Total Horas Projetos Pagos</label>
+            <input type="number" class="form-control {% if form.total_horas_projetos_pagos.errors %}is-invalid{% endif %}" id="{{ form.total_horas_projetos_pagos.id_for_label }}" name="{{ form.total_horas_projetos_pagos.name }}" value="{{ form.total_horas_projetos_pagos.value|default_if_none:'' }}" required>
+            {% for error in form.total_horas_projetos_pagos.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
 
+        <!-- Campo Horas Restantes Pagas -->
+        <div class="form-group">
+            <label for="{{ form.horas_restantes_pagas.id_for_label }}">Horas Restantes Pagas</label>
+            <input type="number" class="form-control {% if form.horas_restantes_pagas.errors %}is-invalid{% endif %}" id="{{ form.horas_restantes_pagas.id_for_label }}" name="{{ form.horas_restantes_pagas.name }}" value="{{ form.horas_restantes_pagas.value|default_if_none:'' }}" required>
+            {% for error in form.horas_restantes_pagas.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Botão de Salvar -->
         <button type="submit" class="btn btn-primary">Salvar</button>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form');
+    form.addEventListener('submit', function() {
+        var valorHora = document.getElementById('id_valor_hora');
+        if (valorHora.value) {
+            valorHora.value = valorHora.value.replace(',', '.');
+        }
+    });
+});
+</script>
+
 {% endblock %}
