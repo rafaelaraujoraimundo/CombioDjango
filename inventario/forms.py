@@ -1,6 +1,6 @@
 from django import forms
 from .models import (AcoesProntuario, Celular, Computador, ControleFones, Controlekit, Estoque,
-    Monitor, ProntuarioCelular, ProntuarioComputador, ProntuarioMonitor, Status, TipoItem)
+    Monitor, ProntuarioCelular, ProntuarioComputador, ProntuarioMonitor, Status, TipoItem, UsuarioDesligamento)
 from dashboard.models import BiFuncionariosCombio
 from django.utils.timezone import now
 
@@ -270,4 +270,26 @@ class ProntuarioComputadorForm(forms.ModelForm):
             'acao': 'Ação',
             'unidade_destino': 'Unidade de Destino',
             'local': 'Local',
+        }
+
+
+class UsuarioDesligamentoForm(forms.ModelForm):
+    class Meta:
+        model = UsuarioDesligamento
+        fields = [
+            'usuario', 'data_desligamento', 'data_limite',
+            'bloqueio_email', 'bloqueio_fluig', 'bloqueio_datasul', 'bloqueio_monday',
+            'bloqueio_qualiteam', 'bloqueio_portal_chamados', 'bloqueio_usuario_impressora'
+        ]
+        labels = {
+            'usuario': 'Usuário a ser desligado',
+            'data_desligamento': 'Data de Desligamento',
+            'data_limite': 'Data Limite',
+            'bloqueio_email': 'Bloqueio Email',
+            'bloqueio_fluig': 'Bloqueio Fluig',
+            'bloqueio_datasul': 'Bloqueio Datasul',
+            'bloqueio_monday': 'Bloqueio Monday',
+            'bloqueio_qualiteam': 'Bloqueio Qualiteam',
+            'bloqueio_portal_chamados': 'Bloqueio Portal de Chamados',
+            'bloqueio_usuario_impressora': 'Bloqueio Usuário da Impressora (Matriz)'
         }

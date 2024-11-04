@@ -12,7 +12,7 @@ from .views import (acoesprontuario_delete, acoesprontuario_edit, AcoesProntuari
     ProntuarioMonitorListView, ProntuarioMonitorUpdate, status_delete, status_edit, StatusCreate,
     StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate, TipoItemList, export_computadores_excel, export_estoque_excel,
     export_controlekit_excel, export_controlefones_excel,
-    export_monitor_excel,export_celular_excel)
+    export_monitor_excel,export_celular_excel, UsuarioDesligamentoCreate, UsuarioDesligamentoList, UsuarioDesligamentoUpdate, UsuarioDesligamentoDelete)
 
 urlpatterns = [
     path('tipoitem/', TipoItemList.as_view(), name='tipoitem_list'),
@@ -84,4 +84,10 @@ urlpatterns = [
     path('controlefones/export', export_controlefones_excel, name='export_controlefones_excel'),
     path('monitor/export', export_monitor_excel, name='export_monitor_excel'),
     path('celular/export', export_celular_excel, name='export_celular_excel'),
+
+
+     path('desligamento/novo/', UsuarioDesligamentoCreate.as_view(), name='usuario_desligamento_create'),
+     path('desligamento/', UsuarioDesligamentoList.as_view(), name='usuario_desligamento_list'),
+      path('desligamento/edit/<int:pk>/', UsuarioDesligamentoUpdate.as_view(), name='usuario_desligamento_edit'),
+      path('desligamento/delete/<int:pk>/', UsuarioDesligamentoDelete.as_view(), name='usuario_desligamento_delete'),
 ]

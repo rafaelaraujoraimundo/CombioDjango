@@ -1,0 +1,121 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Usuário a ser desligado -->
+        <div class="form-group">
+            <label for="usuarioInput">Usuário a ser desligado</label>
+            <input class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" list="usuarios" id="usuarioInput" name="usuario" autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
+            <datalist id="usuarios">
+                {% for user in usuarios_list %}
+                    <option value="{{ user.nom_funcionario }}" data-cdn-funcionario="{{ user.cdn_funcionario }}" data-cdn-estab="{{ user.cdn_estab }}">
+                {% endfor %}
+            </datalist>
+            {% for error in form.usuario.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Datas de desligamento e limite -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.data_desligamento.id_for_label }}">Data de Desligamento</label>
+                    <input type="date" class="form-control {% if form.data_desligamento.errors %}is-invalid{% endif %}" id="dataDesligamento" name="{{ form.data_desligamento.name }}" value="{{ form.data_desligamento.value|date:'Y-m-d'|default_if_none:'' }}">
+                    {% for error in form.data_desligamento.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.data_limite.id_for_label }}">Data Limite</label>
+                    <input type="date" class="form-control {% if form.data_limite.errors %}is-invalid{% endif %}" id="dataLimite" name="{{ form.data_limite.name }}" value="{{ form.data_limite.value|date:'Y-m-d'|default_if_none:'' }}">
+                    {% for error in form.data_limite.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de bloqueio para cada sistema -->
+
+        <!-- Bloqueio de E-mail -->
+        <div class="form-group">
+
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="bloqueioEmail" name="{{ form.bloqueio_email.name }}" {% if form.bloqueio_email.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="bloqueioEmail">Bloquear E-mail</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="{{ form.usuario_email.name }}" value="{{ form.usuario_email.value|default_if_none:'' }}" placeholder="Usuário de E-mail">
+                </div>
+            </div>
+        </div>
+
+        <!-- Bloqueio Fluig -->
+        <div class="form-group">
+
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="bloqueioFluig" name="{{ form.bloqueio_fluig.name }}" {% if form.bloqueio_fluig.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="bloqueioFluig">Bloquear Fluig</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="{{ form.usuario_fluig.name }}" value="{{ form.usuario_fluig.value|default_if_none:'' }}" placeholder="Usuário Fluig">
+                </div>
+            </div>
+        </div>
+
+        <!-- Bloqueio Datasul e Go-Global -->
+        <div class="form-group">
+   
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="bloqueioDatasul" name="{{ form.bloqueio_datasul.name }}" {% if form.bloqueio_datasul.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="bloqueioDatasul">Bloquear Datasul</label>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="{{ form.usuario_datasul.name }}" value="{{ form.usuario_datasul.value|default_if_none:'' }}" placeholder="Usuário Datasul">
+                </div>
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="{{ form.usuario_goglobal.name }}" value="{{ form.usuario_goglobal.value|default_if_none:'' }}" placeholder="Usuário Go-Global">
+                </div>
+            </div>
+        </div>
+
+        <!-- Bloqueio Monday -->
+        <div class="form-group">
+           
+            <div class="row align-items-center mb-2">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="bloqueioMonday" name="{{ form.bloqueio_monday.name }}" {% if form.bloqueio_monday.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="bloqueioMonday">Bloquear Monday</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="{{ form.usuario_monday.name }}" value="{{ form.usuario_monday.value|default_if_none:'' }}" placeholder="Usuário Monday">
+                </div>
+            </div>
+        </div>
+
+        <!-- Continuar para outros sistemas da mesma forma -->
+
+        <!-- Botões -->
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'usuario_desligamento_list' %}" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+{% endblock %}

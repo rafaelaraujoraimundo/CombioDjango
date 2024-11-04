@@ -62,50 +62,30 @@
                             <h5 class="mb-0 text-white line-height"></h5>
                             <span class="text-white font-size-12">Available</span>
                          </div>
-                         <a href="profile.html" class="iq-sub-card iq-bg-primary-hover">
-                            <div class="media align-items-center">
+                      
+                         <a href="#" class="iq-sub-card iq-bg-primary-hover edit-profile-trigger" data-toggle="modal" data-target="#editProfileModal">
+                           <div class="media align-items-center">
                                <div class="rounded iq-card-icon iq-bg-primary">
-                                  <i class="ri-file-user-line"></i>
+                                   <i class="ri-edit-line"></i>
                                </div>
                                <div class="media-body ml-3">
-                                  <h6 class="mb-0 ">My Profile</h6>
-                                  <p class="mb-0 font-size-12">View personal profile details.</p>
+                                   <h6 class="mb-0">Editar Perfil</h6>
+                                   <p class="mb-0 font-size-12">Modifique seus dados de perfil.</p>
                                </div>
-                            </div>
-                         </a>
-                         <a href="profile-edit.html" class="iq-sub-card iq-bg-primary-hover">
-                            <div class="media align-items-center">
-                               <div class="rounded iq-card-icon iq-bg-primary">
-                                  <i class="ri-profile-line"></i>
-                               </div>
-                               <div class="media-body ml-3">
-                                  <h6 class="mb-0 ">Edit Profile</h6>
-                                  <p class="mb-0 font-size-12">Modify your personal details.</p>
-                               </div>
-                            </div>
-                         </a>
-                         <a href="account-setting.html" class="iq-sub-card iq-bg-primary-hover">
-                            <div class="media align-items-center">
-                               <div class="rounded iq-card-icon iq-bg-primary">
-                                  <i class="ri-account-box-line"></i>
-                               </div>
-                               <div class="media-body ml-3">
-                                  <h6 class="mb-0 ">Account settings</h6>
-                                  <p class="mb-0 font-size-12">Manage your account parameters.</p>
-                               </div>
-                            </div>
-                         </a>
-                         <a href="privacy-setting.html" class="iq-sub-card iq-bg-primary-hover">
-                            <div class="media align-items-center">
-                               <div class="rounded iq-card-icon iq-bg-primary">
-                                  <i class="ri-lock-line"></i>
-                               </div>
-                               <div class="media-body ml-3">
-                                  <h6 class="mb-0 ">Privacy Settings</h6>
-                                  <p class="mb-0 font-size-12">Control your privacy parameters.</p>
-                               </div>
-                            </div>
-                         </a>
+                           </div>
+                       </a>
+                         <a href="#" class="iq-sub-card iq-bg-primary-hover change-password-logged-in" data-toggle="modal" data-target="#changePasswordLoggedInModal">
+                           <div class="media align-items-center">
+                              <div class="rounded iq-card-icon iq-bg-primary">
+                                 <i class="ri-account-box-line"></i>
+                              </div>
+                              <div class="media-body ml-3">
+                                 <h6 class="mb-0 ">Alterar Senha</h6>
+                                 <p class="mb-0 font-size-12">Altere sua senha de acesso.</p>
+                              </div>
+                           </div>
+                       </a>
+                        
                          <div class="d-inline-block w-100 text-center p-3">
                            <!-- Formulário para logout com método POST -->
                            <form action="{% url 'account_logout' %}" method="post">
@@ -122,4 +102,192 @@
           </ul>
        </nav>
     </div>
+    
  </div>
+ <div class="modal fade" id="changePasswordLoggedInModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordLoggedInModalLabel" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h5 class="modal-title" id="changePasswordLoggedInModalLabel">Alterar Senha</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form method="post" id="changePasswordLoggedInForm">
+               {% csrf_token %}
+               <div class="modal-body">
+                   <div class="form-group">
+                       <label for="currentPassword">Senha Atual</label>
+                       <input type="password" class="form-control" id="currentPassword" name="current_password" required>
+                       <div class="invalid-feedback" id="currentPasswordError"></div>
+                   </div>
+                   <div class="form-group">
+                       <label for="newPasswordLoggedIn">Nova Senha</label>
+                       <input type="password" class="form-control" id="newPasswordLoggedIn" name="new_password" required>
+                       <div class="invalid-feedback" id="newPasswordError"></div>
+                   </div>
+                   <div class="form-group">
+                       <label for="confirmPasswordLoggedIn">Confirmar Nova Senha</label>
+                       <input type="password" class="form-control" id="confirmPasswordLoggedIn" name="confirm_password" required>
+                       <div class="invalid-feedback" id="confirmPasswordError"></div>
+                   </div>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                   <button type="button" id="submitChangePassword" class="btn btn-primary">Salvar</button>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
+<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+   <div class="modal-dialog" role="document">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h5 class="modal-title" id="editProfileModalLabel">Editar Perfil</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form id="editProfileForm">
+               {% csrf_token %}
+               <div class="modal-body">
+                   <div class="form-group">
+                       <label for="usuarioDatasul">Usuário Datasul</label>
+                       <input type="text" class="form-control" id="usuarioDatasul" name="usuario_datasul" required>
+                       <div class="invalid-feedback" id="usuarioDatasulError"></div>
+                   </div>
+                   <div class="form-group">
+                       <label for="usuarioFluig">Usuário Fluig</label>
+                       <input type="text" class="form-control" id="usuarioFluig" name="usuario_fluig" required>
+                       <div class="invalid-feedback" id="usuarioFluigError"></div>
+                   </div>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                   <button type="button" id="submitEditProfile" class="btn btn-primary">Salvar</button>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#submitChangePassword').click(function(event) {
+            event.preventDefault();  // Evita o submit padrão do formulário
+            
+            // Limpa mensagens de erro anteriores
+            $('.invalid-feedback').text('');
+            $('.form-control').removeClass('is-invalid');
+
+            const currentPassword = $('#currentPassword').val();
+            const newPassword = $('#newPasswordLoggedIn').val();
+            const confirmPassword = $('#confirmPasswordLoggedIn').val();
+            const csrfToken = $('[name=csrfmiddlewaretoken]').val();
+
+            $.ajax({
+                url: '{% url "change_logged_in_user_password" %}',
+                method: 'POST',
+                data: {
+                    'current_password': currentPassword,
+                    'new_password': newPassword,
+                    'confirm_password': confirmPassword,
+                    'csrfmiddlewaretoken': csrfToken
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#changePasswordLoggedInModal').modal('hide');  // Fecha o modal
+                        // Exibe uma mensagem de sucesso fora do modal, se necessário
+                    }
+                },
+                error: function(xhr) {
+                    const errorResponse = JSON.parse(xhr.responseText);
+
+                    // Verifica cada campo e exibe o erro correspondente
+                    if (errorResponse.message === 'Senha atual incorreta.') {
+                        $('#currentPassword').addClass('is-invalid');
+                        $('#currentPasswordError').text('Senha atual incorreta.');
+                    } 
+                    else if (errorResponse.message === 'As senhas não coincidem.') {
+                        $('#confirmPasswordLoggedIn').addClass('is-invalid');
+                        $('#confirmPasswordError').text('As senhas não coincidem.');
+                    } 
+                    else {
+                        $('#newPasswordLoggedIn').addClass('is-invalid');
+                        $('#newPasswordError').text('Ocorreu um erro ao alterar a senha.');
+                    }
+                }
+            });
+        });
+    });
+</script>
+<script>
+   $(document).ready(function() {
+       // Carrega os dados do usuário logado ao abrir o modal
+       $('.edit-profile-trigger').click(function(event) {
+           event.preventDefault();  // Evita o submit padrão do formulário
+
+           $.ajax({
+               url: '{% url "get_logged_in_user_profile" %}',  // Endpoint para obter os dados do usuário logado
+               method: 'GET',
+               success: function(response) {
+                   // Preenche os campos do modal com os dados do usuário
+                   $('#usuarioDatasul').val(response.usuario_datasul);
+                   $('#usuarioFluig').val(response.usuario_fluig);
+                   
+                   // Abre o modal
+                   $('#editProfileModal').modal('show');
+               },
+               error: function(xhr) {
+                   alert('Erro ao carregar os dados do usuário.');
+               }
+           });
+       });
+
+       // Submissão do formulário de edição de perfil
+       $('#submitEditProfile').click(function(event) {
+           event.preventDefault();  // Evita o submit padrão do formulário
+           
+           // Limpa mensagens de erro anteriores
+           $('.invalid-feedback').text('');
+           $('.form-control').removeClass('is-invalid');
+
+           const usuarioDatasul = $('#usuarioDatasul').val();
+           const usuarioFluig = $('#usuarioFluig').val();
+           const csrfToken = $('[name=csrfmiddlewaretoken]').val();
+
+           $.ajax({
+               url: '{% url "edit_logged_in_user_profile" %}',
+               method: 'POST',
+               data: {
+                   'usuario_datasul': usuarioDatasul,
+                   'usuario_fluig': usuarioFluig,
+                   'csrfmiddlewaretoken': csrfToken
+               },
+               success: function(response) {
+                   if (response.success) {
+                       // Fecha o modal
+                       $('#editProfileModal').modal('hide');
+
+                       // Exibe uma mensagem de sucesso (substitua com um toast ou outra notificação, se preferir)
+                       //alert(response.message); 
+                   }
+               },
+               error: function(xhr) {
+                   const errorResponse = JSON.parse(xhr.responseText);
+
+                   // Verifica cada campo e exibe o erro correspondente
+                   if (errorResponse.errors.usuario_datasul) {
+                       $('#usuarioDatasul').addClass('is-invalid');
+                       $('#usuarioDatasulError').text(errorResponse.errors.usuario_datasul[0]);
+                   }
+                   if (errorResponse.errors.usuario_fluig) {
+                       $('#usuarioFluig').addClass('is-invalid');
+                       $('#usuarioFluigError').text(errorResponse.errors.usuario_fluig[0]);
+                   }
+               }
+           });
+       });
+   });
+</script>

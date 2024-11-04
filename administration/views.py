@@ -16,6 +16,9 @@ from django.urls import reverse_lazy
 from .forms import ItensMenuForm, PasswordManagerForm, UserCreationForm
 from .models import PasswordManager, PasswordGroup
 from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
 @permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
@@ -295,3 +298,58 @@ def create_user(request):
                'activegroup': activegroup,
                'title': title}
     return render(request, 'administration/user/user_form.html', context)
+
+
+@login_required
+@require_POST
+def change_logged_in_user_password(request):
+    current_password = request.POST.get('current_password')
+    new_password = request.POST.get('new_password')
+    confirm_password = request.POST.get('confirm_password')
+
+    if new_password != confirm_password:
+        return JsonResponse({'success': False, 'message': 'As senhas não coincidem.'}, status=400)
+
+    user = request.user
+    if not user.check_password(current_password):
+        return JsonResponse({'success': False, 'message': 'Senha atual incorreta.'}, status=400)
+
+    user.set_password(new_password)
+    user.save()
+
+    return JsonResponse({'success': True, 'message': 'Senha alterada com sucesso.'})
+
+@login_required
+@require_POST
+def edit_logged_in_user_profile(request):
+    usuario_datasul = request.POST.get('usuario_datasul')
+    usuario_fluig = request.POST.get('usuario_fluig')
+    user = request.user
+
+    errors = {}
+
+    # Validação básica dos campos (adicione validações adicionais conforme necessário)
+    if not usuario_datasul:
+        errors['usuario_datasul'] = ["Este campo é obrigatório."]
+    if not usuario_fluig:
+        errors['usuario_fluig'] = ["Este campo é obrigatório."]
+
+    if errors:
+        return JsonResponse({'success': False, 'errors': errors}, status=400)
+
+    # Atualiza os dados do usuário logado
+    user.usuario_datasul = usuario_datasul
+    user.usuario_fluig = usuario_fluig
+    user.save()
+
+    return JsonResponse({'success': True, 'message': 'Perfil atualizado com sucesso.'})
+
+
+@login_required
+def get_logged_in_user_profile(request):
+    user = request.user
+    data = {
+        'usuario_datasul': user.usuario_datasul,
+        'usuario_fluig': user.usuario_fluig,
+    }
+    return JsonResponse(data)
