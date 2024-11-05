@@ -1460,7 +1460,8 @@ class UsuarioDesligamentoCreate(CreateView):
         return super().form_valid(form)
 
 
-
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class UsuarioDesligamentoList(ListView):
     model = UsuarioDesligamento
     template_name = 'inventario/desligamento/usuario_desligamento_list.html'
@@ -1474,7 +1475,8 @@ class UsuarioDesligamentoList(ListView):
 
         return context
 
-
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class UsuarioDesligamentoUpdate(UpdateView):
     model = UsuarioDesligamento
     form_class = UsuarioDesligamentoForm
@@ -1492,7 +1494,8 @@ class UsuarioDesligamentoUpdate(UpdateView):
         form.instance.usuario_ultima_alteracao = self.request.user  # Define o usuário de alteração
         return super().form_valid(form)
 
-
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class UsuarioDesligamentoDelete(DeleteView):
     model = UsuarioDesligamento
     template_name = 'inventario/desligamento/usuario_desligamento_confirm_delete.html'
