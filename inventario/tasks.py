@@ -172,7 +172,7 @@ def populate_hardware_data():
     except Exception as e:
         logger.error(f"Erro ao processar os dados da API: {str(e)}")
 
-
+@shared_task
 def verificar_bloqueios_pendentes():
     # Busca todos os registros que têm qualquer bloqueio como False
     registros_pendentes = UsuarioDesligamento.objects.filter(
