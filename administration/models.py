@@ -5,6 +5,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from .encryptor import encrypt_password, decrypt_password
+import hashlib
 
 class UserManager(BaseUserManager):
 
@@ -79,6 +80,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=False
     )
 
+    hash_gravatar = models.CharField(max_length=32, blank=True, editable=False)
+
     USERNAME_FIELD = "email"
 
     objects = UserManager()
@@ -91,6 +94,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+    def save(self, *args, **kwargs):
+        if not self.hash_gravatar or self._state.adding:
+            self.hash_gravatar = hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
+        super(User, self).save(*args, **kwargs)
 
 class ServidorFluig(models.Model):
     servidor = models.CharField(max_length=255, null=False)  # Usando 255 como um valor comum para o comprimento máximo de uma string
