@@ -68,7 +68,7 @@
                     const itemId = this.getAttribute('data-id');
                     const itemName = this.getAttribute('data-item');
                     document.getElementById('deleteItemName').textContent = itemName;
-                    document.getElementById('deleteForm').action = `/inventario/prontuario_computador/${itemId}/excluir/`;
+                    document.getElementById('deleteForm').action = `/inventario/prontuario/computador/delete/${itemId}/`;
                     $('#confirmDeleteModal').modal('show');
                 });
             });

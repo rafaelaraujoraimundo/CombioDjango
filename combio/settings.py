@@ -220,7 +220,7 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger',
 }
 
-CELERY_BEAT_SCHEDULE = {
+"""CELERY_BEAT_SCHEDULE = {
     'get_FluigServer_every_10_minutes_starting_at_5_past_hour': {
         'task': 'api_v1.tasks.get_FluigServer',
         'schedule': crontab(minute='5-59/10'),
@@ -233,7 +233,7 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'api_v1.tasks.get_memory',
         'schedule': crontab(minute='0-59/10'),
     },
-}
+}"""
 
 CELERY_BROKER_URL = 'redis://172.16.0.15:6379'
 
