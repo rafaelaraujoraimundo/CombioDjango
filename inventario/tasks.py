@@ -4,6 +4,7 @@ from celery import shared_task
 import requests
 from requests.auth import HTTPBasicAuth
 import logging
+from administration.views import User
 from .models import AccountInfo, BIOS, CPU, Hardware, Memory, Software, Storage, UsuarioDesligamento
 from decouple import config
 from django.core.mail import send_mail
@@ -234,7 +235,8 @@ def verificar_bloqueios_pendentes():
                     </td>
                 </tr>
             """
-        
+        usuarios = User.objects.filter(enviar_email_desligados=True)
+        emails = [usuario.email for usuario in usuarios]
         mensagem_html += "</table>"
 
         # Envia o e-mail usando send_mail com o corpo em HTML
@@ -242,6 +244,6 @@ def verificar_bloqueios_pendentes():
             subject="Alerta: Bloqueios Pendentes de Usuários",
             message="Os seguintes usuários possuem sistemas pendentes de bloqueio. Confira o conteúdo em HTML para mais detalhes.",
             from_email=settings.EMAIL_HOST_USER,
-            recipient_list=['rafael.araujo@combioenergia.com.br'],
+            recipient_list=emails,
             html_message=mensagem_html  # Define o corpo do e-mail em HTML
         )

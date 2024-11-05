@@ -13,6 +13,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Ativo</th>
+                    <th>Email Desligado</th>
                     <th>E-mail</th>
                     <th>Usuário Datasul</th>
                     <th>Usuário Fluig</th>
@@ -25,6 +26,13 @@
                         <td>{{ user.id }}</td>
                         <td>
                             {% if user.is_active %}
+                                <i class="fa fa-check text-success"></i>
+                            {% else %}
+                                <i class="fa fa-times text-danger"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.enviar_email_desligados %}
                                 <i class="fa fa-check text-success"></i>
                             {% else %}
                                 <i class="fa fa-times text-danger"></i>

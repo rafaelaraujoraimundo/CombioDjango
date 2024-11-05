@@ -112,7 +112,49 @@
         </div>
 
         <!-- Continuar para outros sistemas da mesma forma -->
+        <div class="form-group">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="bloqueioQualiteam" name="{{ form.bloqueio_qualiteam.name }}" {% if form.bloqueio_qualiteam.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="bloqueioQualiteam">Bloquear Qualiteam</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="{{ form.usuario_qualiteam.name }}" value="{{ form.usuario_qualiteam.value|default_if_none:'' }}" placeholder="Usuário Qualiteam">
+                </div>
+            </div>
+        </div>
 
+        <!-- Bloqueio Portal de Chamados -->
+        <div class="form-group">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="bloqueioPortalChamados" name="{{ form.bloqueio_portal_chamados.name }}" {% if form.bloqueio_portal_chamados.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="bloqueioPortalChamados">Bloquear Portal de Chamados</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="{{ form.usuario_portal_chamados.name }}" value="{{ form.usuario_portal_chamados.value|default_if_none:'' }}" placeholder="Usuário do Portal de Chamados">
+                </div>
+            </div>
+        </div>
+
+        <!-- Bloqueio Usuário da Impressora (Matriz) -->
+        <div class="form-group">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="bloqueioUsuarioImpressora" name="{{ form.bloqueio_usuario_impressora.name }}" {% if form.bloqueio_usuario_impressora.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="bloqueioUsuarioImpressora">Bloquear Usuário de Impressora (Matriz)</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" name="{{ form.usuario_impressora.name }}" value="{{ form.usuario_impressora.value|default_if_none:'' }}" placeholder="Usuário de Impressora (Matriz)">
+                </div>
+            </div>
+        </div>
         <!-- Botões -->
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a href="{% url 'usuario_desligamento_list' %}" class="btn btn-secondary">Voltar</a>

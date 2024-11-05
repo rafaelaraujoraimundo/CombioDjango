@@ -1471,7 +1471,7 @@ class UsuarioDesligamentoList(ListView):
         context['activegroup'] = 'inventario'
         context['title'] = 'Desligamento de Usuários'
 
-        verificar_bloqueios_pendentes()
+
         return context
 
 
