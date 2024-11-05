@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from administration.models import PasswordManager, ServidorFluig, User
-from administration.forms import CustomUserChangeForm
+from administration.forms import CustomUserChangeForm, CustomUserCreationForm
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.forms import UserChangeForm
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib import messages
 from django.forms import CheckboxSelectMultiple
 from django.views.generic import ListView
@@ -62,6 +62,30 @@ def user_list(request):
                'title': title}
     return render(request, 'users/user_list.html', context)
 
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+def create_user(request):
+    activegroup = 'administration'
+    title = 'Criação de Usuários'
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user, save_m2m = form.save(commit=False)  # Recebe a função save_m2m
+            user.save()  # Salva o usuário
+            save_m2m()  # Chama save_m2m para salvar as relações ManyToMany
+            user.user_permissions.set(form.cleaned_data['custom_permissions'])  # Configura as permissões customizadas
+            user.save()
+            messages.success(request, 'Usuário criado com sucesso!')
+            return redirect('administration_users')
+        else:
+            messages.error(request, 'Erro ao criar o usuário. Verifique os dados.')
+    else:
+        form = CustomUserCreationForm()
+
+    context = {'form': form, 'activegroup': activegroup, 'title': title}
+    return render(request, 'administration/user/user_form.html', context)
+
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
 @permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def user_edit(request, user_id):
@@ -75,6 +99,8 @@ def user_edit(request, user_id):
         if form.is_valid():
             form.save()
             user.groups.clear()
+            print('user_edit')
+            print(form.cleaned_data.get('groups'))
             for group in form.cleaned_data.get('groups'):
                 user.groups.add(group)
             user.user_permissions.clear()
@@ -282,23 +308,7 @@ def password_manager_create(request):
         form = PasswordManagerForm()
     return render(request, 'administration/passwordManager/password_manager_form.html', {'form': form})
 
-@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
-def create_user(request):
-    activegroup = 'administration'
-    title = 'Criação de Usuarios'
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('administration_users')  # Redirecionar para a página de login após o registro bem-sucedido
-    else:
-        form = UserCreationForm()
-    context = {'form': form,
-               'activegroup': activegroup,
-               'title': title}
-    return render(request, 'administration/user/user_form.html', context)
-
+User = get_user_model()
 
 @login_required
 @require_POST

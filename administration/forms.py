@@ -7,20 +7,39 @@ from menu.models import ItensMenu
 from django import forms
 
 class CustomUserCreationForm(UserCreationForm):
-    usuario_datasul = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'teste'})
+
+
+    custom_permissions = forms.ModelMultipleChoiceField(
+        queryset=Permission.objects.filter(codename__startswith='combio'),  # Filtra permissões com um prefixo específico
+        widget=forms.CheckboxSelectMultiple(),
+        required=False,
+        label="Custom Permissions"
     )
 
     class Meta:
         model = User
-        fields = ('email', 'usuario_datasul', 'usuario_fluig', )
-        widget = {
-            'usuario_datasul':
-            forms.TextInput(attrs={'class': 'teste'})
+        fields = ('email', 'usuario_datasul', 'usuario_fluig', 'groups', 'user_permissions', 'is_active','custom_permissions','enviar_email_desligados','nome_completo')
+        widgets = {
+            'usuario_datasul': forms.TextInput(attrs={'class': 'form-control'}),
+            'usuario_fluig': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.TextInput(attrs={'class': 'form-control'}),
+            'groups': forms.CheckboxSelectMultiple(),
+            'user_permissions': forms.CheckboxSelectMultiple(),
+            'enviar_email_desligados': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
+            }
 
-        }
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+            self.save_m2m()  # Garante que o save_m2m seja chamado para salvar relações ManyToMany
+        else:
+            return user, self.save_m2m  # Retornar a função save_m2m se não commitar imediatamente
 
-
+        # Adicionando permissões customizadas
+        user.user_permissions.set(self.cleaned_data['custom_permissions'])
+        return user
 class CustomUserChangeForm(UserChangeForm):
 
     usuario_datasul = forms.CharField(
@@ -29,13 +48,13 @@ class CustomUserChangeForm(UserChangeForm):
 
     groups = forms.ModelMultipleChoiceField(
         queryset=Group.objects.all(),
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'custom-control-input'}),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'custom-control custom-switch custom-control-input'}),
         required=False,
         label="Groups"
     )
     user_permissions = forms.ModelMultipleChoiceField(
         queryset=Permission.objects.filter(codename__icontains='combio'),
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'custom-control-input'}),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'custom-control custom-switch custom-control-input'}),
         required=False,
         label="Permissions"
     )
@@ -48,11 +67,13 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
         fields = ('email', 'usuario_datasul', 'usuario_fluig',
-                  'groups', 'user_permissions', 'is_active')
+                  'groups', 'user_permissions', 'is_active', 'enviar_email_desligados','nome_completo')
 
         widgets = {
             'usuario_fluig': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.TextInput(attrs={'class': 'form-control'}),
+            'enviar_email_desligados': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 

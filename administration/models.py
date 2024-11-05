@@ -41,35 +41,41 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-
     email = models.EmailField(
         verbose_name="E-mail do usuário",
         max_length=254,
         unique=True,
     )
-
+    nome_completo = models.CharField(
+        verbose_name="Nome Completo",
+        max_length=150,
+        blank=True,
+        null=True,
+    )
     usuario_datasul = models.CharField(
-        verbose_name="Usuário datasul",
+        verbose_name="Usuário Datasul",
         max_length=50,
     )
-
     usuario_fluig = models.CharField(
         verbose_name="Usuário Fluig",
         max_length=100,
     )
-
     is_active = models.BooleanField(
-        "usuario ativo?",
+        "Usuário ativo?",
         default=False
     )
-
     is_staff = models.BooleanField(
-        "usuario é da equipe de desenvolvimento?",
+        "Usuário é da equipe de desenvolvimento?",
+        default=False
+    )
+    is_superuser = models.BooleanField(
+        "Usuário é um superusuário?",
         default=False
     )
 
-    is_superuser = models.BooleanField(
-        "usuario é um superusuário?",
+    # Campo para controlar o envio de e-mail de desligamento
+    enviar_email_desligados = models.BooleanField(
+        "Enviar e-mail de desligamento?",
         default=False
     )
 

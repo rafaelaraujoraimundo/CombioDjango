@@ -2,80 +2,107 @@
 
 {% block content %}
 <div class="container-fluid">
+    <h2>{{ title }}</h2>  <!-- Adicione um título, se necessário -->
     <form method="post">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="{{ form.email.id_for_label }}">Email</label>
-        <div class=" {% if form.email.errors %}is-invalid{% endif %}">
-          {{ form.email }}
-          {% for error in form.email.errors %}
-            <div class="invalid-feedback">{{ error }}</div>
-          {% endfor %}
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="{{ form.usuario_datasul.id_for_label }}">Usuario Datasul</label>
-        <div class="{% if form.usuario_datasul.errors %}is-invalid{% endif %}">
-          {{ form.usuario_datasul }}
-          {% for error in form.usuario_datasul.errors %}
-            <div class="invalid-feedback">{{ error }}</div>
-          {% endfor %}
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="{{ form.usuario_datasul.id_for_label }}">Usuario Fluig</label>
-        <div class="{% if form.usuario_datasul.errors %}is-invalid{% endif %}">
-          {{ form.usuario_fluig }}
-          {% for error in form.usuario_datasul.errors %}
-            <div class="invalid-feedback">{{ error }}</div>
-          {% endfor %}
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="{{ form.is_active.id_for_label }}">Usuario Ativo?</label>
-        <div class="form-check {% if form.is_active.errors %}is-invalid{% endif %}">
-          <div class="form-check">
+        {% csrf_token %}
 
-            {{ form.is_active }}
-          </div>
-          
-          {% for error in form.active.errors %}
-            <div class="invalid-feedback">{{ error }}</div>
-          {% endfor %}
-        </div>
-      </div>
-      <br>
-      <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="{{ form.groups.id_for_label }}">Grupos</label>
-                {% for choice in form.groups %}
-                <div class="form-check">
-                    {{ choice }}
+        <!-- Linha 1: Email e Nome Completo -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                    {% for error in form.email.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.nome_completo.id_for_label }}">Nome Completo</label>
+                    {{ form.nome_completo }}
+                    {% for error in form.nome_completo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
-    </div>
-     
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="{{ form.groups.id_for_label }}">Permissões</label><br>
-                {% for user_permission in form.user_permissions %}
-                
-                
-                    {{ user_permission }}
-            
 
-                {% endfor %}
+        <!-- Linha 2: Usuário Datasul e Usuário Fluig -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.usuario_datasul.id_for_label }}">Usuário Datasul</label>
+                    {{ form.usuario_datasul }}
+                    {% for error in form.usuario_datasul.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.usuario_fluig.id_for_label }}">Usuário Fluig</label>
+                    {{ form.usuario_fluig }}
+                    {% for error in form.usuario_fluig.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
-    </div>
 
+        <!-- Linha 3: Usuário Ativo e Enviar E-mail de Desligamento -->
+        <div class="row">
+          <div class="col-md-6">
+              <div class="form-group">
+                  <label for="{{ form.is_active.id_for_label }}">Usuário Ativo?</label>
+                  <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input {% if form.is_active.errors %}is-invalid{% endif %}" id="{{ form.is_active.id_for_label }}" name="{{ form.is_active.name }}" {% if form.is_active.value %}checked{% endif %}>
+                      <label class="custom-control-label" for="{{ form.is_active.id_for_label }}">Ativo</label>
+                      {% for error in form.is_active.errors %}
+                          <div class="invalid-feedback">{{ error }}</div>
+                      {% endfor %}
+                  </div>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="form-group">
+                  <label for="{{ form.enviar_email_desligados.id_for_label }}">Enviar E-mail de Desligamento?</label>
+                  <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input {% if form.enviar_email_desligados.errors %}is-invalid{% endif %}" id="{{ form.enviar_email_desligados.id_for_label }}" name="{{ form.enviar_email_desligados.name }}" {% if form.enviar_email_desligados.value %}checked{% endif %}>
+                      <label class="custom-control-label" for="{{ form.enviar_email_desligados.id_for_label }}">Enviar</label>
+                      {% for error in form.enviar_email_desligados.errors %}
+                          <div class="invalid-feedback">{{ error }}</div>
+                      {% endfor %}
+                  </div>
+              </div>
+          </div>
+      </div>
+        <!-- Linha 4: Grupos e Permissões -->
+        <div class="row">
+          <div class="col-md-2">
+              <div class="form-group">
+                  <label for="{{ form.groups.id_for_label }}">Grupos</label>
+                  {{ form.groups }}
+              </div>
+          </div>
+          <div class="col-md-10">
+              <div class="form-group">
+                  <label for="{{ form.user_permissions.id_for_label }}">Permissões</label>
+                  <div class="row">
+                      {% for permission in form.user_permissions %}
+                          <div class="col-md-6">
+                              {{ permission }}
+                          </div>
+                          {% if forloop.counter|divisibleby:2 and not forloop.last %}
+                              </div><div class="row">
+                          {% endif %}
+                      {% endfor %}
+                  </div>
+              </div>
+          </div>
+      </div>
 
-
-      <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>
 {% endblock %}
