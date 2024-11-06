@@ -1193,7 +1193,7 @@ def estabelecimento_chart(request):
         'fabricantes_monitor_totals': fabricantes_monitor_totals,
         'status_monitor': status_monitor,
         'status_monitor_totals': status_monitor_totals,
-        'activegroup': 'inventario',
+        'activegroup': 'Dashboard',
         'title': 'Dashboard Ativos'
     }
    
