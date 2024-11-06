@@ -130,12 +130,12 @@ class ProntuarioCelular(models.Model):
 # Modelo principal: Hardware
 class Hardware(models.Model):
     arch = models.CharField(max_length=100, blank=True, null=True)
-    archive = models.CharField(max_length=255, blank=True, null=True)
+    archive = models.CharField(max_length=500, blank=True, null=True)
     category_id = models.IntegerField(blank=True, null=True)
     checksum = models.IntegerField(blank=True, null=True)
     default_gateway = models.CharField(max_length=100, blank=True, null=True)
-    description = models.CharField(max_length=255, blank=True, null=True)
-    device_id = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=500, blank=True, null=True)
+    device_id = models.CharField(max_length=500, blank=True, null=True)
     dns = models.CharField(max_length=100, blank=True, null=True)
     etime = models.CharField(max_length=100, blank=True, null=True)
     fidelity = models.IntegerField(blank=True, null=True)
@@ -144,26 +144,26 @@ class Hardware(models.Model):
     last_come = models.DateTimeField(blank=True, null=True)
     last_date = models.DateTimeField(blank=True, null=True)
     memory = models.IntegerField(blank=True, null=True)  # Memória em MB
-    name = models.CharField(max_length=255, blank=True, null=True)
-    os_comments = models.CharField(max_length=255, blank=True, null=True)
-    os_name = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=500, blank=True, null=True)
+    os_comments = models.CharField(max_length=500, blank=True, null=True)
+    os_name = models.CharField(max_length=500, blank=True, null=True)
     os_version = models.CharField(max_length=100, blank=True, null=True)
     processor_n = models.IntegerField(blank=True, null=True)  # Número de processadores
     processors = models.IntegerField(blank=True, null=True)  # Clock speed
-    processor_t = models.CharField(max_length=255, blank=True, null=True)  # Tipo de processador
+    processor_t = models.CharField(max_length=500, blank=True, null=True)  # Tipo de processador
     quality = models.CharField(max_length=100, blank=True, null=True)
     sstate = models.IntegerField(blank=True, null=True)
     swap = models.IntegerField(blank=True, null=True)  # Swap em MB
     type = models.IntegerField(blank=True, null=True)
-    user_agent = models.CharField(max_length=255, blank=True, null=True)
-    user_domain = models.CharField(max_length=255, blank=True, null=True)
-    user_id = models.CharField(max_length=255, blank=True, null=True)
-    uuid = models.CharField(max_length=255, blank=True, null=True)
-    win_company = models.CharField(max_length=255, blank=True, null=True)
-    win_owner = models.CharField(max_length=255, blank=True, null=True)
-    win_prod_id = models.CharField(max_length=255, blank=True, null=True)
-    win_prod_key = models.CharField(max_length=255, blank=True, null=True)
-    workgroup = models.CharField(max_length=255, blank=True, null=True)
+    user_agent = models.CharField(max_length=500, blank=True, null=True)
+    user_domain = models.CharField(max_length=500, blank=True, null=True)
+    user_id = models.CharField(max_length=500, blank=True, null=True)
+    uuid = models.CharField(max_length=500, blank=True, null=True)
+    win_company = models.CharField(max_length=500, blank=True, null=True)
+    win_owner = models.CharField(max_length=500, blank=True, null=True)
+    win_prod_id = models.CharField(max_length=500, blank=True, null=True)
+    win_prod_key = models.CharField(max_length=500, blank=True, null=True)
+    workgroup = models.CharField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return f'Hardware {self.name} - {self.device_id}'
@@ -200,7 +200,7 @@ class CPU(models.Model):
     serial_number = models.CharField(max_length=100, blank=True, null=True)
     socket = models.CharField(max_length=100, blank=True, null=True)
     speed = models.CharField(max_length=100, blank=True, null=True)
-    type = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=500, blank=True, null=True)
     voltage = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
@@ -210,8 +210,8 @@ class CPU(models.Model):
 class Memory(models.Model):
     hardware = models.ForeignKey(Hardware, on_delete=models.CASCADE, related_name="memories")
     capacity = models.IntegerField(blank=True, null=True)
-    caption = models.CharField(max_length=255, blank=True, null=True)
-    description = models.CharField(max_length=255, blank=True, null=True)
+    caption = models.CharField(max_length=500, blank=True, null=True)
+    description = models.CharField(max_length=500, blank=True, null=True)
     num_slots = models.IntegerField(blank=True, null=True)
     purpose = models.CharField(max_length=100, blank=True, null=True)
     serial_number = models.CharField(max_length=100, blank=True, null=True)
@@ -226,11 +226,11 @@ class Software(models.Model):
     hardware = models.ForeignKey(Hardware, on_delete=models.CASCADE, related_name="software")
     architecture = models.CharField(max_length=100, blank=True, null=True)
     bitswidth = models.IntegerField(blank=True, null=True)
-    comments = models.CharField(max_length=255, blank=True, null=True)
-    filename = models.CharField(max_length=255, blank=True, null=True)
+    comments = models.CharField(max_length=500, blank=True, null=True)
+    filename = models.CharField(max_length=500, blank=True, null=True)
     filesize = models.IntegerField(blank=True, null=True)
-    folder = models.CharField(max_length=255, blank=True, null=True)
-    guid = models.CharField(max_length=255, blank=True, null=True)
+    folder = models.CharField(max_length=500, blank=True, null=True)
+    guid = models.CharField(max_length=500, blank=True, null=True)
     install_date = models.DateTimeField(blank=True, null=True)
     language = models.CharField(max_length=100, blank=True, null=True)
     name_id = models.IntegerField(blank=True, null=True)
@@ -244,12 +244,12 @@ class Software(models.Model):
 # Modelo para Armazenamento (Storage)
 class Storage(models.Model):
     hardware = models.ForeignKey(Hardware, on_delete=models.CASCADE, related_name="storages")
-    description = models.CharField(max_length=255, blank=True, null=True)
+    description = models.CharField(max_length=500, blank=True, null=True)
     disk_size = models.IntegerField(blank=True, null=True)  # Tamanho do disco em MB
     firmware = models.CharField(max_length=100, blank=True, null=True)
     manufacturer = models.CharField(max_length=100, blank=True, null=True)
-    model = models.CharField(max_length=255, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
+    model = models.CharField(max_length=500, blank=True, null=True)
+    name = models.CharField(max_length=500, blank=True, null=True)
     serial_number = models.CharField(max_length=100, blank=True, null=True)
     type = models.CharField(max_length=100, blank=True, null=True)
 
@@ -259,13 +259,13 @@ class Storage(models.Model):
 class AccountInfo(models.Model):
     hardware = models.ForeignKey(Hardware, on_delete=models.CASCADE, related_name="accountinfo")
     tag = models.CharField(max_length=100, blank=True, null=True)
-    fields_14 = models.CharField(max_length=255, blank=True, null=True)
-    fields_3 = models.CharField(max_length=255, blank=True, null=True)
-    fields_4 = models.CharField(max_length=255, blank=True, null=True)
-    fields_5 = models.CharField(max_length=255, blank=True, null=True)
-    fields_7 = models.CharField(max_length=255, blank=True, null=True)
-    fields_8 = models.CharField(max_length=255, blank=True, null=True)
-    fields_9 = models.CharField(max_length=255, blank=True, null=True)
+    fields_14 = models.CharField(max_length=500, blank=True, null=True)
+    fields_3 = models.CharField(max_length=500, blank=True, null=True)
+    fields_4 = models.CharField(max_length=500, blank=True, null=True)
+    fields_5 = models.CharField(max_length=500, blank=True, null=True)
+    fields_7 = models.CharField(max_length=500, blank=True, null=True)
+    fields_8 = models.CharField(max_length=500, blank=True, null=True)
+    fields_9 = models.CharField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return f'AccountInfo {self.tag}'
