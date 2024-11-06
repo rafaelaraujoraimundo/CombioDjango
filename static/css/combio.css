@@ -1,42 +1,27 @@
-
-.message {
-    max-width: 70%;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 10px;
-    position: relative;
-    clear: both;
-    color: white; /* Ajuste a cor da letra para branco */
+.bg-success-custom {
+    background-color: #399444; /* Cor de fundo para status Sucesso */
+    color: white; /* Cor do texto para contraste */
 }
 
-.user-message {
-    background-color: #1c361f; /* Cor do balão do usuário */
-    float: left;
-    text-align: left;
+.bg-warning-custom {
+    background-color: #fae837; /* Cor de fundo para status Warning */
+    color: black; /* Cor do texto para contraste */
 }
 
-.bot-message {
-    background-color: #399444; /* Cor do balão do bot */
-    float: left;
-    text-align: left;
+.bg-danger-custom {
+    background-color: #8A2A2A; /* Cor de fundo para status Erro */
+    color: white; /* Cor do texto para contraste */
 }
 
-#chat-window {
-    height: calc(100vh - 300px); /* Ajuste a altura do chat window */
-    overflow-y: auto;
-    padding-bottom: 40px; /* Espaço suficiente para o formulário de entrada */
+/* Classes para o ícone, para combinar com o tema de fundo */
+.iq-bg-success {
+    background-color: #399444;
 }
 
-#chat-form {
-    position: fixed;
-    bottom: 60px; /* Ajuste a posição para garantir que não seja sobreposto pelo footer */
-    width: 100%;
-    padding: 10px;
-    background-color: white; /* Fundo branco para o formulário de entrada */
-    border-top: 1px solid #ccc;
-    z-index: 1000; /* Garantir que o formulário de entrada fique acima do conteúdo */
+.iq-bg-warning {
+    background-color: #fae837;
 }
 
-#message-input {
-    background: white;
+.iq-bg-danger {
+    background-color: #8A2A2A;
 }

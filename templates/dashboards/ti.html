@@ -114,33 +114,43 @@
     <div class="row">
        
     {% for dataset in servidor_selecionado.datasets %}
-    <div class="col-sm-6 col-md-6 col-lg-3">
+    <div class="col-sm-6 col-md-6 col-lg-3"> 
         <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
-            <div class="iq-card-body iq-box-relative">
-                <div class="iq-box-absolute icon iq-icon-box rounded-circle iq-bg-danger">
+            <div class="iq-card-body iq-box-relative 
+                {% if dataset.syncstatussuccess %}bg-success-custom{% elif dataset.syncstatuswarning %}bg-warning-custom{% elif dataset.syncstatuserror %}bg-danger-custom{% endif %}">
+                
+                <div class="iq-box-absolute icon iq-icon-box rounded-circle 
+                    {% if dataset.syncstatussuccess %}iq-bg-success{% elif dataset.syncstatuswarning %}iq-bg-warning{% elif dataset.syncstatuserror %}iq-bg-danger{% endif %}">
                     <i class="ri-database-2-fill"></i>
                 </div>
-                <p class="card-text mt-1"><strong>{{ dataset.datasetid }}</strong> </p>
-                {% if dataset.syncstatussuccess %} <p class="card-text"><strong>Status:</strong> <button type="button" class="badge badge-success" data-toggle="modal" data-target="#Modal{{dataset.datasetid}}">
-                    Sucesso
-                    </button></p>{% endif%}
-                {% if dataset.syncstatuswarning %}  <p class="card-text"><strong>Status:</strong> <button type="button" class="badge badge-warning" data-toggle="modal" data-target="#Modal{{dataset.datasetid}}">
-                    Warning
-                    </button></p>{% endif%}
-                {% if dataset.syncstatuserror %} <p class="card-text"><strong>Status:</strong> <button type="button" class="badge badge-danger" data-toggle="modal" data-target="#Modal{{dataset.datasetid}}">
-                    Erro
-                    </button></p>{% endif%}
-                <p class="card-text">{{ dataset.datasetdescription }}</p>
-                <p class="card-text">Ultima Sincro.: {{ dataset.lastremotesync|timestamp_to_date }}
-                                     <br>Ultimo Reset:.: {{ dataset.lastreset|timestamp_to_date }}
-                                     <br>Proxima Sincro.: {{ dataset.jobnextexecution }}
-                                     
+                
+                <p class="card-text mt-1"><strong>{{ dataset.datasetid }}</strong></p>
+                
+                <p class="card-text"><strong>Status:</strong>
+                    {% if dataset.syncstatussuccess %}
+                    <button type="button" class="badge badge-success" data-toggle="modal" data-target="#Modal{{dataset.datasetid}}">
+                        Sucesso
+                    </button>
+                    {% elif dataset.syncstatuswarning %}
+                    <button type="button" class="badge badge-warning" data-toggle="modal" data-target="#Modal{{dataset.datasetid}}">
+                        Warning
+                    </button>
+                    {% elif dataset.syncstatuserror %}
+                    <button type="button" class="badge badge-danger" data-toggle="modal" data-target="#Modal{{dataset.datasetid}}">
+                        Erro
+                    </button>
+                    {% endif %}
                 </p>
-               
-                  
-                </div>
+                
+                <p class="card-text">{{ dataset.datasetdescription }}</p>
+                <p class="card-text">
+                    Ultima Sincro.: {{ dataset.lastremotesync|timestamp_to_date }}
+                    <br>Ultimo Reset: {{ dataset.lastreset|timestamp_to_date }}
+                    <br>Proxima Sincro.: {{ dataset.jobnextexecution }}
+                </p>
+            </div>
         </div>
-       </div>
+    </div>
        <div class="modal fade" id="Modal{{dataset.datasetid}}" tabindex="-1" role="dialog" aria-labelledby="Modal{{dataset.datasetid}}Title" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable" role="document">
            <div class="modal-content">
