@@ -21,13 +21,13 @@ def populate_hardware_data():
 
     try:
         response = requests.get(url, auth=HTTPBasicAuth(username, password))
-        
+        print(f"Inicio do populate_hardware_data")
         if response.status_code == 200:
             response_data = response.json()
             
             # Iterar pelos computadores (ID é a chave)
             for computer_id, computer_data in response_data.items():
-                print(f"Processando hardware ID: {computer_id}")
+                
                 
                 # Converte campos de data para timezone-aware
                 def convert_to_aware(date_str):
@@ -175,7 +175,8 @@ def populate_hardware_data():
                         fields_8=accountinfo_data.get("fields_8"),
                         fields_9=accountinfo_data.get("fields_9")
                     )
-
+            print(f"Fim do populate_hardware_data")
+            logger.info(f"Fim do populate_hardware_data")
             logger.info("Dados de hardware e componentes atualizados com sucesso!")
         else:
             logger.error(f"Erro na requisição à API: {response.status_code}")
