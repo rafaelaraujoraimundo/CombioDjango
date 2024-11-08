@@ -4,6 +4,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from django.shortcuts import get_object_or_404, redirect, render
 from dashboard.models import BiCentroCusto, BiEstabelecimento, BiFuncionariosCombio
 from api_v1.schema import Memory
+from inventario.tasks import populate_hardware_data
 from .models import (AccountInfo, AcoesProntuario, BIOS, Celular, Computador, ControleFones,
     Controlekit, CPU, Estoque, Hardware, Monitor, ProntuarioCelular, ProntuarioComputador,
     ProntuarioMonitor, Software, Status, Storage, TipoItem)
@@ -1129,6 +1130,7 @@ class ComputadorDetailView(DetailView):
 
 @login_required(login_url='account_login')
 def estabelecimento_chart(request):
+
     data_computadores = Computador.objects.values('estabelecimento').annotate(total=Count('id')).order_by('estabelecimento')
     computadores_estabelecimentos = [data['estabelecimento'] for data in data_computadores]
     computadores_totals = [data['total'] for data in data_computadores]

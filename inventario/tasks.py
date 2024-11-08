@@ -9,6 +9,7 @@ from .models import AccountInfo, BIOS, CPU, Hardware, Memory, Software, Storage
 from decouple import config
 from django.core.mail import send_mail
 from django.conf import settings
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,16 @@ def populate_hardware_data():
             for computer_id, computer_data in response_data.items():
                 print(f"Processando hardware ID: {computer_id}")
                 
-                # Criar ou atualizar hardware
+                # Converte campos de data para timezone-aware
+                def convert_to_aware(date_str):
+                    if date_str:
+                        return timezone.make_aware(datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S"))
+                    return None
+
+                # Converte os campos datetime para timezone-aware
+                last_come = convert_to_aware(computer_data["hardware"].get("LASTCOME"))
+                last_date = convert_to_aware(computer_data["hardware"].get("LASTDATE"))
+                
                 hardware, created = Hardware.objects.update_or_create(
                     id=computer_data["hardware"].get("ID"),  # Assumindo que a chave principal seja ID
                     defaults={
@@ -41,8 +51,8 @@ def populate_hardware_data():
                         "fidelity": computer_data["hardware"].get("FIDELITY"),
                         "ipaddr": computer_data["hardware"].get("IPADDR"),
                         "ipsrc": computer_data["hardware"].get("IPSRC"),
-                        "last_come": computer_data["hardware"].get("LASTCOME"),
-                        "last_date": computer_data["hardware"].get("LASTDATE"),
+                        "last_come": last_come,
+                        "last_date": last_date,
                         "memory": computer_data["hardware"].get("MEMORY"),
                         "name": computer_data["hardware"].get("NAME"),
                         "os_name": computer_data["hardware"].get("OSNAME"),
@@ -120,6 +130,7 @@ def populate_hardware_data():
 
                 # Inserir novos dados para Software
                 for software_data in computer_data.get("software", []):
+                    install_date = convert_to_aware(software_data.get("INSTALLDATE"))
                     Software.objects.create(
                         hardware=hardware,
                         architecture=software_data.get("ARCHITECTURE"),
@@ -129,7 +140,7 @@ def populate_hardware_data():
                         filesize=software_data.get("FILESIZE"),
                         folder=software_data.get("FOLDER"),
                         guid=software_data.get("GUID"),
-                        install_date=software_data.get("INSTALLDATE"),
+                        install_date=install_date,
                         language=software_data.get("LANGUAGE"),
                         name_id=software_data.get("NAME_ID"),
                         publisher_id=software_data.get("PUBLISHER_ID"),
@@ -171,4 +182,3 @@ def populate_hardware_data():
     
     except Exception as e:
         logger.error(f"Erro ao processar os dados da API: {str(e)}")
-
