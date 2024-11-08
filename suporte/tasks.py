@@ -9,6 +9,7 @@ from .models import UsuarioDesligamento
 from decouple import config
 from django.core.mail import send_mail
 from django.conf import settings
+
 @shared_task
 def verificar_bloqueios_pendentes():
     # Busca todos os registros que têm qualquer bloqueio como False
