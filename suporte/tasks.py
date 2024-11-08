@@ -9,7 +9,6 @@ from .models import UsuarioDesligamento
 from decouple import config
 from django.core.mail import send_mail
 from django.conf import settings
-
 @shared_task
 def verificar_bloqueios_pendentes():
     # Busca todos os registros que têm qualquer bloqueio como False
@@ -30,12 +29,13 @@ def verificar_bloqueios_pendentes():
     )
 
     if registros_pendentes.exists():
-        # Cria a tabela HTML com estilização de cores
+        # Cria a tabela HTML com estilização de cores e coluna para data limite
         mensagem_html = """
         <p>Os seguintes usuários possuem sistemas pendentes de bloqueio:</p>
         <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
             <tr>
                 <th>Usuário</th>
+                <th>Data Limite</th>
                 <th>Email</th>
                 <th>Fluig</th>
                 <th>Datasul</th>
@@ -50,6 +50,7 @@ def verificar_bloqueios_pendentes():
             mensagem_html += f"""
                 <tr>
                     <td>{registro.usuario}</td>
+                    <td>{registro.data_limite.strftime('%d/%m/%Y') if registro.data_limite else 'Não definida'}</td>
                     <td style="background-color: {'#ffcccc' if not registro.bloqueio_email else '#ccffcc'};">
                         {'Pendente' if not registro.bloqueio_email else 'Bloqueado'}
                     </td>
