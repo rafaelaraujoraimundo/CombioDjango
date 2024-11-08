@@ -1,9 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from administration.views import (itemMenu_delete, ItensMenu_edit, ItensMenuCreate, ItensMenuList,
-    password_manager_create, PasswordManagerList, servidorfluig_create, servidorfluig_delete, password_manager_create,
-    servidorfluig_edit, servidorfluig_list, user_edit, get_logged_in_user_profile, user_list,create_user,change_password,delete_user, change_logged_in_user_password, edit_logged_in_user_profile)
+from administration.views import (change_logged_in_user_password, change_password,
+    create_group_process, create_user, delete_group_process, delete_user, edit_group_process,
+    edit_logged_in_user_profile, get_logged_in_user_profile, itemMenu_delete, ItensMenu_edit,
+    ItensMenuCreate, ItensMenuList, list_group_processes, password_manager_create,
+    password_manager_create, PasswordManagerList, servidorfluig_create, servidorfluig_delete,
+    servidorfluig_edit, servidorfluig_list, user_edit, user_list)
 
 urlpatterns = [
     path('userList/', user_list, name="administration_users"),
@@ -27,4 +30,11 @@ urlpatterns = [
 
      path('passwordmanager/', PasswordManagerList.as_view(), name='administration_passwordmanager_list'),
      path('passwordmanager/new', password_manager_create, name='administration_passwordmanager_new'),
+
+    path('groupprocess/', list_group_processes, name='list_group_processes'),  # URL para listar grupos de processos
+    path('groupprocess/create/', create_group_process, name='groupprocess_create'),  # URL para criar um novo grupo
+    path('groupprocess/edit/<int:pk>/', edit_group_process, name='groupprocess_edit'),  # URL para editar um grupo existente
+    path('groupprocess/delete/<int:pk>/', delete_group_process, name='groupprocess_delete'),
+  
 ]
+

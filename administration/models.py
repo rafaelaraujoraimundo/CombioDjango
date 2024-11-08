@@ -142,3 +142,32 @@ class PasswordManager(models.Model):
 
     def __str__(self):
         return self.site_name
+
+
+
+class GroupProcess(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Nome do Grupo')
+
+    def __str__(self):
+        return self.name
+
+
+class Process(models.Model):
+    process_id = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=255)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.description} ({self.process_id})"
+
+class GroupProcessSelection(models.Model):
+    group = models.ForeignKey(GroupProcess, related_name='process_selections', on_delete=models.PROTECT)
+    process = models.ForeignKey(Process, on_delete=models.CASCADE)  # Mudança aqui
+
+    def __str__(self):
+        return f"{self.group.name} - {self.process.description}"
+
+    class Meta:
+        unique_together = ('group', 'process')
+
+

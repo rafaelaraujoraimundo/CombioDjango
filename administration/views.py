@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from administration.models import PasswordManager, ServidorFluig, User
+from administration.models import GroupProcessSelection, PasswordManager, ServidorFluig, User
 from administration.forms import CustomUserChangeForm, CustomUserCreationForm
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.forms import UserChangeForm
@@ -10,14 +10,17 @@ from django.contrib import messages
 from django.forms import CheckboxSelectMultiple
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView
+from administration.tasks import update_processes
 from .forms import ServidorFluigForm
 from menu.models import ItensMenu
 from django.urls import reverse_lazy
-from .forms import ItensMenuForm, PasswordManagerForm, UserCreationForm
+from .forms import ItensMenuForm, PasswordManagerForm, UserCreationForm, GroupProcessForm
 from .models import PasswordManager, PasswordGroup
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from .models import GroupProcess
+
 from django.views.decorators.http import require_POST
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
@@ -363,3 +366,91 @@ def get_logged_in_user_profile(request):
         'usuario_fluig': user.usuario_fluig,
     }
     return JsonResponse(data)
+
+
+
+def list_group_processes(request):
+    update_processes() # Atualiza os dados de processos antes de exibir a página
+    groups = GroupProcess.objects.all()
+    context = {
+        'groups': groups,
+        'activegroup': 'administration',
+        'title': 'Lista de Grupos de Processos'
+    }
+    return render(request, 'administration/groupprocess/groupprocess_list.html', context)
+
+def delete_group_process(request, pk):
+    group = get_object_or_404(GroupProcess, pk=pk)
+    if request.method == 'POST':
+        group.delete()
+        return redirect('list_group_processes')
+    context = {
+        'group': group,
+        'activegroup': 'administration',
+        'title': 'Excluir Grupo de Processos'
+    }
+    return render(request, 'administration/groupprocess/delete_confirmation.html', context)
+
+
+def create_group_process(request):
+    if request.method == 'POST':
+        form = GroupProcessForm(request.POST)
+        if form.is_valid():
+            # Salva o grupo primeiro
+            group = form.save(commit=False)
+            group.save()
+            
+            # Salva as seleções de processos em GroupProcessSelection
+            selected_processes = form.cleaned_data['selected_processes']
+            for process in selected_processes:
+                GroupProcessSelection.objects.create(group=group, process=process)
+            
+            return redirect('list_group_processes')
+    else:
+        form = GroupProcessForm()
+    context = {
+        'form': form,
+        'activegroup': 'administration',
+        'title': 'Adicionar Grupo de Processos',
+        'button_label': 'Adicionar'
+    }
+    return render(request, 'administration/groupprocess/groupprocess_form.html', context)
+
+def edit_group_process(request, pk):
+    group = get_object_or_404(GroupProcess, pk=pk)
+    
+    if request.method == 'POST':
+        form = GroupProcessForm(request.POST, instance=group)
+        if form.is_valid():
+            group = form.save(commit=False)
+            group.save()
+
+            # Limpa seleções de processos anteriores
+            GroupProcessSelection.objects.filter(group=group).delete()
+
+            # Salva as novas seleções de processos das checkboxes
+            selected_processes = form.cleaned_data['selected_processes']
+            for process in selected_processes:
+                GroupProcessSelection.objects.create(group=group, process=process)
+
+            # Salva as novas seleções de processos dos switches
+            selected_processes_switch = form.cleaned_data['selected_processes_switch']
+            for process in selected_processes_switch:
+                GroupProcessSelection.objects.get_or_create(group=group, process=process)
+
+            return redirect('list_group_processes')
+    else:
+        # Configura o formulário com processos já selecionados para checkboxes e switches
+        form = GroupProcessForm(instance=group)
+        selected_process_ids = group.process_selections.values_list('process_id', flat=True)
+        form.fields['selected_processes'].initial = group.process_selections.values_list('process', flat=True)
+        form.fields['selected_processes_switch'].initial = group.process_selections.values_list('process', flat=True)
+    
+    context = {
+        'form': form,
+        'activegroup': 'administration',
+        'selected_process_ids': list(selected_process_ids),
+        'title': 'Editar Grupo de Processos',
+        'button_label': 'Salvar'
+    }
+    return render(request, 'administration/groupprocess/groupprocess_form.html', context)

@@ -1,0 +1,41 @@
+{% extends 'menu/index.html' %}
+{% block content %}
+<div class="container-fluid">
+    <h1>{{ title }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_name">Nome do Grupo</label>
+            {{ form.name }}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <label>{{ form.selected_processes.label }}</label>
+                <div class="checkbox-group">
+                    {{ form.selected_processes }}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label>Switches de Processos</label>
+                <div class="switch-group">
+                    {% for process in form.fields.selected_processes.queryset %}
+                        <div class="custom-control custom-switch custom-control-inline">
+                            <input type="checkbox" class="custom-control-input" id="switch_{{ process.id }}" 
+                                   name="selected_processes_switch" value="{{ process.id }}"
+                                   {% if process.id in selected_process_ids %} checked{% endif %}>
+                            <label class="custom-control-label" for="switch_{{ process.id }}">
+                                {{ process.description }} ({{ process.process_id }})
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">{{ button_label }}</button>
+        <a href="{% url 'list_group_processes' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

@@ -2,9 +2,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import Group, Permission
 from django.forms.widgets import CheckboxSelectMultiple
-from .models import User, ServidorFluig, PasswordManager
+from .models import User, ServidorFluig, PasswordManager, GroupProcess, Process, GroupProcessSelection
 from menu.models import ItensMenu
-from django import forms
+from requests_oauthlib import OAuth1Session
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -151,3 +151,31 @@ class UserCreationForm(forms.ModelForm):
 class CustomCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
     template_name = 'widgets/custom_checkbox_select.html'
     option_template_name = 'widgets/custom_checkbox_option.html'
+
+
+
+
+class GroupProcessForm(forms.ModelForm):
+    selected_processes = forms.ModelMultipleChoiceField(
+        queryset=Process.objects.filter(active=True),
+        widget=forms.CheckboxSelectMultiple(),
+        required=False
+    )
+
+    selected_processes_switch = forms.ModelMultipleChoiceField(
+        queryset=Process.objects.filter(active=True),
+        widget=forms.CheckboxSelectMultiple(),
+        required=False
+    )
+
+    class Meta:
+        model = GroupProcess
+        fields = ['name', 'selected_processes', 'selected_processes_switch']
+
+    def __init__(self, *args, **kwargs):
+        super(GroupProcessForm, self).__init__(*args, **kwargs)
+        self.fields['selected_processes'].help_text = "Selecione os processos ativos."
+        self.fields['selected_processes_switch'].help_text = "Selecione os processos ativos usando o switch."
+
+
+
