@@ -42,7 +42,7 @@ class UsuarioDesligamentoList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(UsuarioDesligamentoList, self).get_context_data(**kwargs)
-        context['activegroup'] = 'inventario'
+        context['activegroup'] = 'suporte'
         context['title'] = 'Desligamento de Usuários'
 
 
@@ -58,7 +58,7 @@ class UsuarioDesligamentoUpdate(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(UsuarioDesligamentoUpdate, self).get_context_data(**kwargs)
-        context['activegroup'] = 'inventario'
+        context['activegroup'] = 'suporte'
         context['title'] = 'Editar Desligamento de Usuário'
         context['usuarios_list'] = BiFuncionariosCombio.objects.all().values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
         return context
@@ -76,6 +76,6 @@ class UsuarioDesligamentoDelete(DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['activegroup'] = 'inventario'
+        context['activegroup'] = 'suporte'
         context['title'] = 'Confirmar Exclusão de Usuário'
         return context
