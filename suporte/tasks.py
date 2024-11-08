@@ -5,7 +5,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import logging
 from administration.views import User
-from .models import AccountInfo, BIOS, CPU, Hardware, Memory, Software, Storage, UsuarioDesligamento
+from .models import UsuarioDesligamento
 from decouple import config
 from django.core.mail import send_mail
 from django.conf import settings
