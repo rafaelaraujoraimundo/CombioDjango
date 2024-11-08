@@ -79,6 +79,7 @@ INSTALLED_APPS += [
     "novosProjetos",
     "chatbot",
     "inventario",
+    "suporte",
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
