@@ -370,7 +370,7 @@ def get_logged_in_user_profile(request):
 
 
 def list_group_processes(request):
-    update_processes() # Atualiza os dados de processos antes de exibir a página
+    update_processes.delay() # Atualiza os dados de processos antes de exibir a página
     groups = GroupProcess.objects.all()
     context = {
         'groups': groups,

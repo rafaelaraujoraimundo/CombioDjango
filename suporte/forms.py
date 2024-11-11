@@ -1,5 +1,6 @@
 from django import forms
-from .models import UsuarioDesligamento
+from administration.models import GroupProcess
+from .models import UsuarioDesligamento, UsuarioFluig
 
 class UsuarioDesligamentoForm(forms.ModelForm):
     class Meta:
@@ -34,3 +35,33 @@ class UsuarioDesligamentoForm(forms.ModelForm):
             'bloqueio_usuario_impressora': 'Bloqueio Usuário da Impressora (Matriz)',
             'usuario_impressora': 'Usuário de Impressora (Matriz)'
         }
+
+
+class SubstituicaoForm(forms.Form):
+    usuario_a_substituir = forms.ModelChoiceField(
+        queryset=UsuarioFluig.objects.filter(is_active=True),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Usuário a ser Substituído"
+    )
+    usuario_substituto = forms.ModelChoiceField(
+        queryset=UsuarioFluig.objects.filter(is_active=True),
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Usuário Substituto"
+    )
+    data_inicial = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label="Data Inicial"
+    )
+    data_final = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        label="Data Final"
+    )
+    grupos_switch = forms.ModelMultipleChoiceField(
+        queryset=GroupProcess.objects.all(),  # Filtragem adicional pode ser feita aqui se necessário
+        widget=forms.CheckboxSelectMultiple(),
+        label="Grupos para Substituição"
+    )
+    code = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False
+    )

@@ -1,0 +1,45 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <a href="{% url 'create_substituto_fluig' %}" class="btn btn-primary mb-3">
+        <i class="fa fa-plus"></i> Adicionar Substituto Fluig
+    </a>
+    
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Usuário a ser Substituído</th>
+                <th>Usuário Substituto</th>
+                <th>Data Inicial</th>
+                <th>Data Final</th>
+                <th>Quantidade Total de Processos</th>
+                <th>Usuário Inclusão</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for substituicao in substituicoes %}
+                <tr>
+                    <td>{{ substituicao.usuario_a_substituir.full_name }}</td>
+                    <td>{{ substituicao.usuario_substituto.full_name }}</td>
+                    <td>{{ substituicao.data_inicial|date:"d/m/Y" }}</td>
+                    <td>{{ substituicao.data_final|date:"d/m/Y" }}</td>
+                    <td>{{ substituicao.total_process_count }}</td>
+                    <td>{{ substituicao.usuario_inclusao.nome_completo }}</td>
+                    <td>
+                        <a href="{% url 'substituicao_detail' substituicao.id %}" class="btn btn-info">
+                            <i class="fa fa-eye"></i> Visualizar
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7">Nenhuma substituição encontrada.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <form method="post" id="substituicaoForm">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_usuario_a_substituir">Usuário a ser Substituído</label>
+                    <select class="form-control {% if form.usuario_a_substituir.errors %}is-invalid{% endif %}" 
+                            id="id_usuario_a_substituir" name="{{ form.usuario_a_substituir.name }}">
+                        {% for option in form.usuario_a_substituir.field.queryset %}
+                            <option value="{{ option.pk }}" 
+                                    {% if option.pk == form.usuario_a_substituir.value %}selected{% endif %}>
+                                {{ option.full_name }} ({{ option.login }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.usuario_a_substituir.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_usuario_substituto">Usuário Substituto</label>
+                    <select class="form-control {% if form.usuario_substituto.errors %}is-invalid{% endif %}" 
+                            id="id_usuario_substituto" name="{{ form.usuario_substituto.name }}">
+                        {% for option in form.usuario_substituto.field.queryset %}
+                            <option value="{{ option.pk }}" 
+                                    {% if option.pk == form.usuario_substituto.value %}selected{% endif %}>
+                                {{ option.full_name }} ({{ option.login }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.usuario_substituto.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Segunda linha: Data Inicial e Data Final -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_data_inicial">Data Inicial</label>
+                    <input type="date" class="form-control {% if form.data_inicial.errors %}is-invalid{% endif %}" 
+                           id="id_data_inicial" name="{{ form.data_inicial.name }}" 
+                           value="{{ form.data_inicial.value|default_if_none:'' }}">
+                    {% for error in form.data_inicial.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="id_data_final">Data Final</label>
+                    <input type="date" class="form-control {% if form.data_final.errors %}is-invalid{% endif %}" 
+                           id="id_data_final" name="{{ form.data_final.name }}" 
+                           value="{{ form.data_final.value|default_if_none:'' }}">
+                    {% for error in form.data_final.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Grupos para Substituição com switch-style -->
+        <div class="form-group">
+            <label>Grupos para Substituição</label>
+            <div class="switch-group">
+                <div class="row">
+                    {% for grupo in form.fields.grupos_switch.queryset %}
+                        <div class="col-md-5 ml-2">
+                            <div class="custom-control custom-switch custom-control-inline">
+                                <input type="checkbox" class="custom-control-input" id="switch_grupo_{{ grupo.id }}" 
+                                       name="grupos_switch" value="{{ grupo.id }}"
+                                       {% if grupo.id in form.grupos_switch.value %} checked{% endif %}>
+                                <label class="custom-control-label" for="switch_grupo_{{ grupo.id }}">
+                                    {{ grupo.name }}
+                                </label>
+                            </div>
+                        </div>
+                        {% if forloop.counter0|divisibleby:2 and not forloop.last %}
+                            </div><div class="row">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" id="codeField" name="code" value="{{ form.code.value }}">
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'substituicao_list' %}" class="btn btn-secondary ml-2">Voltar</a>
+        
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Lógica para configurar o campo oculto 'code' com o 'code' do usuário substituto
+        const usuarioSubstitutoSelect = document.getElementById('id_usuario_substituto');
+        const codeField = document.getElementById('codeField');
+
+        usuarioSubstitutoSelect.addEventListener('change', function() {
+            const selectedOption = usuarioSubstitutoSelect.options[usuarioSubstitutoSelect.selectedIndex];
+            codeField.value = selectedOption.dataset.code;
+        });
+    });
+</script>
+{% endblock %}

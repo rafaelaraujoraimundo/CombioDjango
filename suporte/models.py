@@ -1,5 +1,5 @@
 from django.db import models
-from administration.models import User
+from administration.models import GroupProcess, User
 from django.utils import timezone
 
 # Create your models here.
@@ -37,3 +37,47 @@ class UsuarioDesligamento(models.Model):
 
     def __str__(self):
         return self.usuario
+
+
+class UsuarioFluig(models.Model):
+    login = models.CharField(max_length=100, unique=True, verbose_name="Login")
+    email = models.EmailField(verbose_name="Email")
+    code = models.CharField(max_length=100, verbose_name="Code")
+    full_name = models.CharField(max_length=255, verbose_name="Full Name")
+    is_active = models.BooleanField(default=True, verbose_name="Is Active")
+
+    def __str__(self):
+        return f"{self.full_name} ({self.login})"
+    
+
+
+class Substituicao(models.Model):
+    usuario_a_substituir = models.ForeignKey(
+        UsuarioFluig,
+        related_name="substituicoes_como_substituido",
+        on_delete=models.CASCADE,
+        verbose_name="Usuário a ser Substituído"
+    )
+    usuario_substituto = models.ForeignKey(
+        UsuarioFluig,
+        related_name="substituicoes_como_substituto",
+        on_delete=models.CASCADE,
+        verbose_name="Usuário Substituto"
+    )
+    data_inicial = models.DateField(verbose_name="Data Inicial")
+    data_final = models.DateField(verbose_name="Data Final")
+    grupos_switch = models.ManyToManyField(
+        GroupProcess,
+        verbose_name="Grupos para Substituição"
+    )
+    code = models.CharField(max_length=100, blank=True, null=True)
+    usuario_inclusao = models.ForeignKey(  # Novo campo
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Usuário de Inclusão"
+    )
+
+    def __str__(self):
+        return f"Substituição de {self.usuario_a_substituir} por {self.usuario_substituto} de {self.data_inicial} a {self.data_final}"

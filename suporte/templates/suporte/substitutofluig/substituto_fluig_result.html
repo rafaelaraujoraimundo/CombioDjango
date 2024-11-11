@@ -1,0 +1,17 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+
+    
+    <h3>Resultado do JSON</h3>
+    <pre>{{ json_result | safe | json_script:"json-output" }}</pre>
+
+    <button class="btn btn-primary mt-4" onclick="window.history.back();">Voltar</button>
+</div>
+
+<script>
+    const jsonData = JSON.parse(document.getElementById('json-output').textContent);
+    console.log(jsonData);
+</script>
+{% endblock %}
