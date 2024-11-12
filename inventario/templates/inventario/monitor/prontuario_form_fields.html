@@ -1,12 +1,10 @@
 <!-- Campo Usuário -->
-<div class="form-group">
+<div class="form-group position-relative">
     <label for="usuarioInput">Nome do Usuário</label>
-    <input class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" list="usuarios" id="usuarioInput" name="usuario" autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
-    <datalist id="usuarios">
-        {% for user in usuarios_list %}
-            <option value="{{ user.nom_funcionario }}" data-cdn-funcionario="{{ user.cdn_funcionario }}" data-cdn-estab="{{ user.cdn_estab }}">
-        {% endfor %}
-    </datalist>
+    <input type="text" class="form-control {% if form.usuario.errors %}is-invalid{% endif %}"
+           id="usuarioInput" name="usuario" autocomplete="off"
+           placeholder="Digite o nome do Usuário para buscar..." value="{{ form.usuario.value|default_if_none:'' }}">
+    <ul class="suggestions-list" id="usuarioSuggestions"></ul>
     <input type="hidden" id="usuarioCode" name="matricula" value="{{ form.matricula.value|default_if_none:'' }}">
     {% for error in form.usuario.errors %}
         <div class="invalid-feedback">{{ error }}</div>
@@ -44,31 +42,44 @@
 
 <!-- Terceira linha: Unidade de Destino e Local -->
 <div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
+    <!-- Unidade de Destino (Estabelecimento) -->
+    <div class="col-md-4">
+        <div class="form-group position-relative">
             <label for="estabelecimentoInput">Unidade de Destino (Estabelecimento)</label>
-            <input class="form-control {% if form.unidade_destino.errors %}is-invalid{% endif %}" list="estabelecimentos" id="estabelecimentoInput" name="unidade_destino" autocomplete="off" value="{{ form.unidade_destino.value|default_if_none:'' }}">
-            <datalist id="estabelecimentos">
-                {% for est in estabelecimentos_list %}
-                    <option value="{{ est.estabelecimento }} - {{ est.sigla_unidade }}" data-value="{{ est.estabelecimento }}">
-                {% endfor %}
-            </datalist>
+            <input type="text" class="form-control {% if form.unidade_destino.errors %}is-invalid{% endif %}"
+                   id="estabelecimentoInput" name="unidade_destino" autocomplete="off"
+                   placeholder="Digite o Estabelecimento..." value="{{ form.unidade_destino.value|default_if_none:'' }}">
+            <ul class="suggestions-list" id="estabelecimentoSuggestions"></ul>
+            <input type="hidden" id="estabelecimentoCode" name="estabelecimento_code" value="{{ form.estabelecimento.value|default_if_none:'' }}">
             {% for error in form.unidade_destino.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="form-group">
-            <label for="centroCustoInput">Centro de Custo (Local)</label>
-            <input class="form-control {% if form.local.errors %}is-invalid{% endif %}" list="centros_custo" id="centroCustoInput" name="local" autocomplete="off" value="{{ form.local.value|default_if_none:'' }}">
-            <datalist id="centros_custo">
-                {% for cc in centros_custo_list %}
-                    <option value="{{ cc.centrocusto }} - {{ cc.descricaocusto }}" data-value="{{ cc.centrocusto }}">
-                {% endfor %}
-            </datalist>
+    <!-- Centro de Custo (Local) -->
+    <div class="col-md-4">
+        <div class="form-group position-relative">
+            <label for="centroCustoInput">Centro de Custo</label>
+            <input type="text" class="form-control {% if form.local.errors %}is-invalid{% endif %}"
+                   id="centroCustoInput" name="local" autocomplete="off"
+                   placeholder="Digite o Centro de Custo..." value="{{ form.local.value|default_if_none:'' }}">
+            <ul class="suggestions-list" id="centroCustoSuggestions"></ul>
+            <input type="hidden" id="centroCustoCode" name="centro_custo_code" value="{{ form.local.value|default_if_none:'' }}">
             {% for error in form.local.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Localização de Destino -->
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="localizacaoInput">Localização de Destino</label>
+            <input type="text" class="form-control {% if form.localizacao_destino.errors %}is-invalid{% endif %}" 
+                   id="localizacaoInput" name="localizacao_destino" 
+                   value="{{ form.localizacao_destino.value|default_if_none:'' }}">
+            {% for error in form.localizacao_destino.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}
         </div>

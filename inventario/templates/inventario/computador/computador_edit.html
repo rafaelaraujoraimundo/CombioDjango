@@ -15,46 +15,52 @@
 
         <!-- Linha 1: Estabelecimento, Centro de Custo, Usuário e Cargo -->
         <div class="row">
-            <div class="col-md-3">
-                <div class="form-group">
-                    <label for="estabelecimentoInput">Estabelecimento (Filial)</label>
-                    <input class="form-control {% if form.estabelecimento.errors %}is-invalid{% endif %}" list="estabelecimentos" id="estabelecimentoInput" name="estabelecimento" autocomplete="off" value="{{ form.estabelecimento.value|default_if_none:'' }}">
-                    <datalist id="estabelecimentos">
-                        {% for est in estabelecimentos_list %}
-                            <option value="{{ est.estabelecimento }} - {{ est.sigla_unidade }}" data-value="{{ est.estabelecimento }}">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group position-relative">
+                        <label for="usuarioInput">Nome do Usuário</label>
+                        <input 
+                            type="text" 
+                            class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" 
+                            id="usuarioInput" 
+                            name="usuario" 
+                            autocomplete="off" 
+                            placeholder="Digite o nome do Usuário para buscar..." 
+                            value="{{ form.usuario.value|default_if_none:'' }}"
+                        />
+                        <ul class="suggestions-list" id="usuarioSuggestions"></ul>
+                        <input type="hidden" id="usuarioCode" name="matricula" value="{{ form.matricula.value|default_if_none:'' }}">
+                        {% for error in form.usuario.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
                         {% endfor %}
-                    </datalist>
-                    <input type="hidden" id="estabelecimentoCode" name="estabelecimento" value="{{ form.estabelecimento.value|default_if_none:'' }}">
-                    {% for error in form.estabelecimento.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
-                    {% endfor %}
+                    </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="form-group position-relative">
                     <label for="centroCustoInput">Centro de Custo</label>
-                    <input class="form-control {% if form.centro_custo.errors %}is-invalid{% endif %}" list="centros_custo" id="centroCustoInput" name="centro_custo" autocomplete="off" value="{{ form.centro_custo.value|default_if_none:'' }}">
-                    <datalist id="centros_custo">
-                        {% for cc in centros_custo_list %}
-                            <option value="{{ cc.centrocusto }} - {{ cc.descricaocusto }}" data-value="{{ cc.descricaocusto }}">
-                        {% endfor %}
-                    </datalist>
-                    <input type="hidden" id="centroCustoCode" name="centro_custo" value="{{ form.centro_custo.value|default_if_none:'' }}">
+                    <input type="text" class="form-control {% if form.centro_custo.errors %}is-invalid{% endif %}" 
+                           id="centroCustoInput" name="centro_custo" autocomplete="off" 
+                           value="{{ form.centro_custo.value|default_if_none:'' }}" 
+                           placeholder="Digite para buscar...">
+                    <ul class="suggestions-list" id="centroCustoSuggestions"></ul>
+                    <input type="hidden" id="centroCustoCode" name="centro_custo" 
+                           value="{{ form.centro_custo.value|default_if_none:'' }}">
                     {% for error in form.centro_custo.errors %}
                         <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="form-group position-relative">
                     <label for="usuarioInput">Nome do Usuário</label>
-                    <input class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" list="usuarios" id="usuarioInput" name="usuario" autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
-                    <datalist id="usuarios">
-                        {% for user in usuarios_list %}
-                            <option value="{{ user.nom_funcionario }}" data-cdn-funcionario="{{ user.cdn_funcionario }}" data-cdn-estab="{{ user.cdn_estab }}">
-                        {% endfor %}
-                    </datalist>
-                    <input type="hidden" id="usuarioCode" name="matricula" value="{{ form.matricula.value|default_if_none:'' }}">
+                    <input type="text" class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" 
+                           id="usuarioInput" name="usuario" autocomplete="off" 
+                           value="{{ form.usuario.value|default_if_none:'' }}" 
+                           placeholder="Digite para buscar...">
+                    <ul class="suggestions-list" id="usuarioSuggestions"></ul>
+                    <input type="hidden" id="usuarioCode" name="matricula" 
+                           value="{{ form.matricula.value|default_if_none:'' }}">
                     {% for error in form.usuario.errors %}
                         <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
@@ -63,7 +69,9 @@
             <div class="col-md-3">
                 <div class="form-group">
                     <label for="{{ form.cargo.id_for_label }}">Cargo</label>
-                    <input type="text" class="form-control {% if form.cargo.errors %}is-invalid{% endif %}" id="{{ form.cargo.id_for_label }}" name="{{ form.cargo.name }}" value="{{ form.cargo.value|default_if_none:'' }}">
+                    <input type="text" class="form-control {% if form.cargo.errors %}is-invalid{% endif %}" 
+                           id="{{ form.cargo.id_for_label }}" name="{{ form.cargo.name }}" 
+                           value="{{ form.cargo.value|default_if_none:'' }}">
                     {% for error in form.cargo.errors %}
                         <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
@@ -103,24 +111,15 @@
         <!-- Linha 4: Hardware, Fabricante, Modelo, Sistema Operacional -->
         <div class="row">
             <div class="col-md-3">
-                <div class="form-group">
+                <div class="form-group position-relative">
                     <label for="hardwareInput">Hardware</label>
-                    <input class="form-control {% if form.hardware.errors %}is-invalid{% endif %}" list="hardwareList" id="hardwareInput" name="hardware" autocomplete="off" value="{{ form.hardware.value|default_if_none:'' }}">
-                    <datalist id="hardwareList">
-                        {% for hw in hardware_list %}
-                            <option 
-                                value="{{ hw.name }} - {{ hw.device_id }}" 
-                                data-id="{{ hw.id }}" 
-                                data-memory="{{ hw.memory }}"
-                                data-processor="{{ hw.processor_t }}"
-                                data-hd="{{ hw.total_hd }}"
-                                data-os="{{ hw.os_name }}"
-                                data-bios-mmanufacturer="{{ hw.bios_mmodel }}"
-                                data-bios-model="{{ hw.bios_mmodel }} {{ hw.bios_smodel }}"
-                                data-bios-serial="{{ hw.bios_ssn }}">
-                        {% endfor %}
-                    </datalist>
-                    <input type="hidden" id="hardwareCode" name="hardware" value="{{ form.hardware.value|default_if_none:'' }}">
+                    <input type="text" class="form-control {% if form.hardware.errors %}is-invalid{% endif %}" 
+                           id="hardwareInput" name="hardware" autocomplete="off" 
+                           value="{{ form.hardware.value|default_if_none:'' }}" 
+                           placeholder="Digite para buscar...">
+                    <ul class="suggestions-list" id="hardwareSuggestions"></ul>
+                    <input type="hidden" id="hardwareCode" name="hardware" 
+                           value="{{ form.hardware.value|default_if_none:'' }}">
                     {% for error in form.hardware.errors %}
                         <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
@@ -252,53 +251,139 @@
 </div>
 <script>
 
-
+    document.addEventListener("DOMContentLoaded", function () {
+        // Função para configurar autocomplete para um campo de entrada
+        function setupAutocomplete(inputElement, suggestionsListElement, data, hiddenFieldId) {
+            inputElement.addEventListener("input", function () {
+                const query = this.value.toLowerCase();
+                suggestionsListElement.innerHTML = "";
+                if (query) {
+                    const filteredData = data.filter(item =>
+                        item.display.toLowerCase().includes(query)
+                    );
+                    filteredData.forEach(item => {
+                        const li = document.createElement("li");
+                        li.textContent = item.display;
+                        li.classList.add("suggestion-item");
+                        
+                        li.setAttribute("data-id", item.value);
+                        li.setAttribute("data-bios-mmanufacturer", item.bios_mmanufacturer || "");
+                        li.setAttribute("data-processor", item.processor || "");
+                        li.setAttribute("data-memory", item.memory || "");
+                        li.setAttribute("data-hd", item.hd || "");
+                        li.setAttribute("data-os", item.os || "");
+                        li.setAttribute("data-bios-model", item.bios_model || "");
+                        li.setAttribute("data-bios-serial", item.bios_serial || "");
+    
+                        li.addEventListener("mousedown", function () {
+                            inputElement.value = item.display;
+                            document.getElementById(hiddenFieldId).value = item.value;
+                            suggestionsListElement.style.display = "none";
+    
+                            // Se for o campo de hardware, chama a função para preencher os detalhes
+                            if (inputElement.id === "hardwareInput") {
+                                setHardwareDetails();
+                            }
+                        });
+                        suggestionsListElement.appendChild(li);
+                    });
+                    suggestionsListElement.style.display = "block";
+                } else {
+                    suggestionsListElement.style.display = "none";
+                }
+            });
+    
+            inputElement.addEventListener("blur", function () {
+                setTimeout(() => { suggestionsListElement.style.display = "none"; }, 100);
+            });
+    
+            inputElement.addEventListener("focus", function () {
+                if (this.value) {
+                    suggestionsListElement.style.display = "block";
+                }
+            });
+        }
+    
+        // Dados para autocomplete dos campos, com valor de exibição e valor real
+        const estabelecimentosList = [
+            {% for est in estabelecimentos_list %}
+                { display: "{{ est.estabelecimento }} - {{ est.sigla_unidade }}", value: "{{ est.estabelecimento }}" },
+            {% endfor %}
+        ];
+        const centrosCustoList = [
+            {% for cc in centros_custo_list %}
+                { display: "{{ cc.centrocusto }} - {{ cc.descricaocusto }}", value: "{{ cc.centrocusto }}" },
+            {% endfor %}
+        ];
+        const usuariosList = [
+            {% for user in usuarios_list %}
+                { display: "{{ user.nom_funcionario }}", value: "{{ user.cdn_funcionario }}" },
+            {% endfor %}
+        ];
+        const hardwareList = [
+            {% for hw in hardware_list %}
+                { 
+                    display: "{{ hw.name }} - {{ hw.device_id }}", 
+                    value: "{{ hw.id }}",
+                    bios_mmanufacturer: "{{ hw.bios_mmodel }}",
+                    processor: "{{ hw.processor_t }}",
+                    memory: "{{ hw.memory }}",
+                    hd: "{{ hw.total_hd }}",
+                    os: "{{ hw.os_name }}",
+                    bios_model: "{{ hw.bios_mmodel }} {{ hw.bios_smodel }}",
+                    bios_serial: "{{ hw.bios_ssn }}"
+                },
+            {% endfor %}
+        ];
+    
+        // Configurações de autocomplete para cada campo
+        setupAutocomplete(
+            document.getElementById("estabelecimentoInput"),
+            document.getElementById("estabelecimentoSuggestions"),
+            estabelecimentosList,
+            "estabelecimentoCode"
+        );
+    
+        setupAutocomplete(
+            document.getElementById("centroCustoInput"),
+            document.getElementById("centroCustoSuggestions"),
+            centrosCustoList,
+            "centroCustoCode"
+        );
+    
+        setupAutocomplete(
+            document.getElementById("usuarioInput"),
+            document.getElementById("usuarioSuggestions"),
+            usuariosList,
+            "usuarioCode"
+        );
+    
+        setupAutocomplete(
+            document.getElementById("hardwareInput"),
+            document.getElementById("hardwareSuggestions"),
+            hardwareList,
+            "hardwareCode"
+        );
+    });
+    
     function setHardwareDetails() {
         const hardwareInput = document.getElementById('hardwareInput');
-        const selectedOption = document.querySelector(`#hardwareList option[value="${hardwareInput.value}"]`);
-        console.log(selectedOption)
-        if (selectedOption) {
-            document.getElementById('hardwareCode').value = selectedOption.getAttribute('data-id');
-            document.getElementById('{{ form.fabricante.id_for_label }}').value = selectedOption.getAttribute('data-bios-mmanufacturer');
-            document.getElementById('{{ form.processador.id_for_label }}').value = selectedOption.getAttribute('data-processor');
-            document.getElementById('{{ form.memoria.id_for_label }}').value = selectedOption.getAttribute('data-memory');
-            document.getElementById('{{ form.hd.id_for_label }}').value = selectedOption.getAttribute('data-hd');
-            document.getElementById('{{ form.sistema_operacional.id_for_label }}').value = selectedOption.getAttribute('data-os');
-            document.getElementById('{{ form.modelo.id_for_label }}').value = selectedOption.getAttribute('data-bios-model');
-            document.getElementById('{{ form.numero_serie.id_for_label }}').value = selectedOption.getAttribute('data-bios-serial');
-            document.getElementById('{{ form.hostname.id_for_label }}').value = selectedOption.getAttribute('value').split(' ')[0];
-        }
+        const selectedOptionText = hardwareInput.value;
+        const suggestions = document.querySelectorAll("#hardwareSuggestions .suggestion-item");
+        
+        suggestions.forEach(option => {
+            if (option.textContent === selectedOptionText) {
+                document.getElementById('hardwareCode').value = option.getAttribute('data-id');
+                document.getElementById('{{ form.fabricante.id_for_label }}').value = option.getAttribute('data-bios-mmanufacturer');
+                document.getElementById('{{ form.processador.id_for_label }}').value = option.getAttribute('data-processor');
+                document.getElementById('{{ form.memoria.id_for_label }}').value = option.getAttribute('data-memory');
+                document.getElementById('{{ form.hd.id_for_label }}').value = option.getAttribute('data-hd');
+                document.getElementById('{{ form.sistema_operacional.id_for_label }}').value = option.getAttribute('data-os');
+                document.getElementById('{{ form.modelo.id_for_label }}').value = option.getAttribute('data-bios-model');
+                document.getElementById('{{ form.numero_serie.id_for_label }}').value = option.getAttribute('data-bios-serial');
+                document.getElementById('{{ form.hostname.id_for_label }}').value = selectedOptionText.split(' ')[0];
+            }
+        });
     }
-
-    function setUsuarioCode() {
-        const usuarioInput = document.getElementById('usuarioInput');
-        const selectedOption = document.querySelector(`#usuarios option[value="${usuarioInput.value}"]`);
-        if (selectedOption) {
-            const cdnFuncionario = selectedOption.getAttribute('data-cdn-funcionario');
-            const cdnEstab = selectedOption.getAttribute('data-cdn-estab');
-            document.getElementById('usuarioCode').value = `${cdnEstab}-${cdnFuncionario}`;
-        }
-    }
-
-    function setEstabelecimentoCode() {
-        const estabelecimentoInput = document.getElementById('estabelecimentoInput');
-        const selectedOption = document.querySelector(`#estabelecimentos option[value="${estabelecimentoInput.value}"]`);
-        if (selectedOption) {
-            document.getElementById('estabelecimentoCode').value = selectedOption.getAttribute('data-value');
-        }
-    }
-
-    function setCentroCustoCode() {
-        const centroCustoInput = document.getElementById('centroCustoInput');
-        const selectedOption = document.querySelector(`#centros_custo option[value="${centroCustoInput.value}"]`);
-        if (selectedOption) {
-            document.getElementById('centroCustoCode').value = selectedOption.getAttribute('data-value');
-        }
-    }
-  
-    document.getElementById('hardwareInput').addEventListener('input', setHardwareDetails);
-    document.getElementById('usuarioInput').addEventListener('input', setUsuarioCode);
-    document.getElementById('estabelecimentoInput').addEventListener('input', setEstabelecimentoCode);
-    document.getElementById('centroCustoInput').addEventListener('input', setCentroCustoCode);
 </script>
 {% endblock %}

@@ -1,6 +1,8 @@
 {% extends "menu/index.html" %}
 
 {% block content %}
+{% load static %}
+
 <div class="container-fluid">
 
     <!-- Exibir erros gerais de validação no topo do formulário -->
@@ -16,15 +18,22 @@
         <!-- Primeira linha: Nome do Usuário -->
         <div class="row">
             <div class="col-md-12">
-                <div class="form-group">
+                <div class="form-group position-relative">
                     <label for="usuarioInput">Nome do Usuário</label>
-                    <input class="form-control" list="usuarios" id="usuarioInput" name="usuario" autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
-                    <datalist id="usuarios">
-                        {% for user in usuarios_list %}
-                            <option value="{{ user.nom_funcionario }}" data-cdn-funcionario="{{ user.cdn_funcionario }}" data-cdn-estab="{{ user.cdn_estab }}">
-                        {% endfor %}
-                    </datalist>
+                    <input 
+                        type="text" 
+                        class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" 
+                        id="usuarioInput" 
+                        name="usuario" 
+                        autocomplete="off" 
+                        placeholder="Digite o nome do Usuário para buscar..." 
+                        value="{{ form.usuario.value|default_if_none:'' }}"
+                    />
+                    <ul class="suggestions-list" id="usuarioSuggestions"></ul>
                     <input type="hidden" id="usuarioCode" name="matricula" value="{{ form.matricula.value|default_if_none:'' }}">
+                    {% for error in form.usuario.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -78,28 +87,42 @@
         <!-- Quarta linha: Estabelecimento (Filial) e Centro de Custo -->
         <div class="row">
             <div class="col-md-6">
-                <div class="form-group">
+                <div class="form-group position-relative">
                     <label for="estabelecimentoInput">Estabelecimento (Filial)</label>
-                    <input class="form-control" list="estabelecimentos" id="estabelecimentoInput" name="estabelecimento" autocomplete="off" value="{{ form.estabelecimento.value|default_if_none:'' }}">
-                    <datalist id="estabelecimentos">
-                        {% for est in estabelecimentos_list %}
-                            <option value="{{ est.estabelecimento }} - {{ est.sigla_unidade }}" data-value="{{ est.estabelecimento }}">
-                        {% endfor %}
-                    </datalist>
+                    <input 
+                        type="text" 
+                        class="form-control {% if form.estabelecimento.errors %}is-invalid{% endif %}" 
+                        id="estabelecimentoInput" 
+                        name="estabelecimento" 
+                        autocomplete="off" 
+                        placeholder="Digite o Estabelecimento..." 
+                        value="{{ form.estabelecimento.value|default_if_none:'' }}"
+                    />
+                    <ul class="suggestions-list" id="estabelecimentoSuggestions"></ul>
                     <input type="hidden" id="estabelecimentoCode" name="estabelecimento" value="{{ form.estabelecimento.value|default_if_none:'' }}">
+                    {% for error in form.estabelecimento.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
                 </div>
             </div>
 
             <div class="col-md-6">
-                <div class="form-group">
+                <div class="form-group position-relative">
                     <label for="centroCustoInput">Centro de Custo</label>
-                    <input class="form-control" list="centros_custo" id="centroCustoInput" name="centro_custo" autocomplete="off" value="{{ form.centro_custo.value|default_if_none:'' }}">
-                    <datalist id="centros_custo">
-                        {% for cc in centros_custo_list %}
-                            <option value="{{ cc.centrocusto }} - {{ cc.descricaocusto }}" data-value="{{ cc.descricaocusto }}">
-                        {% endfor %}
-                    </datalist>
+                    <input 
+                        type="text" 
+                        class="form-control {% if form.centro_custo.errors %}is-invalid{% endif %}" 
+                        id="centroCustoInput" 
+                        name="centro_custo" 
+                        autocomplete="off" 
+                        placeholder="Digite o Centro de Custo..." 
+                        value="{{ form.centro_custo.value|default_if_none:'' }}"
+                    />
+                    <ul class="suggestions-list" id="centroCustoSuggestions"></ul>
                     <input type="hidden" id="centroCustoCode" name="centro_custo" value="{{ form.centro_custo.value|default_if_none:'' }}">
+                    {% for error in form.centro_custo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -113,31 +136,36 @@
         </div>
     </form>
 </div>
-
+<script src="{% static 'js/autocomplete.js' %}"></script>
 <!-- Script para associar os valores dos datalists -->
 <script>
-    function setUsuarioCode() {
-        const usuarioInput = document.getElementById('usuarioInput');
-        const selectedOption = document.querySelector(`#usuarios option[value="${usuarioInput.value}"]`);
-        if (selectedOption) {
-            const cdnFuncionario = selectedOption.getAttribute('data-cdn-funcionario');
-            const cdnEstab = selectedOption.getAttribute('data-cdn-estab');
-            document.getElementById('usuarioCode').value = `${cdnEstab}-${cdnFuncionario}`;
-        }
-    }
+    // Executa o código de inicialização apenas quando a página estiver completamente carregada
+    window.addEventListener('load', function() {
+        // Dados para autocomplete
+        const usuariosList = [
+            {% for user in usuarios_list %}
+                { display: "{{ user.nom_funcionario }}", value: "{{ user.cdn_funcionario }}" },
+            {% endfor %}
+        ];
 
-    document.getElementById('usuarioInput').addEventListener('input', setUsuarioCode);
+        const estabelecimentosList = [
+        {% for est in estabelecimentos_list %}
+            { display: "{{ est.estabelecimento }} - {{ est.sigla_unidade }}", value: "{{ est.estabelecimento }} - {{ est.sigla_unidade }}" },
+        {% endfor %}
+    ];
 
-    // Função para calcular a data final como data de entrega + 2 anos
-    function setDataFinal() {
-        const dataEntregaInput = document.getElementById('dataEntrega').value;
-        if (dataEntregaInput) {
-            const dataEntrega = new Date(dataEntregaInput);
-            const dataFinal = new Date(dataEntrega.setFullYear(dataEntrega.getFullYear() + 2));
-            document.getElementById('dataFinal').value = dataFinal.toISOString().split('T')[0];
-        }
-    }
+    const centrosCustoList = [
+        {% for cc in centros_custo_list %}
+            { display: "{{ cc.centrocusto }} - {{ cc.descricaocusto }}" , value: "{{ cc.centrocusto }} - {{ cc.descricaocusto }}" },
+        {% endfor %}
+    ];
 
-    document.getElementById('dataEntrega').addEventListener('change', setDataFinal);
+        // Inicializar autocomplete para todos os campos necessários
+        initializeAutocomplete([
+            { inputId: "usuarioInput", listId: "usuarioSuggestions", dataList: usuariosList, hiddenFieldId: "usuarioCode" },
+            { inputId: "estabelecimentoInput", listId: "estabelecimentoSuggestions", dataList: estabelecimentosList, hiddenFieldId: "estabelecimentoCode" },
+            { inputId: "centroCustoInput", listId: "centroCustoSuggestions", dataList: centrosCustoList, hiddenFieldId: "centroCustoCode" },
+        ]);
+    });
 </script>
 {% endblock %}

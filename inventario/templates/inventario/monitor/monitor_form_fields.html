@@ -34,12 +34,17 @@
     <div class="col-md-4">
         <div class="form-group">
             <label for="estabelecimentoInput">Estabelecimento</label>
-            <input class="form-control {% if form.estabelecimento.errors %}is-invalid{% endif %}" list="estabelecimentos" id="estabelecimentoInput" name="estabelecimento" autocomplete="off" value="{{ form.estabelecimento.value|default_if_none:'' }}">
-            <datalist id="estabelecimentos">
-                {% for est in estabelecimentos_list %}
-                    <option value="{{ est.estabelecimento }} - {{ est.sigla_unidade }}" data-value="{{ est.estabelecimento }}">
-                {% endfor %}
-            </datalist>
+            <input 
+                type="text" 
+                class="form-control {% if form.estabelecimento.errors %}is-invalid{% endif %}" 
+                id="estabelecimentoInput" 
+                name="estabelecimento" 
+                autocomplete="off" 
+                value="{{ form.estabelecimento.value|default_if_none:'' }}" 
+                placeholder="Digite o Estabelecimento"
+            />
+            <ul class="suggestions-list" id="estabelecimentoSuggestions"></ul>
+            <input type="hidden" id="estabelecimentoCode" name="estabelecimento_code" value="{{ form.estabelecimento.value|default_if_none:'' }}">
             {% for error in form.estabelecimento.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}
@@ -56,13 +61,18 @@
     </div>
     <div class="col-md-4">
         <div class="form-group">
-            <label for="centroCustoInput">Centro de Custo (Local)</label>
-            <input class="form-control {% if form.local.errors %}is-invalid{% endif %}" list="centros_custo" id="centroCustoInput" name="local" autocomplete="off" value="{{ form.local.value|default_if_none:'' }}">
-            <datalist id="centros_custo">
-                {% for cc in centros_custo_list %}
-                    <option value="{{ cc.centrocusto }} - {{ cc.descricaocusto }}" data-value="{{ cc.descricaocusto }}">
-                {% endfor %}
-            </datalist>
+            <label for="centroCustoInput">Centro de Custo</label>
+            <input 
+                type="text" 
+                class="form-control {% if form.local.errors %}is-invalid{% endif %}" 
+                id="centroCustoInput" 
+                name="local" 
+                autocomplete="off" 
+                value="{{ form.local.value|default_if_none:'' }}" 
+                placeholder="Digite o Centro de Custo"
+            />
+            <ul class="suggestions-list" id="centroCustoSuggestions"></ul>
+            <input type="hidden" id="centroCustoCode" name="centro_custo_code" value="{{ form.local.value|default_if_none:'' }}">
             {% for error in form.local.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}

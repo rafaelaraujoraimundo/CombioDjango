@@ -436,7 +436,7 @@ class CelularCreate(CreateView):
 class CelularUpdate(UpdateView):
     model = Celular
     form_class = CelularForm
-    template_name = 'inventario/celular/celular_edit.html'
+    template_name = 'inventario/celular/celular_form.html'
     success_url = reverse_lazy('celular_list')
 
     def get_context_data(self, **kwargs):
@@ -920,7 +920,7 @@ class ComputadorCreate(CreateView):
 class ComputadorUpdate(UpdateView):
     model = Computador
     form_class = ComputadorForm
-    template_name = 'inventario/computador/computador_edit.html'
+    template_name = 'inventario/computador/computador_form.html'
     success_url = reverse_lazy('computador_list')
 
     def get_context_data(self, **kwargs):

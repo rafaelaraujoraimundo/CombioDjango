@@ -1,6 +1,8 @@
 {% extends "menu/index.html" %}
 
 {% block content %}
+
+{% load static %}
 <div class="container-fluid">
     <h2>Adicionar Monitor</h2>
     <form method="post">
@@ -13,4 +15,26 @@
         <a href="{% url 'monitor_list' %}" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
+
+<script src="{% static 'js/autocomplete.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const estabelecimentosList = [
+            {% for est in estabelecimentos_list %}
+                { display: "{{ est.estabelecimento }} - {{ est.sigla_unidade }}", value: "{{ est.estabelecimento }}" },
+            {% endfor %}
+        ];
+
+        const centrosCustoList = [
+            {% for cc in centros_custo_list %}
+                { display: "{{ cc.centrocusto }} - {{ cc.descricaocusto }}", value: "{{ cc.centrocusto }}" },
+            {% endfor %}
+        ];
+
+        initializeAutocomplete([
+            { inputId: "estabelecimentoInput", listId: "estabelecimentoSuggestions", dataList: estabelecimentosList, hiddenFieldId: "estabelecimentoCode" },
+            { inputId: "centroCustoInput", listId: "centroCustoSuggestions", dataList: centrosCustoList, hiddenFieldId: "centroCustoCode" },
+        ]);
+    });
+</script>
 {% endblock %}
