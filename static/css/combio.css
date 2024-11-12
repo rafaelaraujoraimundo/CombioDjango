@@ -1,27 +1,55 @@
 .bg-success-custom {
-    background-color: #399444; /* Cor de fundo para status Sucesso */
-    color: white; /* Cor do texto para contraste */
+  background-color: #399444; /* Cor de fundo para status Sucesso */
+  color: white; /* Cor do texto para contraste */
 }
 
 .bg-warning-custom {
-    background-color: #fae837; /* Cor de fundo para status Warning */
-    color: black; /* Cor do texto para contraste */
+  background-color: #fae837; /* Cor de fundo para status Warning */
+  color: black; /* Cor do texto para contraste */
 }
 
 .bg-danger-custom {
-    background-color: #8A2A2A; /* Cor de fundo para status Erro */
-    color: white; /* Cor do texto para contraste */
+  background-color: #8a2a2a; /* Cor de fundo para status Erro */
+  color: white; /* Cor do texto para contraste */
 }
 
 /* Classes para o ícone, para combinar com o tema de fundo */
 .iq-bg-success {
-    background-color: #399444;
+  background-color: #399444;
 }
 
 .iq-bg-warning {
-    background-color: #fae837;
+  background-color: #fae837;
 }
 
 .iq-bg-danger {
-    background-color: #8A2A2A;
+  background-color: #8a2a2a;
+}
+
+.position-relative {
+  position: relative;
+}
+
+.suggestions-list {
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background-color: white;
+  z-index: 1000;
+  padding-left: 0;
+  margin-top: 2px;
+  display: none; /* Inicia oculta */
+  list-style-type: none;
+}
+
+.suggestions-list li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.suggestions-list li:hover {
+  background-color: #f0f0f0;
 }
