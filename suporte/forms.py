@@ -8,6 +8,7 @@ class UsuarioDesligamentoForm(forms.ModelForm):
         fields = [
             'usuario', 'data_desligamento', 'data_limite',
             'bloqueio_email', 'usuario_email', 
+            'envio_email_gestor', 'gestor',  
             'bloqueio_fluig', 'usuario_fluig',
             'bloqueio_datasul', 'usuario_datasul', 'usuario_goglobal',
             'bloqueio_monday', 'usuario_monday',
@@ -18,6 +19,8 @@ class UsuarioDesligamentoForm(forms.ModelForm):
         labels = {
             'usuario': 'Usuário a ser desligado',
             'data_desligamento': 'Data de Desligamento',
+             'envio_email_gestor': 'Envio de E-mail ao Gestor/Substituto',  # Novo rótulo
+            'gestor': 'Gestor Responsável/Substituto',
             'data_limite': 'Data Limite',
             'bloqueio_email': 'Bloqueio Email',
             'usuario_email': 'Usuário de E-mail',

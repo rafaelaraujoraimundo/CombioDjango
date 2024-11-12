@@ -35,6 +35,10 @@ class UsuarioDesligamento(models.Model):
     bloqueio_usuario_impressora = models.BooleanField(default=False)
     usuario_impressora = models.CharField(max_length=100, null=True, blank=True, help_text="Usuário de Impressora (Matriz) a ser bloqueado")
 
+    envio_email_gestor = models.BooleanField(default=False, help_text="Indica se um email será enviado ao gestor")
+    gestor = models.CharField(max_length=100, null=True, blank=True, help_text="Nome do gestor responsável")
+    
+
     def __str__(self):
         return self.usuario
 
