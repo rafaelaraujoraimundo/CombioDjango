@@ -18,7 +18,18 @@
     <h4>Editar Ação no Prontuário</h4>
     <form method="post">
         {% csrf_token %}
-        
+        {% if form.non_field_errors or form.errors %}
+        <div class="alert alert-danger">
+            {% if form.non_field_errors %}
+                <p>{{ form.non_field_errors }}</p>
+            {% endif %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <p>{{ field.label }}: {{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
         <!-- Campos do Prontuário -->
         {% include "inventario/computador/partials/prontuario_form_fields.html" %}
 

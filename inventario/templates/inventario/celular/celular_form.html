@@ -159,6 +159,11 @@
         <div class="form-group">
             <label for="{{ form.arquivo_celular.id_for_label }}">Upload de Arquivo</label>
             <input type="file" class="form-control-file {% if form.arquivo_celular.errors %}is-invalid{% endif %}" id="{{ form.arquivo_celular.id_for_label }}" name="{{ form.arquivo_celular.name }}">
+            {% if form.instance.arquivo_celular %}
+            <p>
+                <h5><a href="{{ form.instance.arquivo_celular.url }}" target="_blank">Imagem atual</a><h5>
+            </p>
+        {% endif %}
             {% for error in form.arquivo_celular.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}

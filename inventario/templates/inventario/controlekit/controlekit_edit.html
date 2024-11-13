@@ -139,6 +139,16 @@
 <script src="{% static 'js/autocomplete.js' %}"></script>
 <!-- Script para associar os valores dos datalists -->
 <script>
+    function setDataFinal() {
+        const dataEntregaInput = document.getElementById('dataEntrega').value;
+        if (dataEntregaInput) {
+            const dataEntrega = new Date(dataEntregaInput);
+            const dataFinal = new Date(dataEntrega.setFullYear(dataEntrega.getFullYear() + 2));
+            document.getElementById('dataFinal').value = dataFinal.toISOString().split('T')[0];
+        }
+    }
+
+    document.getElementById('dataEntrega').addEventListener('change', setDataFinal);
     // Executa o código de inicialização apenas quando a página estiver completamente carregada
     window.addEventListener('load', function() {
         // Dados para autocomplete

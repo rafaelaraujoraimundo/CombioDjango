@@ -1,82 +1,169 @@
-<!-- Campo Usuário -->
-<div class="form-group">
+<div class="form-group position-relative">
     <label for="usuarioInput">Nome do Usuário</label>
-    <input class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" list="usuarios" id="usuarioInput" name="usuario" autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
-    <datalist id="usuarios">
-        {% for user in usuarios_list %}
-            <option value="{{ user.nom_funcionario }}" data-cdn-funcionario="{{ user.cdn_funcionario }}" data-cdn-estab="{{ user.cdn_estab }}">
-        {% endfor %}
-    </datalist>
-    <input type="hidden" id="usuarioCode" name="matricula" value="{{ form.matricula.value|default_if_none:'' }}">
     {% for error in form.usuario.errors %}
-        <div class="invalid-feedback">{{ error }}</div>
+        <div class="text-danger">{{ error }}</div>
     {% endfor %}
+    <input type="text" class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" 
+           id="usuarioInput" name="usuario" placeholder="Digite o nome do Usuário" 
+           autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
+    <input type="hidden" id="usuarioCode" name="matricula" 
+           value="{{ form.matricula.value|default_if_none:'' }}">
+    <ul class="suggestions-list" id="usuarioSuggestions"></ul>
 </div>
 
-<!-- Segunda linha: Ação e Data -->
+<!-- Linha: Ação e Data -->
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
             <label for="{{ form.acao.id_for_label }}">Ação</label>
-            <select class="form-control {% if form.acao.errors %}is-invalid{% endif %}" id="{{ form.acao.id_for_label }}" name="{{ form.acao.name }}">
+            {% for error in form.acao.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+            <select class="form-control {% if form.acao.errors %}is-invalid{% endif %}" 
+                    id="{{ form.acao.id_for_label }}" name="{{ form.acao.name }}">
                 {% for choice_value, choice_label in form.acao.field.choices %}
-                    <option value="{{ choice_value }}" {% if form.acao.value|stringformat:"s" == choice_value|stringformat:"s" %}selected{% endif %}>{{ choice_label }}</option>
+                    <option value="{{ choice_value }}" 
+                            {% if form.acao.value|stringformat:"s" == choice_value|stringformat:"s" %}selected{% endif %}>
+                        {{ choice_label }}
+                    </option>
                 {% endfor %}
             </select>
-            {% for error in form.acao.errors %}
-                <div class="invalid-feedback">{{ error }}</div>
-            {% endfor %}
         </div>
     </div>
+
     <div class="col-md-6">
         <div class="form-group">
             <label for="{{ form.data.id_for_label }}">Data</label>
-            <input type="date" class="form-control {% if form.data.errors %}is-invalid{% endif %}" id="{{ form.data.id_for_label }}" name="{{ form.data.name }}" value="{{ form.data.value|date:'Y-m-d'|default_if_none:'' }}">
             {% for error in form.data.errors %}
-                <div class="invalid-feedback">{{ error }}</div>
+                <div class="text-danger">{{ error }}</div>
             {% endfor %}
+            <input type="date" class="form-control {% if form.data.errors %}is-invalid{% endif %}" 
+                   id="{{ form.data.id_for_label }}" name="{{ form.data.name }}" 
+                   value="{{ form.data.value|date:'Y-m-d'|default_if_none:'' }}">
         </div>
     </div>
 </div>
 
-<!-- Terceira linha: Unidade de Destino e Local -->
+<!-- Linha: Unidade de Destino e Centro de Custo (Local) -->
 <div class="row">
     <div class="col-md-6">
-        <div class="form-group">
-            <label for="estabelecimentoInput">Unidade de Destino (Estabelecimento)</label>
-            <input class="form-control {% if form.unidade_destino.errors %}is-invalid{% endif %}" list="estabelecimentos" id="estabelecimentoInput" name="unidade_destino" autocomplete="off" value="{{ form.unidade_destino.value|default_if_none:'' }}">
-            <datalist id="estabelecimentos">
-                {% for est in estabelecimentos_list %}
-                    <option value="{{ est.estabelecimento }} - {{ est.sigla_unidade }}" data-value="{{ est.estabelecimento }}">
-                {% endfor %}
-            </datalist>
+        <div class="form-group position-relative">
+            <label for="unidade_destinoInput">Unidade de Destino (Estabelecimento)</label>
             {% for error in form.unidade_destino.errors %}
-                <div class="invalid-feedback">{{ error }}</div>
+                <div class="text-danger">{{ error }}</div>
             {% endfor %}
+            <input type="text" class="form-control {% if form.unidade_destino.errors %}is-invalid{% endif %}" 
+                   id="unidade_destinoInput" name="unidade_destino" placeholder="Digite o estabelecimento" 
+                   autocomplete="off" value="{{ form.unidade_destino.value|default_if_none:'' }}">
+            <input type="hidden" id="estabelecimentoCode" name="estabelecimento_code" 
+                   value="{{ form.estabelecimento_code.value|default_if_none:'' }}">
+            <ul class="suggestions-list" id="estabelecimentoSuggestions"></ul>
         </div>
     </div>
 
     <div class="col-md-6">
-        <div class="form-group">
-            <label for="centroCustoInput">Centro de Custo (Local)</label>
-            <input class="form-control {% if form.local.errors %}is-invalid{% endif %}" list="centros_custo" id="centroCustoInput" name="local" autocomplete="off" value="{{ form.local.value|default_if_none:'' }}">
-            <datalist id="centros_custo">
-                {% for cc in centros_custo_list %}
-                    <option value="{{ cc.centrocusto }} - {{ cc.descricaocusto }}" data-value="{{ cc.centrocusto }}">
-                {% endfor %}
-            </datalist>
+        <div class="form-group position-relative">
+            <label for="localInput">Centro de Custo (Local)</label>
             {% for error in form.local.errors %}
-                <div class="invalid-feedback">{{ error }}</div>
+                <div class="text-danger">{{ error }}</div>
             {% endfor %}
+            <input type="text" class="form-control {% if form.local.errors %}is-invalid{% endif %}" 
+                   id="localInput" name="local" placeholder="Digite o centro de custo" 
+                   autocomplete="off" value="{{ form.local.value|default_if_none:'' }}">
+            <input type="hidden" id="localCode" name="local_code" 
+                   value="{{ form.centro_custo_code.value|default_if_none:'' }}">
+            <ul class="suggestions-list" id="centroCustoSuggestions"></ul>
         </div>
     </div>
 </div>
 
-<!-- Quarta linha: Motivo da Ocorrência -->
+<!-- Campo: Motivo da Ocorrência -->
 <div class="form-group">
     <label for="{{ form.motivo_ocorrencia.id_for_label }}">Motivo da Ocorrência</label>
-    <textarea class="form-control {% if form.motivo_ocorrencia.errors %}is-invalid{% endif %}" id="{{ form.motivo_ocorrencia.id_for_label }}" name="{{ form.motivo_ocorrencia.name }}">{{ form.motivo_ocorrencia.value|default_if_none:'' }}</textarea>
     {% for error in form.motivo_ocorrencia.errors %}
-        <div class="invalid-feedback">{{ error }}</div>
+        <div class="text-danger">{{ error }}</div>
     {% endfor %}
+    <textarea class="form-control {% if form.motivo_ocorrencia.errors %}is-invalid{% endif %}" 
+              id="{{ form.motivo_ocorrencia.id_for_label }}" name="{{ form.motivo_ocorrencia.name }}">{{ form.motivo_ocorrencia.value|default_if_none:'' }}</textarea>
 </div>
+
+<!-- Script de Autocomplete -->
+<script>
+    const usuariosList = [
+        {% for user in usuarios_list %}
+            { display: "{{ user.nom_funcionario }}", value: "{{ user.cdn_funcionario }}" },
+        {% endfor %}
+    ];
+
+    const estabelecimentosList = [
+        {% for est in estabelecimentos_list %}
+            { display: "{{ est.estabelecimento }} - {{ est.sigla_unidade }}", value: "{{ est.estabelecimento }} - {{ est.sigla_unidade }}" },
+        {% endfor %}
+    ];
+
+    const centrosCustoList = [
+        {% for cc in centros_custo_list %}
+            { display: "{{ cc.centrocusto }} - {{ cc.descricaocusto }}", value: "{{ cc.centrocusto }} - {{ cc.descricaocusto }}" },
+        {% endfor %}
+    ];
+
+    document.addEventListener("DOMContentLoaded", function () {
+        function setupAutocomplete(inputElement, suggestionsListElement, data, hiddenFieldId) {
+            inputElement.addEventListener("input", function () {
+                const query = this.value.toLowerCase();
+                suggestionsListElement.innerHTML = "";
+                if (query) {
+                    const filteredData = data.filter(item =>
+                        item.display.toLowerCase().includes(query)
+                    );
+                    filteredData.forEach(item => {
+                        const li = document.createElement("li");
+                        li.textContent = item.display;
+                        li.classList.add("suggestion-item");
+                        li.addEventListener("mousedown", function () {
+                            inputElement.value = item.display;
+                            document.getElementById(hiddenFieldId).value = item.value;
+                            suggestionsListElement.style.display = "none";
+                        });
+                        suggestionsListElement.appendChild(li);
+                    });
+                    suggestionsListElement.style.display = "block";
+                } else {
+                    suggestionsListElement.style.display = "none";
+                }
+            });
+
+            inputElement.addEventListener("blur", function () {
+                setTimeout(() => { suggestionsListElement.style.display = "none"; }, 100);
+            });
+
+            inputElement.addEventListener("focus", function () {
+                if (this.value) {
+                    suggestionsListElement.style.display = "block";
+                }
+            });
+        }
+
+        // Inicializar autocomplete para cada campo
+        setupAutocomplete(
+            document.getElementById("usuarioInput"),
+            document.getElementById("usuarioSuggestions"),
+            usuariosList,
+            "usuarioCode"
+        );
+
+        setupAutocomplete(
+            document.getElementById("unidade_destinoInput"),
+            document.getElementById("estabelecimentoSuggestions"),
+            estabelecimentosList,
+            "estabelecimentoCode"
+        );
+
+        setupAutocomplete(
+            document.getElementById("localInput"),
+            document.getElementById("centroCustoSuggestions"),
+            centrosCustoList,
+            "localCode"
+        );
+    });
+</script>

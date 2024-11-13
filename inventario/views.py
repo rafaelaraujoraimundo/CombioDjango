@@ -248,7 +248,7 @@ class ControlekitList(ListView):
 class ControlekitCreate(CreateView):
     model = Controlekit
     form_class = ControlekitForm
-    template_name = 'inventario/controlekit/controlekit_form.html'
+    template_name = 'inventario/controlekit/controlekit_edit.html'
     success_url = reverse_lazy('controlekit_list')
 
     def get_context_data(self, **kwargs):
