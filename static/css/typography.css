@@ -239,7 +239,7 @@ Background Color
 .bg-info, .badge-info { color: var(--iq-white) !important;background: var(--iq-info) !important;}
 .bg-light, .badge-light { background-color: var(--iq-light) !important; }
 .bg-dark, .badge-dark { color: var(--iq-white); background-color: var(--iq-dark) !important; }
-
+.bg-password-card { color: var(--iq-white); background-color: var(--iq-border-light) !important; }
 /*----------------------------------------------
 Custom Background Color
 ------------------------------------------------*/

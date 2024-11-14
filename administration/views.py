@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from administration.models import GroupProcessSelection, PasswordManager, ServidorFluig, User
+from administration.models import (GroupProcessSelection, PasswordManager, PasswordType,
+    ServidorFluig, User)
 from administration.forms import CustomUserChangeForm, CustomUserCreationForm
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.forms import UserChangeForm
@@ -20,6 +21,8 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import GroupProcess
+from django.views import View
+from django.utils import timezone
 
 from django.views.decorators.http import require_POST
 
@@ -281,23 +284,42 @@ def itemMenu_delete(request, itensMenu_id):
 class PasswordManagerList(ListView):
     model = PasswordManager
     template_name = 'administration/passwordManager/passwordManager_list.html'
-
-
+    
     def get_context_data(self, **kwargs):
-        # Primeiro, pegue o contexto existente da classe base
-        context = super(PasswordManagerList, self).get_context_data(**kwargs)
-        # Agora, adicione suas variáveis de contexto
-        context['PasswordGroups'] = PasswordGroup.objects.all()
+        context = super().get_context_data(**kwargs)
         context['activegroup'] = 'administration'
         context['title'] = 'Password Manager'
-        # Retorne o contexto atualizado
+        context['form'] = PasswordManagerForm()  # Formulário vazio para modal de edição
+
+        # Adiciona listas de opções para os selects de tipo e grupo
+        context['tipos'] = PasswordType.objects.all()  # Todos os tipos
+        context['grupos'] = PasswordGroup.objects.all()  # Todos os grupos
+
+        # Adiciona todos os PasswordGroups com seus respectivos PasswordManagers
+        context['PasswordGroups'] = PasswordGroup.objects.prefetch_related('passwords').all()
+
         return context
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        for password in queryset:
-            password.decrypted_password = password.get_password()  # Adiciona a senha descriptografada ao objeto
-        return queryset
+    def post(self, request, *args, **kwargs):
+        if 'edit_password_id' in request.POST:
+            password_manager = get_object_or_404(PasswordManager, id=request.POST.get('edit_password_id'))
+            form = PasswordManagerForm(request.POST, instance=password_manager)
+            
+            if form.is_valid():
+                # Atualiza o campo de senha criptografada, se necessário
+                if form.cleaned_data['password']:
+                    password_manager.set_password(form.cleaned_data['password'])
+
+                # Define o usuário e a data de alteração
+                password_manager.usuario_alteracao = request.user
+                password_manager.data_alteracao = timezone.now()
+
+                # Salva o objeto atualizado
+                password_manager.save()
+                return redirect(reverse_lazy('administration_passwordmanager_list'))
+        
+        return super().get(request, *args, **kwargs)
+
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
 @permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
@@ -454,3 +476,24 @@ def edit_group_process(request, pk):
         'button_label': 'Salvar'
     }
     return render(request, 'administration/groupprocess/groupprocess_form.html', context)
+
+
+
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+def get_decrypted_password(request, id):
+    password_manager = PasswordManager.objects.get(pk=id)
+    decrypted_password = password_manager.get_password()
+    messages.success(request, 'Senha copiada com sucesso.')
+    return JsonResponse({'decrypted_password': decrypted_password})
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class InactivatePasswordManager(View):
+    def post(self, request, pk, *args, **kwargs):
+        password_manager = get_object_or_404(PasswordManager, pk=pk)
+        password_manager.ativo = False
+        password_manager.usuario_alteracao = request.user
+        password_manager.save()
+        return redirect(reverse_lazy('administration_passwordmanager_list'))

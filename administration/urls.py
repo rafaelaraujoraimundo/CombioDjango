@@ -6,7 +6,7 @@ from administration.views import (change_logged_in_user_password, change_passwor
     edit_logged_in_user_profile, get_logged_in_user_profile, itemMenu_delete, ItensMenu_edit,
     ItensMenuCreate, ItensMenuList, list_group_processes, password_manager_create,
     password_manager_create, PasswordManagerList, servidorfluig_create, servidorfluig_delete,
-    servidorfluig_edit, servidorfluig_list, user_edit, user_list)
+    servidorfluig_edit, servidorfluig_list, user_edit, user_list, get_decrypted_password, InactivatePasswordManager)
 
 urlpatterns = [
     path('userList/', user_list, name="administration_users"),
@@ -30,6 +30,8 @@ urlpatterns = [
 
      path('passwordmanager/', PasswordManagerList.as_view(), name='administration_passwordmanager_list'),
      path('passwordmanager/new', password_manager_create, name='administration_passwordmanager_new'),
+    path('passwordmanager/get-password/<int:id>/', get_decrypted_password, name='get_decrypted_password'),
+     path('passwordmanager/inactivate/<int:pk>/', InactivatePasswordManager.as_view(), name='administration_passwordmanager_inactivate'),
 
     path('groupprocess/', list_group_processes, name='list_group_processes'),  # URL para listar grupos de processos
     path('groupprocess/create/', create_group_process, name='groupprocess_create'),  # URL para criar um novo grupo
