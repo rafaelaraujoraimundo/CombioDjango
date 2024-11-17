@@ -14,23 +14,49 @@ from django.db.models import Prefetch
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
+from django.db.models import Q, Prefetch
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class PasswordManagerList(ListView):
     model = PasswordManager
     template_name = 'cofre/passwordManager/passwordManager_list.html'
+    context_object_name = 'passwords'
 
     def get_queryset(self):
-        """Aplica filtros para exibir apenas os registros permitidos."""
+        """
+        Aplica filtros para exibir apenas os registros permitidos e realiza a pesquisa.
+        """
         user = self.request.user
-        return PasswordManager.objects.filter(
+
+        # Termo de pesquisa
+        search_query = self.request.GET.get('search', '').strip()
+
+        # Filtro inicial com base na visualização
+        queryset = PasswordManager.objects.filter(
             ativo=True
         ).filter(
-            models.Q(visualizacao='TODOS') | models.Q(visualizacao='PERSONAL', usuario_criacao=user)
+            Q(visualizacao='TODOS') | Q(visualizacao='PERSONAL', usuario_criacao=user)
         )
 
+        if search_query:
+            # Adiciona o filtro de pesquisa
+            queryset = queryset.filter(
+                Q(site_name__icontains=search_query) |
+                Q(username__icontains=search_query) |
+                Q(url__icontains=search_query) |
+                Q(observacoes__icontains=search_query) |
+                Q(tipo__nome__icontains=search_query) |
+                Q(grupo__nome__icontains=search_query) |
+                Q(vault__nome_cofre__icontains=search_query)
+            )
+
+        return queryset
+
     def get_context_data(self, **kwargs):
+        """
+        Define os dados adicionais que serão passados ao template.
+        """
         context = super().get_context_data(**kwargs)
         context['activegroup'] = 'cofre'
         context['title'] = 'Password Manager'
