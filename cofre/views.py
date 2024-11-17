@@ -16,7 +16,7 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class PasswordManagerList(ListView):
     model = PasswordManager
     template_name = 'cofre/passwordManager/passwordManager_list.html'
@@ -62,7 +62,7 @@ class PasswordManagerList(ListView):
 
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+@permission_required('global_permissions.combio_cofre', login_url='erro_page')
 def password_manager_create(request):
     if request.method == 'POST':
         form = PasswordManagerForm(request.POST)
@@ -80,7 +80,7 @@ def password_manager_create(request):
 
 
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
+@permission_required('global_permissions.combio_cofre', login_url='erro_page')
 def get_decrypted_password(request, id):
     password_manager = PasswordManager.objects.get(pk=id)
     decrypted_password = password_manager.get_password()
@@ -89,7 +89,7 @@ def get_decrypted_password(request, id):
 
 
 @method_decorator(login_required, name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class InactivatePasswordManager(View):
     def post(self, request, pk, *args, **kwargs):
         password_manager = get_object_or_404(PasswordManager, pk=pk)
@@ -101,7 +101,7 @@ class InactivatePasswordManager(View):
 
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class PasswordTypeCreate(CreateView):
     model = PasswordType
     form_class = PasswordTypeForm
@@ -115,7 +115,7 @@ class PasswordTypeCreate(CreateView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class PasswordTypeList(ListView):
     model = PasswordType
     template_name = 'cofre/passwordtype/passwordtype_list.html'
@@ -128,7 +128,7 @@ class PasswordTypeList(ListView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class PasswordTypeUpdate(UpdateView):
     model = PasswordType
     form_class = PasswordTypeForm
@@ -142,7 +142,7 @@ class PasswordTypeUpdate(UpdateView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class PasswordTypeDelete(DeleteView):
     model = PasswordType
     template_name = 'cofre/passwordtype/passwordtype_confirm_delete.html'
@@ -157,7 +157,7 @@ class PasswordTypeDelete(DeleteView):
 
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class PasswordGroupCreate(CreateView):
     model = PasswordGroup
     form_class = PasswordGroupForm
@@ -171,7 +171,7 @@ class PasswordGroupCreate(CreateView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class PasswordGroupList(ListView):
     model = PasswordGroup
     template_name = 'cofre/passwordgroup/passwordgroup_list.html'
@@ -184,7 +184,7 @@ class PasswordGroupList(ListView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class PasswordGroupUpdate(UpdateView):
     model = PasswordGroup
     form_class = PasswordGroupForm
@@ -198,7 +198,7 @@ class PasswordGroupUpdate(UpdateView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class PasswordGroupDelete(DeleteView):
     model = PasswordGroup
     template_name = 'cofre/passwordgroup/passwordgroup_confirm_delete.html'
@@ -212,7 +212,7 @@ class PasswordGroupDelete(DeleteView):
     
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class VaultCreate(CreateView):
     model = Vault
     form_class = VaultForm
@@ -232,7 +232,7 @@ class VaultCreate(CreateView):
 
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class VaultList(ListView):
     model = Vault
     template_name = 'cofre/vault/vault_list.html'
@@ -250,7 +250,7 @@ class VaultList(ListView):
 
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class VaultUpdate(UpdateView):
     model = Vault
     form_class = VaultForm
@@ -279,7 +279,7 @@ class VaultUpdate(UpdateView):
 
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class VaultDelete(DeleteView):
     model = Vault
     template_name = 'cofre/vault/vault_confirm_delete.html'
@@ -310,7 +310,7 @@ class VaultDelete(DeleteView):
         return context
     
 @method_decorator(login_required, name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class InactivePasswordManagerList(View):
     def get(self, request, *args, **kwargs):
         # Lista todos os registros onde ativo=False
@@ -333,7 +333,7 @@ class InactivePasswordManagerList(View):
 
 
 @method_decorator(login_required, name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
 class ActivatePasswordManager(View):
     def post(self, request, pk, *args, **kwargs):
         # Encontra o registro e ativa
