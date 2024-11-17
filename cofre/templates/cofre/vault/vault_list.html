@@ -1,0 +1,114 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <a href="{% url 'vault_create' %}" class="btn btn-primary mb-3">
+        <i class="fa fa-plus"></i> Novo Cofre
+    </a>
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Valor</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vault in vaults %}
+                <tr>
+                    <td>{{ vault.id }}</td>
+                    <td>{{ vault.nome_cofre }}</td>
+                    <td>
+                        <span class="masked-value">******</span>
+                        <button type="button" class="btn btn-outline-secondary btn-sm toggle-value" data-value="{{ vault.valor }}">
+                            Mostrar
+                        </button>
+                    </td>
+                    <td>
+                        <a href="{% url 'vault_edit' vault.id %}" class="btn btn-warning btn-sm">
+                            <i class="fa fa-edit"></i> Editar
+                        </a>
+                        <button class="btn btn-danger btn-sm delete-trigger" 
+                                data-id="{{ vault.id }}" 
+                                data-nome="{{ vault.nome_cofre }}" 
+                                data-toggle="modal" 
+                                data-target="#confirmDeleteModal">
+                            <i class="fa fa-trash"></i> Excluir
+                        </button>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">Nenhum cofre encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja excluir o cofre <strong id="deleteNome"></strong> (ID: <span id="deleteVaultId"></span>)?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".toggle-value");
+
+        buttons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                const span = this.previousElementSibling;
+                if (span.classList.contains("masked-value")) {
+                    span.textContent = this.getAttribute("data-value");
+                    span.classList.remove("masked-value");
+                    this.textContent = "Ocultar";
+                } else {
+                    span.textContent = "******";
+                    span.classList.add("masked-value");
+                    this.textContent = "Mostrar";
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Seleciona todos os botões de exclusão
+        const deleteTriggers = document.querySelectorAll(".delete-trigger");
+
+        deleteTriggers.forEach((trigger) => {
+            trigger.addEventListener("click", function () {
+                const vaultId = this.getAttribute("data-id");
+                const vaultNome = this.getAttribute("data-nome");
+                const formAction = `/cofre/vault/delete/${vaultId}/`; // Ajuste conforme necessário
+
+                // Atualiza os elementos do modal
+                document.getElementById("deleteVaultId").textContent = vaultId;
+                document.getElementById("deleteNome").textContent = vaultNome;
+                document.getElementById("deleteForm").setAttribute("action", formAction);
+            });
+        });
+    });
+</script>
+{% endblock %}

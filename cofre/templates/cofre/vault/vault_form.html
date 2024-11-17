@@ -1,0 +1,51 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.nome_cofre.id_for_label }}">Nome do Cofre</label>
+            <input type="text" class="form-control {% if form.nome_cofre.errors %}is-invalid{% endif %}" id="nome_cofre" name="{{ form.nome_cofre.name }}" value="{{ form.nome_cofre.value|default_if_none:'' }}">
+            {% for error in form.nome_cofre.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.valor.id_for_label }}">Valor</label>
+            <div class="input-group">
+                <input type="password" class="form-control {% if form.valor.errors %}is-invalid{% endif %}" id="valor" name="{{ form.valor.name }}" value="{{ form.valor.value|default_if_none:'' }}">
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-outline-secondary" id="toggleSecret">
+                        Mostrar
+                    </button>
+                </div>
+            </div>
+            {% for error in form.valor.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'vault_list' %}" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleButton = document.getElementById("toggleSecret");
+        const secretField = document.getElementById("valor");
+
+        if (toggleButton && secretField) {
+            toggleButton.addEventListener("click", function () {
+                if (secretField.type === "password") {
+                    secretField.type = "text";
+                    toggleButton.textContent = "Ocultar";
+                } else {
+                    secretField.type = "password";
+                    toggleButton.textContent = "Mostrar";
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

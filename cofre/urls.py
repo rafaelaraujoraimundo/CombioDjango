@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (PasswordManagerList, password_manager_create, get_decrypted_password, InactivatePasswordManager,
                     PasswordTypeList, PasswordTypeCreate, PasswordTypeUpdate, PasswordTypeDelete, 
-                    PasswordGroupList, PasswordGroupCreate, PasswordGroupUpdate, PasswordGroupDelete)
+                    PasswordGroupList, PasswordGroupCreate, PasswordGroupUpdate, PasswordGroupDelete,
+                    VaultCreate, VaultList, VaultUpdate, VaultDelete)
  
 urlpatterns = [
         path('passwordmanager/', PasswordManagerList.as_view(), name='administration_passwordmanager_list'),
@@ -20,5 +21,8 @@ urlpatterns = [
     path('passwordgroup/edit/<int:pk>/', PasswordGroupUpdate.as_view(), name='passwordgroup_edit'),
     path('passwordgroup/delete/<int:pk>/', PasswordGroupDelete.as_view(), name='passwordgroup_delete'),
 
-    
+    path('vault/create/', VaultCreate.as_view(), name='vault_create'),
+    path('vault/', VaultList.as_view(), name='vault_list'),
+    path('vault/edit/<int:pk>/', VaultUpdate.as_view(), name='vault_edit'),
+    path('vault/delete/<int:pk>/', VaultDelete.as_view(), name='vault_delete'),
  ]

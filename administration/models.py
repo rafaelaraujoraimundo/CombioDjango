@@ -4,7 +4,7 @@ from django.contrib.auth.models import (
     AbstractBaseUser,
     PermissionsMixin,
 )
-from .encryptor import encrypt_password, decrypt_password
+
 import hashlib
 
 class UserManager(BaseUserManager):
