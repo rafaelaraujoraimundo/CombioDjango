@@ -12,6 +12,8 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Prefetch
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.http import HttpResponseRedirect
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
@@ -71,7 +73,9 @@ def password_manager_create(request):
             return redirect('administration_passwordmanager_list')
     else:
         form = PasswordManagerForm()
-    return render(request, 'cofre/passwordManager/password_manager_form.html', {'form': form})
+    return render(request, 'cofre/passwordManager/password_manager_form.html', {'form': form,
+                                                                               'activegroup': 'cofre',
+                                                                                'title': 'Incluir Senha Segura' })
 
 
 
@@ -260,6 +264,13 @@ class VaultUpdate(UpdateView):
             raise PermissionDenied("Você não tem permissão para editar este cofre.")
         return obj
 
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except ValidationError as e:
+            messages.error(self.request, str(e))
+            return redirect('vault_list')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['activegroup'] = 'cofre'
@@ -281,8 +292,53 @@ class VaultDelete(DeleteView):
             raise PermissionDenied("Você não tem permissão para excluir este cofre.")
         return obj
 
+    def post(self, request, *args, **kwargs):
+        obj = self.get_object()
+        try:
+            obj.delete()
+            messages.success(request, "Cofre deletado com sucesso.")
+        except ValidationError as e:
+            # Captura as mensagens da exceção ValidationError e as exibe ao usuário
+            for message in e.messages:
+                messages.error(request, message)
+        return HttpResponseRedirect(self.success_url)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['activegroup'] = 'cofre'
         context['title'] = 'Confirmar Exclusão do Cofre'
         return context
+    
+@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class InactivePasswordManagerList(View):
+    def get(self, request, *args, **kwargs):
+        # Lista todos os registros onde ativo=False
+        inactive_passwords = PasswordManager.objects.filter(ativo=False)
+        return render(request, 'cofre/passwordManager/inactive_password_list.html', {
+            'inactive_passwords': inactive_passwords,
+            'title': 'Senhas Inativas',
+            'activegroup': 'cofre'
+        })
+
+    def post(self, request, *args, **kwargs):
+        # Ativa a senha pelo ID fornecido
+        password_manager_id = request.POST.get('password_manager_id')
+        password_manager = get_object_or_404(PasswordManager, pk=password_manager_id)
+        password_manager.ativo = True
+        password_manager.usuario_alteracao = request.user
+        password_manager.save()
+        return redirect(reverse_lazy('inactive_password_manager_list'))
+    
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ActivatePasswordManager(View):
+    def post(self, request, pk, *args, **kwargs):
+        # Encontra o registro e ativa
+        password_manager = get_object_or_404(PasswordManager, pk=pk)
+        password_manager.ativo = True
+        password_manager.usuario_alteracao = request.user
+        password_manager.save()
+        return redirect(reverse_lazy('inactive_password_manager_list'))

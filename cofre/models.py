@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from .encryptor import encrypt_password, decrypt_password
 from administration.models import User
@@ -24,11 +25,19 @@ class Vault(models.Model):
     usuario_criacao = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name="Usuário de Criação")
     valor = models.CharField(max_length=44, verbose_name="Chave de Criptografia")  # 44 caracteres base64
 
+    def has_passwords(self):
+        """Verifica se o Vault está associado a senhas."""
+        return PasswordManager.objects.filter(vault=self).exists()
+
     def save(self, *args, **kwargs):
-        # Gera uma chave compatível com Fernet se o campo valor estiver vazio ou inválido
-        if not self.valor or len(self.valor) != 44:  # Fernet key length in base64
-            self.valor = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8')
+        if self.pk and self.has_passwords():
+            raise ValidationError("Não é possível alterar o cofre porque ele está associado a senhas.")
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.has_passwords():
+            raise ValidationError("Não é possível deletar o cofre porque ele está associado a senhas.")
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return self.nome_cofre
