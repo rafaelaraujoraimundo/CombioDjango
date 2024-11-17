@@ -2,9 +2,10 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import Group, Permission
 from django.forms.widgets import CheckboxSelectMultiple
-from .models import User, ServidorFluig, PasswordManager, GroupProcess, Process, GroupProcessSelection
+from .models import User, ServidorFluig, GroupProcess, Process, GroupProcessSelection, Parametro
 from menu.models import ItensMenu
 from requests_oauthlib import OAuth1Session
+from django.apps import apps
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -100,20 +101,6 @@ class ItensMenuForm(forms.ModelForm):
 
 
 
-class PasswordManagerForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, label='Senha')
-
-    class Meta:
-        model = PasswordManager
-        fields = ['site_name', 'url', 'username', 'password', 'tipo', 'grupo']
-
-    def save(self, commit=True):
-        password_manager = super().save(commit=False)
-        password_manager.set_password(self.cleaned_data['password'])
-        if commit:
-            password_manager.save()
-        return password_manager
-    
 
 
 class UserCreationForm(forms.ModelForm):
@@ -179,3 +166,20 @@ class GroupProcessForm(forms.ModelForm):
 
 
 
+class ParametroForm(forms.ModelForm):
+    class Meta:
+        model = Parametro
+        fields = ['codigo', 'modulo', 'tipo_dado', 'valor']
+        labels = {
+            'codigo': 'Código',
+            'modulo': 'Módulo',
+            'tipo_dado': 'Tipo de Dado',
+            'valor': 'Valor',
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Carrega dinamicamente os nomes dos apps no campo 'modulo'
+        self.fields['modulo'].widget = forms.Select()
+        app_names = [(app.name, app.verbose_name) for app in apps.get_app_configs()]
+        self.fields['modulo'].choices = app_names

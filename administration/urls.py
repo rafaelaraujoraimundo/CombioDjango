@@ -4,9 +4,10 @@ from django.contrib.auth import views as auth_views
 from administration.views import (change_logged_in_user_password, change_password,
     create_group_process, create_user, delete_group_process, delete_user, edit_group_process,
     edit_logged_in_user_profile, get_logged_in_user_profile, itemMenu_delete, ItensMenu_edit,
-    ItensMenuCreate, ItensMenuList, list_group_processes, password_manager_create,
-    password_manager_create, PasswordManagerList, servidorfluig_create, servidorfluig_delete,
-    servidorfluig_edit, servidorfluig_list, user_edit, user_list, get_decrypted_password, InactivatePasswordManager)
+    ItensMenuCreate, ItensMenuList, list_group_processes, 
+    servidorfluig_create, servidorfluig_delete,
+    servidorfluig_edit, servidorfluig_list, user_edit, user_list,   
+    ParametroList, ParametroCreate, ParametroUpdate, ParametroDelete)
 
 urlpatterns = [
     path('userList/', user_list, name="administration_users"),
@@ -28,15 +29,18 @@ urlpatterns = [
     path('itensmenu/<int:itensMenu_id>/',ItensMenu_edit , name='administration_itensmenu_edit'),
     path('itensmenuDelete/<int:itensMenu_id>/',itemMenu_delete , name='administration_itensmenu_delete'),
 
-     path('passwordmanager/', PasswordManagerList.as_view(), name='administration_passwordmanager_list'),
-     path('passwordmanager/new', password_manager_create, name='administration_passwordmanager_new'),
-    path('passwordmanager/get-password/<int:id>/', get_decrypted_password, name='get_decrypted_password'),
-     path('passwordmanager/inactivate/<int:pk>/', InactivatePasswordManager.as_view(), name='administration_passwordmanager_inactivate'),
+
 
     path('groupprocess/', list_group_processes, name='list_group_processes'),  # URL para listar grupos de processos
     path('groupprocess/create/', create_group_process, name='groupprocess_create'),  # URL para criar um novo grupo
     path('groupprocess/edit/<int:pk>/', edit_group_process, name='groupprocess_edit'),  # URL para editar um grupo existente
     path('groupprocess/delete/<int:pk>/', delete_group_process, name='groupprocess_delete'),
+
+
+    path('parametros/', ParametroList.as_view(), name='parametro_list'),
+    path('parametros/create/', ParametroCreate.as_view(), name='parametro_create'),
+    path('parametros/edit/<int:pk>/', ParametroUpdate.as_view(), name='parametro_edit'),
+    path('parametros/delete/<int:pk>/', ParametroDelete.as_view(), name='parametro_delete'),
   
 ]
 

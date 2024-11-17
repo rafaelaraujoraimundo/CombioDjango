@@ -1,5 +1,5 @@
 from django.contrib import admin
-from administration.models import PasswordGroup, PasswordManager, PasswordType, ServidorFluig, User
+from administration.models import ServidorFluig, User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 # Register your models here.
@@ -29,5 +29,3 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.register(ServidorFluig)
-admin.site.register(PasswordGroup)
-admin.site.register(PasswordType)

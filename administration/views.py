@@ -1,6 +1,5 @@
 from django.shortcuts import render
-from administration.models import (GroupProcessSelection, PasswordManager, PasswordType,
-    ServidorFluig, User)
+from administration.models import (GroupProcessSelection, ServidorFluig, User)
 from administration.forms import CustomUserChangeForm, CustomUserCreationForm
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.forms import UserChangeForm
@@ -10,13 +9,13 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib import messages
 from django.forms import CheckboxSelectMultiple
 from django.views.generic import ListView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from administration.tasks import update_processes
 from .forms import ServidorFluigForm
 from menu.models import ItensMenu
 from django.urls import reverse_lazy
-from .forms import ItensMenuForm, PasswordManagerForm, UserCreationForm, GroupProcessForm
-from .models import PasswordManager, PasswordGroup
+from .forms import ItensMenuForm, UserCreationForm, GroupProcessForm, ParametroForm
+from .models import Parametro
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -279,59 +278,7 @@ def itemMenu_delete(request, itensMenu_id):
     return redirect('administration_itensmenu_list')
 
 
-@method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
-class PasswordManagerList(ListView):
-    model = PasswordManager
-    template_name = 'administration/passwordManager/passwordManager_list.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['activegroup'] = 'administration'
-        context['title'] = 'Password Manager'
-        context['form'] = PasswordManagerForm()  # Formulário vazio para modal de edição
 
-        # Adiciona listas de opções para os selects de tipo e grupo
-        context['tipos'] = PasswordType.objects.all()  # Todos os tipos
-        context['grupos'] = PasswordGroup.objects.all()  # Todos os grupos
-
-        # Adiciona todos os PasswordGroups com seus respectivos PasswordManagers
-        context['PasswordGroups'] = PasswordGroup.objects.prefetch_related('passwords').all()
-
-        return context
-
-    def post(self, request, *args, **kwargs):
-        if 'edit_password_id' in request.POST:
-            password_manager = get_object_or_404(PasswordManager, id=request.POST.get('edit_password_id'))
-            form = PasswordManagerForm(request.POST, instance=password_manager)
-            
-            if form.is_valid():
-                # Atualiza o campo de senha criptografada, se necessário
-                if form.cleaned_data['password']:
-                    password_manager.set_password(form.cleaned_data['password'])
-
-                # Define o usuário e a data de alteração
-                password_manager.usuario_alteracao = request.user
-                password_manager.data_alteracao = timezone.now()
-
-                # Salva o objeto atualizado
-                password_manager.save()
-                return redirect(reverse_lazy('administration_passwordmanager_list'))
-        
-        return super().get(request, *args, **kwargs)
-
-
-@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
-def password_manager_create(request):
-    if request.method == 'POST':
-        form = PasswordManagerForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('administration_passwordmanager_list')
-    else:
-        form = PasswordManagerForm()
-    return render(request, 'administration/passwordManager/password_manager_form.html', {'form': form})
 
 User = get_user_model()
 
@@ -479,21 +426,59 @@ def edit_group_process(request, pk):
 
 
 
-@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
-@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
-def get_decrypted_password(request, id):
-    password_manager = PasswordManager.objects.get(pk=id)
-    decrypted_password = password_manager.get_password()
-    messages.success(request, 'Senha copiada com sucesso.')
-    return JsonResponse({'decrypted_password': decrypted_password})
 
 
-@method_decorator(login_required, name='dispatch')
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
-class InactivatePasswordManager(View):
-    def post(self, request, pk, *args, **kwargs):
-        password_manager = get_object_or_404(PasswordManager, pk=pk)
-        password_manager.ativo = False
-        password_manager.usuario_alteracao = request.user
-        password_manager.save()
-        return redirect(reverse_lazy('administration_passwordmanager_list'))
+class ParametroCreate(CreateView):
+    model = Parametro
+    form_class = ParametroForm
+    template_name = 'administration/parametro/parametro_form.html'
+    success_url = reverse_lazy('parametro_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['activegroup'] = 'administration'
+        context['title'] = 'Novo Parâmetro'
+        return context
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ParametroList(ListView):
+    model = Parametro
+    template_name = 'administration/parametro/parametro_list.html'
+    context_object_name = 'parametros'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['activegroup'] = 'administration'
+        context['title'] = 'Lista de Parâmetros'
+        return context
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ParametroUpdate(UpdateView):
+    model = Parametro
+    form_class = ParametroForm
+    template_name = 'administration/parametro/parametro_form.html'
+    success_url = reverse_lazy('parametro_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['activegroup'] = 'administration'
+        context['title'] = 'Editar Parâmetro'
+        return context
+
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
+class ParametroDelete(DeleteView):
+    model = Parametro
+    template_name = 'administration/parametro/parametro_confirm_delete.html'
+    success_url = reverse_lazy('parametro_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['activegroup'] = 'administration'
+        context['title'] = 'Confirmar Exclusão de Parâmetro'
+        return context

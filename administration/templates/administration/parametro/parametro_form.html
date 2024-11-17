@@ -1,0 +1,77 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.codigo.id_for_label }}">Código</label>
+            <input type="text" class="form-control {% if form.codigo.errors %}is-invalid{% endif %}" id="codigo" name="{{ form.codigo.name }}" value="{{ form.codigo.value|default_if_none:'' }}">
+            {% for error in form.codigo.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.modulo.id_for_label }}">Módulo</label>
+            <select class="form-control {% if form.modulo.errors %}is-invalid{% endif %}" id="{{ form.modulo.id_for_label }}" name="{{ form.modulo.name }}">
+                {% for choice_value, choice_label in form.modulo.field.choices %}
+                    <option value="{{ choice_value }}" {% if choice_value == form.modulo.value %}selected{% endif %}>{{ choice_label }}</option>
+                {% endfor %}
+            </select>
+            {% for error in form.modulo.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.tipo_dado.id_for_label }}">Tipo de Dado</label>
+            <select class="form-control {% if form.tipo_dado.errors %}is-invalid{% endif %}" id="tipo_dado" name="{{ form.tipo_dado.name }}">
+                {% for choice in form.tipo_dado.field.choices %}
+                    <option value="{{ choice.0 }}" {% if choice.0 == form.tipo_dado.value %}selected{% endif %}>{{ choice.1 }}</option>
+                {% endfor %}
+            </select>
+            {% for error in form.tipo_dado.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.valor.id_for_label }}">Valor</label>
+            {% if form.tipo_dado.value == 'secret' %}
+                <div class="input-group">
+                    <input type="password" class="form-control {% if form.valor.errors %}is-invalid{% endif %}" id="valor" name="{{ form.valor.name }}" value="{{ form.valor.value|default_if_none:'' }}">
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-outline-secondary" id="toggleSecret">
+                            Mostrar
+                        </button>
+                    </div>
+                </div>
+            {% else %}
+                <textarea class="form-control {% if form.valor.errors %}is-invalid{% endif %}" id="valor" name="{{ form.valor.name }}">{{ form.valor.value|default_if_none:'' }}</textarea>
+            {% endif %}
+            {% for error in form.valor.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'parametro_list' %}" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleButton = document.getElementById("toggleSecret");
+        const secretField = document.getElementById("valor");
+
+        if (toggleButton && secretField) {
+            toggleButton.addEventListener("click", function () {
+                if (secretField.type === "password") {
+                    secretField.type = "text";
+                    toggleButton.textContent = "Ocultar";
+                } else {
+                    secretField.type = "password";
+                    toggleButton.textContent = "Mostrar";
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

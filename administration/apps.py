@@ -7,3 +7,6 @@ class AdminConfig(AppConfig):
 
     def ready(self):
         import combio.signals
+        import administration.signals 
+
+

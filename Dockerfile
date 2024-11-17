@@ -22,5 +22,6 @@ RUN python manage.py collectstatic --no-input --clear
 
 RUN python manage.py migrate
 
+
 # O comando para rodar a aplicação
 CMD ["gunicorn", "combio.wsgi:application", "-b", "0.0.0.0:8000", "--workers", "4"]

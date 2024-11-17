@@ -1,0 +1,121 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <a href="{% url 'parametro_create' %}" class="btn btn-primary mb-3">
+        <i class="fa fa-plus"></i> Adicionar Parâmetro
+    </a>
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Código</th>
+                <th>Módulo</th>
+                <th>Tipo de Dado</th>
+                <th>Valor</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for parametro in parametros %}
+                <tr>
+                    <td>{{ parametro.id }}</td>
+                    <td>{{ parametro.codigo }}</td>
+                    <td>{{ parametro.modulo }}</td>
+                    <td>{{ parametro.get_tipo_dado_display }}</td>
+                    <td>
+                        {% if parametro.tipo_dado == 'secret' %}
+                            <span class="masked-value">******</span>
+                            <button type="button" class="btn btn-outline-secondary btn-sm toggle-value" data-value="{{ parametro.valor }}">
+                                Mostrar
+                            </button>
+                        {% else %}
+                            {{ parametro.valor }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'parametro_edit' parametro.id %}" class="mr-2 btn btn-warning">
+                            <i class="fa fa-edit"></i> Editar
+                        </a>
+                        <button class="btn btn-danger delete-trigger" 
+                                data-id="{{ parametro.id }}" 
+                                data-codigo="{{ parametro.codigo }}" 
+                                data-toggle="modal" 
+                                data-target="#confirmDeleteModal">
+                            <i class="fa fa-trash"></i> Excluir
+                        </button>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">Nenhum parâmetro cadastrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja excluir o parâmetro <strong id="deleteCodigo"></strong> (ID: <span id="deleteParametroId"></span>)?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Seleciona todos os botões de exclusão
+        document.querySelectorAll('.delete-trigger').forEach(function(button) {
+            button.addEventListener('click', function() {
+                // Obtém os dados do parâmetro a ser excluído
+                const parametroId = button.getAttribute('data-id');
+                const parametroCodigo = button.getAttribute('data-codigo');
+                const formAction = `/administration/parametros/delete/${parametroId}/`;  // Substitua pela URL correta
+
+                // Define os valores no modal
+                document.getElementById('deleteParametroId').textContent = parametroId;
+                document.getElementById('deleteCodigo').textContent = parametroCodigo;
+                document.getElementById('deleteForm').setAttribute('action', formAction);
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".toggle-value");
+
+        buttons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                const span = this.previousElementSibling;
+                if (span.classList.contains("masked-value")) {
+                    span.textContent = this.getAttribute("data-value");
+                    span.classList.remove("masked-value");
+                    this.textContent = "Ocultar";
+                } else {
+                    span.textContent = "******";
+                    span.classList.add("masked-value");
+                    this.textContent = "Mostrar";
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

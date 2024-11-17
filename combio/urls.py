@@ -43,6 +43,7 @@ urlpatterns = [
     path('chatbot/', include('chatbot.urls')),
      path('inventario/', include('inventario.urls')),
      path('suporte/', include('suporte.urls')),
+     path('cofre/', include('cofre.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
