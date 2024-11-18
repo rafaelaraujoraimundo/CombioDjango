@@ -27,21 +27,43 @@ class Vault(models.Model):
 
     def has_passwords(self):
         """Verifica se o Vault está associado a senhas."""
-        return PasswordManager.objects.filter(vault=self).exists()
+        return self.passwords.exists()
 
     def save(self, *args, **kwargs):
+        """
+        Garante que o campo `valor` esteja formatado corretamente como chave base64.
+        """
+        if not self.valor or len(self.valor) != 44:
+            # Gera uma chave base64 compatível com Fernet se o campo estiver vazio ou inválido
+            self.valor = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8')
+        elif len(self.valor) != 44 or not self.is_base64(self.valor):
+            raise ValidationError("A chave de criptografia deve ter 44 caracteres e estar no formato base64.")
+
+        # Impede alterações em um Vault associado a senhas
         if self.pk and self.has_passwords():
             raise ValidationError("Não é possível alterar o cofre porque ele está associado a senhas.")
+
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
+        """
+        Impede a exclusão de um Vault associado a senhas.
+        """
         if self.has_passwords():
             raise ValidationError("Não é possível deletar o cofre porque ele está associado a senhas.")
         super().delete(*args, **kwargs)
 
+    @staticmethod
+    def is_base64(value):
+        """Valida se uma string está no formato base64."""
+        try:
+            base64.urlsafe_b64decode(value.encode('utf-8'))
+            return True
+        except Exception:
+            return False
+
     def __str__(self):
         return self.nome_cofre
-
 
 class PasswordManager(models.Model):
     VISUALIZACAO_CHOICES = [

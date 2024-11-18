@@ -246,7 +246,7 @@ class VaultCreate(CreateView):
     success_url = reverse_lazy('vault_list')
 
     def form_valid(self, form):
-        # Atribui o usuário autenticado ao campo usuario_criacao
+        # Atribui o usuário autenticado ao campo `usuario_criacao`
         form.instance.usuario_criacao = self.request.user
         return super().form_valid(form)
 
@@ -255,7 +255,6 @@ class VaultCreate(CreateView):
         context['activegroup'] = 'cofre'
         context['title'] = 'Novo Cofre'
         return context
-
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_cofre', login_url='erro_page'), name='dispatch')
@@ -284,7 +283,6 @@ class VaultUpdate(UpdateView):
     success_url = reverse_lazy('vault_list')
 
     def get_object(self, queryset=None):
-        # Garante que o objeto pertence ao usuário autenticado
         obj = super().get_object(queryset)
         if obj.usuario_criacao != self.request.user:
             raise PermissionDenied("Você não tem permissão para editar este cofre.")
@@ -295,7 +293,7 @@ class VaultUpdate(UpdateView):
             return super().form_valid(form)
         except ValidationError as e:
             messages.error(self.request, str(e))
-            return redirect('vault_list')
+            return redirect(self.success_url)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

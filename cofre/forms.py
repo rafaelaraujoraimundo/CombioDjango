@@ -1,5 +1,8 @@
 from django import forms
 from .models import PasswordManager, PasswordType, PasswordGroup, Vault
+from django.core.exceptions import ValidationError
+import base64
+import os
 
 
 class PasswordManagerForm(forms.ModelForm):
@@ -110,25 +113,43 @@ class VaultForm(forms.ModelForm):
         widgets = {
             'nome_cofre': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Digite o nome do cofre'
+                'placeholder': 'Digite o nome do cofre',
             }),
             'valor': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Digite o valor (ou deixe vazio para gerar automaticamente)'
+                'placeholder': 'Digite a chave ou deixe vazio para gerar automaticamente',
             }),
         }
         labels = {
             'nome_cofre': 'Nome do Cofre',
-            'valor': 'Valor',
+            'valor': 'Chave de Criptografia',
         }
 
     def clean_valor(self):
         """
-        Método para garantir que o valor seja transformado automaticamente se estiver vazio.
+        Método para validar e converter o valor para uma chave compatível com o Fernet.
         """
         valor = self.cleaned_data.get('valor')
+    
         if not valor:
-            import base64
-            import os
-            valor = f"sjddu{base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8')}"
+            # Gera uma chave automaticamente se o campo estiver vazio
+            valor = base64.urlsafe_b64encode(os.urandom(32)).decode('utf-8')
+        else:
+            try:
+                # Tenta validar o valor como base64 e verificar o comprimento decodificado
+                valor_bytes = base64.urlsafe_b64decode(valor.encode('utf-8'))
+                if len(valor_bytes) != 32:
+                    raise ValueError("Chave base64 não possui 32 bytes.")
+            except Exception:
+                # Se o valor não for base64, converte a string fornecida em chave base64 válida
+                try:
+                    # Ajusta o comprimento da string para 32 bytes antes de codificar
+                    valor = valor.ljust(32, '*')  # Preenche até 32 caracteres
+                    valor_bytes = base64.urlsafe_b64encode(valor.encode('utf-8'))
+                    if len(base64.urlsafe_b64decode(valor_bytes)) != 32:
+                        raise ValueError("Erro ao gerar chave base64 compatível com Fernet.")
+                    valor = valor_bytes.decode('utf-8')
+                except Exception:
+                    raise ValidationError("A chave fornecida não é válida. Deve ser uma chave Fernet válida.")
+    
         return valor

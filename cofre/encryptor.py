@@ -1,5 +1,7 @@
 from cryptography.fernet import Fernet
 from decouple import config
+from administration.models import Parametro  # Certifique-se de importar o modelo correto
+
 
 
 def encrypt_password(password: str, vault) -> str:
