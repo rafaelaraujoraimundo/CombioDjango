@@ -1,0 +1,92 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <a href="{% url 'configuracao_create' %}" class="btn btn-primary mb-4">Adicionar Nova Configuração</a>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Nome do Arquivo</th>
+                <th>Usuário de Inclusão</th>
+                <th>Data de Inclusão</th>
+                <th>Usuário de Alteração</th>
+                <th>Data de Alteração</th>
+                <th>Observações</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for configuracao in configuracoes %}
+            <tr id="configRow{{ configuracao.id }}">
+                <td>{{ configuracao.nome_arquivo }}</td>
+                <td>{{ configuracao.usuario_inclusao.username }}</td>
+                <td>{{ configuracao.data_inclusao|date:"d/m/Y H:i" }}</td>
+                <td>{{ configuracao.usuario_alteracao.username|default:"N/A" }}</td>
+                <td>{{ configuracao.data_alteracao|date:"d/m/Y H:i" }}</td>
+                <td>{{ configuracao.observacao }}</td>
+                <td>
+                    <a href="{% url 'configuracao_edit' configuracao.id %}" class="btn btn-warning btn-sm">Editar</a>
+                    <!-- Botão que ativa o modal -->
+                    <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal{{ configuracao.id }}">
+                        Excluir
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Modal de Confirmação de Exclusão para cada configuração -->
+    {% for configuracao in configuracoes %}
+    <div class="modal fade" id="deleteModal{{ configuracao.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel{{ configuracao.id }}" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel{{ configuracao.id }}">Confirmar Exclusão</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Tem certeza de que deseja excluir "{{ configuracao.nome_arquivo }}"?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger btn-delete-confirm" data-url="{% url 'configuracao_delete' configuracao.id %}" data-row-id="configRow{{ configuracao.id }}">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- AJAX Script for Deleting Configuration -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var deleteButtons = document.querySelectorAll('.btn-delete-confirm');
+    deleteButtons.forEach(function(button) {
+        button.addEventListener('click', function(event) {
+            var targetUrl = button.getAttribute('data-url');
+            var rowId = button.getAttribute('data-row-id');
+            fetch(targetUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 'csrfmiddlewaretoken': '{{ csrf_token }}' })
+            }).then(response => {
+                if (response.ok) {
+                    $('#'+rowId).fadeOut(300, function() { $(this).remove(); }); // Fade out and remove row on success
+                    $('.modal').modal('hide'); // Hide all modals
+                } else {
+                    alert('Falha ao excluir. Por favor, tente novamente.');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

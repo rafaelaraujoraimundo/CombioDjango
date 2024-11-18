@@ -44,6 +44,8 @@ urlpatterns = [
      path('inventario/', include('inventario.urls')),
      path('suporte/', include('suporte.urls')),
      path('cofre/', include('cofre.urls')),
+     path('comunicacao/', include('comunicacao.urls')),
 ]
+
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

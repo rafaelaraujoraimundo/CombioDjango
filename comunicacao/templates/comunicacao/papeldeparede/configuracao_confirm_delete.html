@@ -1,0 +1,99 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <div class="alert alert-danger"">
+        {% if form.non_field_errors %}
+            <div>{{ form.non_field_errors }}</div>
+        {% endif %}
+        {% for field in form %}
+            {% if field.errors %}
+                <div>{{ field.label }}: {{ field.errors }}</div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Linha para Arquivo de Imagem e Nome do Arquivo -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group position-relative">
+                    <label for="{{ form.arquivo_imagem.id_for_label }}">Arquivo de Imagem</label>
+                    <input type="file" class="form-control-file {% if form.arquivo_imagem.errors %}is-invalid{% endif %}" 
+                           id="{{ form.arquivo_imagem.id_for_label }}" name="{{ form.arquivo_imagem.name }}">
+                    {% for error in form.arquivo_imagem.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group position-relative">
+                    <label for="{{ form.nome_arquivo.id_for_label }}">Nome do Arquivo</label>
+                    <input type="text" class="form-control {% if form.nome_arquivo.errors %}is-invalid{% endif %}" 
+                           id="{{ form.nome_arquivo.id_for_label }}" name="{{ form.nome_arquivo.name }}"
+                           value="{{ form.nome_arquivo.value|default_if_none:'' }}" placeholder="Nome do arquivo">
+                    {% for error in form.nome_arquivo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkbox para Papel de Parede e Bloqueio de Tela -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input {% if form.padrao_papel_parede.errors %}is-invalid{% endif %}" 
+                               id="{{ form.padrao_papel_parede.id_for_label }}" name="{{ form.padrao_papel_parede.name }}" 
+                               {{ form.padrao_papel_parede.value|yesno:"checked," }}>
+                        <label class="custom-control-label" for="{{ form.padrao_papel_parede.id_for_label }}">Definir como padrão de papel de parede</label>
+                    </div>
+                    {% for error in form.padrao_papel_parede.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input {% if form.padrao_bloqueio_tela.errors %}is-invalid{% endif %}" 
+                               id="{{ form.padrao_bloqueio_tela.id_for_label }}" name="{{ form.padrao_bloqueio_tela.name }}" 
+                               {{ form.padrao_bloqueio_tela.value|yesno:"checked," }}>
+                        <label class="custom-control-label" for="{{ form.padrao_bloqueio_tela.id_for_label }}">Definir como padrão de bloqueio de tela</label>
+                    </div>
+                    {% for error in form.padrao_bloqueio_tela.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Observação -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="{{ form.observacao.id_for_label }}">Observação</label>
+                    <textarea class="form-control {% if form.observacao.errors %}is-invalid{% endif %}" 
+                              id="{{ form.observacao.id_for_label }}" name="{{ form.observacao.name }}"
+                              placeholder="Adicione uma observação...">{{ form.observacao.value|default_if_none:'' }}</textarea>
+                    {% for error in form.observacao.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="row">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="{% url 'configuracao_list' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
