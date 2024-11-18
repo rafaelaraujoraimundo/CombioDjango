@@ -3,8 +3,11 @@ from django.urls import reverse_lazy
 from .forms import ConfiguracaoForm
 from .models import Configuracao
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
+from django.utils.decorators import method_decorator
 
-
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_comunicacao', login_url='erro_page'), name='dispatch')
 class ConfiguracaoListView(ListView):
     model = Configuracao
     template_name = 'comunicacao/papeldeparede/configuracao_list.html'
@@ -16,6 +19,8 @@ class ConfiguracaoListView(ListView):
         context['activegroup'] = 'comunicacao'  # Grupo ativo no menu
         return context
 
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_comunicacao', login_url='erro_page'), name='dispatch')
 class ConfiguracaoCreateView(LoginRequiredMixin, CreateView):
     model = Configuracao
     form_class = ConfiguracaoForm
@@ -32,6 +37,8 @@ class ConfiguracaoCreateView(LoginRequiredMixin, CreateView):
         context['activegroup'] = 'comunicacao'
         return context
 
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_comunicacao', login_url='erro_page'), name='dispatch')
 class ConfiguracaoUpdateView(LoginRequiredMixin, UpdateView):
     model = Configuracao
     form_class = ConfiguracaoForm
@@ -48,6 +55,8 @@ class ConfiguracaoUpdateView(LoginRequiredMixin, UpdateView):
         context['activegroup'] = 'comunicacao'
         return context
 
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_comunicacao', login_url='erro_page'), name='dispatch')
 class ConfiguracaoDeleteView(DeleteView):
     model = Configuracao
     template_name = 'comunicacao/papeldeparede/configuracao_confirm_delete.html'
