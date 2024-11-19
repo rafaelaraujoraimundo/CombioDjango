@@ -2,23 +2,17 @@
 
 {% block content %}
 <div class="container-fluid">
-
+    {% if form.non_field_errors %}
     <div class="alert alert-danger">
-        {% if form.non_field_errors %}
-            <div>{{ form.non_field_errors }}</div>
-        {% endif %}
-        {% for field in form %}
-            {% if field.errors %}
-                <div>{{ field.label }}: {{ field.errors }}</div>
-            {% endif %}
-        {% endfor %}
+        {{ form.non_field_errors }}
     </div>
+{% endif %}
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         
         <!-- Linha para Arquivo de Imagem e Nome do Arquivo -->
-        <div class="row">
+        <div class="row mt-6">
             <div class="col-md-6">
                 <div class="form-group position-relative">
                     <label for="{{ form.arquivo_imagem.id_for_label }}">Arquivo de Imagem</label>
