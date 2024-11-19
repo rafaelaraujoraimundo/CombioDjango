@@ -6,6 +6,16 @@ from .models import User, ServidorFluig, GroupProcess, Process, GroupProcessSele
 from menu.models import ItensMenu
 from requests_oauthlib import OAuth1Session
 from django.apps import apps
+from django.urls import get_resolver
+
+def get_all_urls():
+    url_patterns = []
+    all_urls = get_resolver().url_patterns  # Recupera todas as rotas do URLConf raiz
+    for url in all_urls:
+        if hasattr(url, 'name') and url.name:  # Verifica se a URL tem um nome
+            url_patterns.append(url.name)
+    return url_patterns
+
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -16,6 +26,7 @@ class CustomUserCreationForm(UserCreationForm):
         required=False,
         label="Custom Permissions"
     )
+    #pagina_inicial = forms.ChoiceField(choices=[(url, url) for url in get_all_urls()])
 
     class Meta:
         model = User
