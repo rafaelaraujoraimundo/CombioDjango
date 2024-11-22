@@ -55,6 +55,7 @@ def change_password(request):
         messages.error(request, 'Método não permitido.')
         return redirect('administration_users')
 
+ # Redireciona para a página de login se não estiver logado
 @login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
 @permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def user_list(request):
@@ -68,7 +69,8 @@ def user_list(request):
     return render(request, 'users/user_list.html', context)
 
 
-@login_required(login_url='account_login')
+
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
 @permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def create_user(request):
     activegroup = 'administration'
@@ -327,7 +329,7 @@ def edit_logged_in_user_profile(request):
     return JsonResponse({'success': True, 'message': 'Perfil atualizado com sucesso.'})
 
 
-@login_required
+@login_required(login_url='account_login') 
 def get_logged_in_user_profile(request):
     user = request.user
     data = {
@@ -337,7 +339,8 @@ def get_logged_in_user_profile(request):
     return JsonResponse(data)
 
 
-
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def list_group_processes(request):
     #update_processes() # Atualiza os dados de processos antes de exibir a página
     groups = GroupProcess.objects.all()
@@ -348,6 +351,8 @@ def list_group_processes(request):
     }
     return render(request, 'administration/groupprocess/groupprocess_list.html', context)
 
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def delete_group_process(request, pk):
     group = get_object_or_404(GroupProcess, pk=pk)
     if request.method == 'POST':
@@ -360,7 +365,8 @@ def delete_group_process(request, pk):
     }
     return render(request, 'administration/groupprocess/delete_confirmation.html', context)
 
-
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def create_group_process(request):
     if request.method == 'POST':
         form = GroupProcessForm(request.POST)
@@ -385,6 +391,8 @@ def create_group_process(request):
     }
     return render(request, 'administration/groupprocess/groupprocess_form.html', context)
 
+@login_required(login_url='account_login')  # Redireciona para a página de login se não estiver logado
+@permission_required('global_permissions.combio_admin_admin', login_url='erro_page')
 def edit_group_process(request, pk):
     group = get_object_or_404(GroupProcess, pk=pk)
     

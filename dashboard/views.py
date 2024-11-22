@@ -18,6 +18,7 @@ from administration.models import ServidorFluig
 import chartify
 from django.utils import timezone
 from inventario.tasks import populate_hardware_data
+from django.contrib.auth.decorators import login_required, permission_required
 
 
 def view_padrao(request):
@@ -26,7 +27,7 @@ def view_padrao(request):
     context = {'activegroup': activegroup}
     return render(request, 'dashboards/ti.html', context)
 
-
+@login_required(login_url='account_login') 
 @permission_required('global_permissions.combio_dashboard', login_url='erro_page')
 def dashboard_fluig(request, servidor_id=None):
     activegroup = 'Dashboard'
@@ -102,7 +103,7 @@ def dashboard_fluig(request, servidor_id=None):
     }
     return render(request, 'dashboards/ti.html', context)
 
-
+@login_required(login_url='account_login') 
 @permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
 def dashboard_ti2(request):
     activegroup = 'Dashboard'
@@ -160,7 +161,7 @@ def dashboard_ti2(request):
                'div2': div2, 'activegroup': activegroup}
     return render(request, 'dashboards/ti.html', context)
 
-
+@login_required(login_url='account_login') 
 @permission_required('global_permissions.combio_dashboard_controladoria', login_url='erro_page')
 def dashboard_controladoria(request):
     activegroup = 'Dashboard'
@@ -267,7 +268,7 @@ def dashboard_controladoria(request):
     # Renderizar o template inicial
     return render(request, 'dashboards/controladoria.html', {'table1_html': table1_html, 'activegroup': activegroup})
 
-
+@login_required(login_url='account_login') 
 @permission_required('global_permissions.combio_dashboard_controladoria', login_url='erro_page')
 def exemplo(request):
     activegroup = 'Dashboard'

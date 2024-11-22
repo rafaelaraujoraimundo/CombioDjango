@@ -20,7 +20,7 @@ from django.db.models import Count
 
 # Create your views here.
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_suporte', login_url='erro_page'), name='dispatch')
 class UsuarioDesligamentoCreate(CreateView):
     model = UsuarioDesligamento
     form_class = UsuarioDesligamentoForm
@@ -40,7 +40,7 @@ class UsuarioDesligamentoCreate(CreateView):
 
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_suporte', login_url='erro_page'), name='dispatch')
 class UsuarioDesligamentoList(ListView):
     model = UsuarioDesligamento
     template_name = 'suporte/desligamento/usuario_desligamento_list.html'
@@ -55,7 +55,7 @@ class UsuarioDesligamentoList(ListView):
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_suporte', login_url='erro_page'), name='dispatch')
 class UsuarioDesligamentoUpdate(UpdateView):
     model = UsuarioDesligamento
     form_class = UsuarioDesligamentoForm
@@ -74,7 +74,7 @@ class UsuarioDesligamentoUpdate(UpdateView):
         return super().form_valid(form)
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_suporte', login_url='erro_page'), name='dispatch')
 class UsuarioDesligamentoDelete(DeleteView):
     model = UsuarioDesligamento
     template_name = 'suporte/desligamento/usuario_desligamento_confirm_delete.html'
@@ -97,7 +97,7 @@ from .models import Substituicao, GroupProcess
 from .tasks import substituir_usuario_fluig
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
-@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_suporte', login_url='erro_page'), name='dispatch')
 class CreateSubstitutoFluig(View):
     template_name = 'suporte/substitutofluig/substituto_fluig_form.html'
     result_template_name = 'suporte/substitutofluig/substituicao_list.html'
@@ -160,7 +160,8 @@ class CreateSubstitutoFluig(View):
         }
         return render(request, self.template_name, context)
 
-
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_suporte', login_url='erro_page'), name='dispatch')
 class SubstituicaoListView(ListView):
     model = Substituicao
     template_name = 'suporte/substitutofluig/substituicao_list.html'
@@ -186,7 +187,8 @@ class SubstituicaoListView(ListView):
         context['title'] = 'Lista de Substituto Fluig'
         return context
     
-
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_suporte', login_url='erro_page'), name='dispatch')
 class SubstituicaoDetailView(DetailView):
     model = Substituicao
     template_name = 'suporte/substitutofluig/substituicao_detail.html'

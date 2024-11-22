@@ -827,6 +827,7 @@ def monitor_delete(request, monitor_id):
 
 
 @method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class ComputadorList(ListView):
     model = Computador
     template_name = 'inventario/computador/computador_list.html'
