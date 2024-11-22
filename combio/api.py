@@ -4,6 +4,7 @@ from ninja_jwt.controller import NinjaJWTDefaultController
 from ninja_extra import NinjaExtraAPI
 from inventario.api_inventario import (routerCelular, routerComputador, routerEstoque,
     routerHardware, routerMonitor, routerStatus, routerTipoItem, routerCentroCusto, routerEstabelecimento)
+from comunicacao.api_comunicacao import  routerParametro
 
   
 api = NinjaExtraAPI(version='2.0.0', urls_namespace='Fluig')
@@ -21,6 +22,6 @@ api.add_router("/v1/inventario", routerComputador)
 api.add_router("/v1/inventario", routerStatus)
 api.add_router("/v1/inventario", routerCentroCusto)
 api.add_router("/v1/inventario", routerEstabelecimento)
-
+api.add_router("/v1/comunicacao",routerParametro )
 
 
