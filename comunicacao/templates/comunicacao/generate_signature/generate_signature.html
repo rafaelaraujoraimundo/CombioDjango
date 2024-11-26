@@ -1,0 +1,32 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<form id="imageForm" method="post" enctype="multipart/form-data" action="{% url 'process_image' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="file" name="uploadImage" accept="image/*">
+    <button type="submit">Enviar Imagem</button>
+</form>
+<div id="imageResult"></div>
+<script>
+document.getElementById('imageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.image) {
+            // Exibe a imagem processada
+            document.getElementById('imageResult').innerHTML = `<img src="data:image/png;base64,${data.image}" alt="Processed Image" />`;
+        } else {
+            document.getElementById('imageResult').innerHTML = 'No image returned.';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+</script>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<form id="signatureForm" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <label for="uploadImage">Upload an image:</label>
+    <input type="file" id="uploadImage" name="uploadImage" accept="image/*">
+    <button type="envio">Gerar e Processar</button>
+</form>
+<div id="signatureResult"></div>
+
+<script>
+    document.getElementById('signatureForm').addEventListener('envio', function(e) {
+        console.log('antes pevente')
+        e.preventDefault();
+        console.log('depois do precente')
+        const formData = new FormData(this);
+    
+        fetch('/comunicacao/generate/process_image/', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            
+            if (data.image) {
+                const imageSrc = `data:image/png;base64,${data.image}`;
+                //document.getElementById('signatureResult').innerHTML = `<img src="${imageSrc}" alt="Processed Image"/>`;
+            }
+            
+            const signatureHTML += `
+          
+<table id="assinatura-div-gmail" style="
+@import url('https://fonts.googleapis.com/css2?family=Kodchasan:wght@400;700&family=Varela+Round&display=swap');
+width: 420pt;
+height: 151pt;
+font-size: 9pt;
+font-family: Kodchasan, sans-serif;
+line-height: 16px;
+background-size: contain;
+background-repeat: no-repeat;" 
+cellpadding="0" cellspacing="0">
+<tbody>
+    <tr>
+        <td colspan="2" style="width: 151pt;">
+        
+            <img style="width: 128pt; min-width: 128pt; height: auto;" 
+                src="${imageSrc}">
+        </td>
+        <td style="display: inline-block; font-size: 12pt; line-height: 19px; padding-bottom: 8px; width: 195pt;">
+            <table style="min-height: 135pt; height: 135pt;" cellpadding="0" cellspacing="0" border="0">
+                <tbody>
+                    <tr style="height: 10pt;">
+                        <td height="2" colspan="2" cellpadding="2" cellspacing="2"></td>
+                    </tr>
+                    <tr style="height: 50pt;">
+                        <td colspan="2">
+                            <span style="font-family: Kodchasan, sans-serif; color: #02642e; font-size: 13pt; font-weight: bold;">
+                                 ${data.nome}
+                            </span>
+                            <span style="margin-top: 1px; font-family: Kodchasan, sans-serif; color: #3d9036; font-size: 12pt;">
+                                <br>${data.setor}
+                            </span>
+                            <br>
+                        </td>
+                    </tr>
+                    <tr style="height: 15pt;">
+                        <td colspan="1" style="width: 15pt; text-align-last: center;">
+                            <img alt="Phone icon" border="0" width="8" height="14" 
+                                 src="https://www.manacacomunicacao.com.br/wp-content/uploads/2023/08/Celular.png">
+                        </td>
+                        <td colspan="1">
+                            <span style="font-family: Arial, sans-serif; color: #2c2c2c; font-size: 8pt; line-height: 0px;">
+                                ${data.telefone}
+                            </span>
+                            <br>
+                        </td>
+                    </tr>
+                    <tr style="height: 15pt;">
+                        <td colspan="1" style="width: 15pt; text-align-last: center;">
+                            <img alt="Email icon" border="0" width="14" height="10" 
+                                 src="https://www.manacacomunicacao.com.br/wp-content/uploads/2023/08/Email.png">
+                        </td>
+                        <td colspan="1">
+                            <span style="font-family: Arial, sans-serif; color: #2c2c2c; font-size: 8pt; line-height: 0px;">
+                                ${data.email}@combio.com.br
+                            </span>
+                            <br>
+                        </td>
+                    </tr>
+                    <tr style="height: 15pt;">
+                        <td colspan="1" style="width: 15pt; text-align-last: center;">
+                            <img alt="Location icon" border="0" width="10" height="14" 
+                                 src="https://www.manacacomunicacao.com.br/wp-content/uploads/2023/08/Local.png">
+                        </td>
+                        <td colspan="1">
+                            <span style="font-family: Arial, sans-serif; color: #2c2c2c; font-size: 8pt; line-height: 0px;">
+                                R. Fradique Coutinho, 30 - Pinheiros, São Paulo
+                            </span>
+                            <br>
+                        </td>
+                    </tr>
+                    <tr style="height: 15pt;">
+                        <td colspan="1" style="width: 15pt; text-align-last: center;">
+                            <img alt="WebSite icon" border="0" width="14" height="14" 
+                                 src="https://combioenergia.fluig.cloudtotvs.com.br/volume/stream/Rmx1aWc=/P3Q9MSZ2b2w9RGVmYXVsdCZpZD00ODY4OTQmdmVyPTEwMDAmZmlsZT1JY29uZStXZWJzaXRlLnBuZyZjcmM9MjYyMTEwNTYyMiZzaXplPTAuMDAxNTEzJnVJZD0zMjkmZlNJZD0xJnVTSWQ9MSZkPWZhbHNlJnRrbj0mcHVibGljVXJsPXRydWU=.png">
+                        </td>
+                        <td colspan="1">
+                            <table cellpadding="0" cellspacing="0" border="0">
+                                <tbody>
+                                    <tr>
+                                        <td colspan="1" style="width: 120pt;">
+                                            <span style="font-family: Arial, sans-serif; color: #2c2c2c; font-size: 8pt; line-height: 0px;">
+                                                <a href="https://combioenergia.fluig.cloudtotvs.com.br/" 
+                                                   target="_blank" style="vertical-align: middle; text-decoration: none; color: #02642e;">
+                                                   combio.com.br
+                                                </a>
+                                            </span>
+                                        </td>
+                                        <td colspan="1">
+                                            <a href="https://www.linkedin.com/company/combio-energia-s-a-/" 
+                                               target="_blank" style="display: inline-block;">
+                                                <img src="https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg" 
+                                                     alt="LinkedIn Logo" 
+                                                     style="width: 24px; height: 24px; vertical-align: middle;">
+                                            </a>
+                                        </td>
+                                        <td colspan="1">
+                                            <a href="https://www.instagram.com/combioenergia/" target="_blank">
+                                                <img alt="Instagram icon" border="0" width="25" height="25" 
+                                                    style="border: 0; width: 25px; height: 25px;" 
+                                                    src="data:image/png;base64,iVBORw0KGgo">
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr style="height: 25pt;">
+                        <td height="2" colspan="2" cellpadding="2" cellspacing="2"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td style="width: 10pt;">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <img width="2" height="134" style="width: 2px; height: 100pt; border: 0; padding-left: 4pt; padding-right: 4pt; padding-bottom: 6pt; margin-top: 0px;" 
+                                 src="https://combioenergia.fluig.cloudtotvs.com.br/volume/stream/Rmx1aWc=/P3Q9MSZ2b2w9RGVmYXVsdCZpZD00ODM4MTcmdmVyPTEwMDAmZmlsZT1ncmVlbi1saW5lLnBuZyZjcmM9NDY0NTc4ODcxJnNpemU9NC4wRS00JnVJZD0zMjkmZlNJZD0xJnVTSWQ9MSZkPWZhbHNlJnRrbj0mcHVibGljVXJsPXRydWU=.png">
+                        </td>
+                    </tr>
+                    <tr style="height: 20pt;">
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td style="width: 90pt; max-width: 90pt;" colspan="2">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <img width="107" height="102" style="border: 0px; vertical-align: middle; width: 107px; height: 102px; padding-left: 12px; padding-bottom: 15px; margin-top: 0px;" 
+                                 src="https://www.manacacomunicacao.com.br/wp-content/uploads/2023/08/Logo02.png">
+                        </td>
+                    </tr>
+                    <tr style="height: 40pt;">
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+</tbody>
+</table>
+            `;
+    document.getElementById('signatureResult').innerHTML = signatureHTML;
+    console.log(signatureHTML)
+        })
+        .catch(error => console.error('Error:', error));
+    });
+    </script>
+    
+    {% endblock %}

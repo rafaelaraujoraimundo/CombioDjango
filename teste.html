@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Gráfico CSS</title>
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f0f0f0; /* Cor de fundo neutra para melhor contraste */
+    }
+    .circle-wrapper {
+        position: relative;
+        width: 300px;
+        height: 300px;
+    }
+    .circle-main {
+        width: 100%;
+        height: 100%;
+        background-color: #ccc;
+        border-radius: 50%;
+        position: relative;
+        overflow: hidden;
+    }
+    .circle-green {
+        position: absolute;
+        width: 50%;
+        height: 100%;
+        background-color: #008000; /* Cor verde */
+        clip-path: circle(50% at 100% 50%);
+        right: 0;
+    }
+    .small-circle {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        background-color: #fff; /* Cor branca */
+        border-radius: 50%;
+        box-shadow: 0 0 10px rgba(0,0,0,0.15); /* Sombra suave para dar profundidade */
+    }
+    .small-circle.top {
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .small-circle.bottom {
+        bottom: 10px;
+        right: 10px;
+    }
+</style>
+</head>
+<body>
+<div class="circle-wrapper">
+    <div class="circle-main">
+        <div class="circle-green"></div>
+        <div class="small-circle top"></div>
+        <div class="small-circle bottom"></div>
+    </div>
+</div>
+</body>
+</html>

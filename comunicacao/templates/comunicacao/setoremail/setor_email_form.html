@@ -1,0 +1,30 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group position-relative">
+                    <label for="{{ form.nome.id_for_label }}">Nome do Setor</label>
+                    <input type="text" class="form-control {% if form.nome.errors %}is-invalid{% endif %}" 
+                           id="{{ form.nome.id_for_label }}" name="{{ form.nome.name }}"
+                           value="{{ form.nome.value|default_if_none:'' }}" placeholder="Nome do setor">
+                    {% for error in form.nome.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="{% url 'setoremail_list' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

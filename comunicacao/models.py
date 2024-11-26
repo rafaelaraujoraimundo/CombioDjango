@@ -42,3 +42,10 @@ class Configuracao(models.Model):
 
     def __str__(self):
         return self.nome_arquivo if self.nome_arquivo else str(self.id)
+
+
+class SetorEmail(models.Model):
+    nome = models.CharField(max_length=100, blank=False)
+
+    def __str__(self):
+        return self.nome
