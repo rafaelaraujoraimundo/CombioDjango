@@ -186,6 +186,75 @@
                 </div>
             </div>
         </div>
+        <div class="form-group">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="backupEmail" name="{{ form.backup_email.name }}" {% if form.backup_email.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="backupEmail">Backup do E-mail</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <textarea class="form-control" name="{{ form.observacao_email.name }}" placeholder="Observações sobre o backup do e-mail">{{ form.observacao_email.value }}</textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="backupOneDrive" name="{{ form.backup_onedrive.name }}" {% if form.backup_onedrive.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="backupOneDrive">Backup do OneDrive</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <textarea class="form-control" name="{{ form.observacao_onedrive.name }}" placeholder="Observações sobre o backup do OneDrive">{{ form.observacao_onedrive.value }}</textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="backupDesktop" name="{{ form.backup_desktop.name }}" {% if form.backup_desktop.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="backupDesktop">Backup da Área de Trabalho</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <textarea class="form-control" name="{{ form.observacao_desktop.name }}" placeholder="Observações sobre o backup da Área de Trabalho">{{ form.observacao_desktop.value }}</textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="devolucaoComputador" name="{{ form.devolucao_computador.name }}" {% if form.devolucao_computador.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="devolucaoComputador">Devolução do Computador</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <textarea class="form-control" name="{{ form.observacao_computador.name }}" placeholder="Observações sobre a devolução do computador">{{ form.observacao_computador.value }}</textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="devolucaoCelular" name="{{ form.devolucao_celular.name }}" {% if form.devolucao_celular.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="devolucaoCelular">Devolução do Celular</label>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <textarea class="form-control" name="{{ form.observacao_celular.name }}" placeholder="Observações sobre a devolução do celular">{{ form.observacao_celular.value }}</textarea>
+                </div>
+            </div>
+        </div>
         <!-- Botões -->
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a href="{% url 'usuario_desligamento_list' %}" class="btn btn-secondary">Voltar</a>

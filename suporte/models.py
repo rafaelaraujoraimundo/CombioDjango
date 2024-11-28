@@ -37,7 +37,21 @@ class UsuarioDesligamento(models.Model):
 
     envio_email_gestor = models.BooleanField(default=False, help_text="Indica se um email será enviado ao gestor")
     gestor = models.CharField(max_length=100, null=True, blank=True, help_text="Nome do gestor responsável")
-    
+
+    backup_email = models.BooleanField(default=False, help_text="Backup do e-mail realizado")
+    observacao_email = models.TextField(null=True, blank=True, help_text="Observações sobre o backup do e-mail")
+
+    backup_onedrive = models.BooleanField(default=False, help_text="Backup do OneDrive realizado")
+    observacao_onedrive = models.TextField(null=True, blank=True, help_text="Observações sobre o backup do OneDrive")
+
+    backup_desktop = models.BooleanField(default=False, help_text="Backup da Área de Trabalho/Documentos realizado")
+    observacao_desktop = models.TextField(null=True, blank=True, help_text="Observações sobre o backup da Área de Trabalho/Documentos")
+
+    devolucao_computador = models.BooleanField(default=False, help_text="Computador devolvido")
+    observacao_computador = models.TextField(null=True, blank=True, help_text="Observações sobre a devolução do computador")
+
+    devolucao_celular = models.BooleanField(default=False, help_text="Celular devolvido")
+    observacao_celular = models.TextField(null=True, blank=True, help_text="Observações sobre a devolução do celular")    
 
     def __str__(self):
         return self.usuario

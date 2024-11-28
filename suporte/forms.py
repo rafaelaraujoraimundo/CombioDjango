@@ -14,7 +14,12 @@ class UsuarioDesligamentoForm(forms.ModelForm):
             'bloqueio_monday', 'usuario_monday',
             'bloqueio_qualiteam', 'usuario_qualiteam',
             'bloqueio_portal_chamados', 'usuario_portal_chamados',
-            'bloqueio_usuario_impressora', 'usuario_impressora'
+            'bloqueio_usuario_impressora', 'usuario_impressora',
+            'backup_email', 'observacao_email',
+            'backup_onedrive', 'observacao_onedrive',
+            'backup_desktop', 'observacao_desktop',
+            'devolucao_computador', 'observacao_computador',
+            'devolucao_celular', 'observacao_celular',
         ]
         labels = {
             'usuario': 'Usuário a ser desligado',
@@ -36,7 +41,17 @@ class UsuarioDesligamentoForm(forms.ModelForm):
             'bloqueio_portal_chamados': 'Bloqueio Portal de Chamados',
             'usuario_portal_chamados': 'Usuário do Portal de Chamados',
             'bloqueio_usuario_impressora': 'Bloqueio Usuário da Impressora (Matriz)',
-            'usuario_impressora': 'Usuário de Impressora (Matriz)'
+            'usuario_impressora': 'Usuário de Impressora (Matriz)',
+            'backup_email': 'Backup do E-mail',
+            'observacao_email': 'Observação sobre o Backup do E-mail',
+            'backup_onedrive': 'Backup do OneDrive',
+            'observacao_onedrive': 'Observação sobre o Backup do OneDrive',
+            'backup_desktop': 'Backup da Área de Trabalho/Documentos',
+            'observacao_desktop': 'Observação sobre o Backup da Área de Trabalho/Documentos',
+            'devolucao_computador': 'Devolução do Computador',
+            'observacao_computador': 'Observação sobre a Devolução do Computador',
+            'devolucao_celular': 'Devolução do Celular',
+            'observacao_celular': 'Observação sobre a Devolução do Celular',
         }
 
 

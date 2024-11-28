@@ -11,25 +11,48 @@
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
-                    <th>ID</th>
+                
                     <th>Usuário</th>
                     <th>Data Desligamento</th>
                     <th>Data Limite</th>
-                    <th>Usuário de Cadastro</th>
-                    <th>Última Alteração</th>
+                    <th>Usuário de Alteração</th>
+                    <th>Backup Email</th>
+                    <th>Backup OneDrive</th>
+                    <th>Backup Desktop</th>
+                    <th>Devolução Computador</th>
+                    <th>Devolução Celular</th>
+                    <th>Bloqueio Email</th>
+                    <th>Bloqueio Fluig</th>
+                    <th>Bloqueio Datasul</th>
+            
+                    <th>Bloqueio Monday</th>
+                    <th>Bloqueio Qualiteam</th>
+                    <th>Bloqueio Portal Chamados</th>
+                    <th>Bloqueio Impressora</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 {% for desligamento in desligamentos %}
                     <tr>
-                        <td>{{ desligamento.id }}</td>
+                        
                         <td>{{ desligamento.usuario }}</td>
                         <td>{{ desligamento.data_desligamento|date:"d/m/Y" }}</td>
                         <td>{{ desligamento.data_limite|date:"d/m/Y" }}</td>
-                        <td>{{ desligamento.usuario_cadastro }}</td>
-                        <td>{{ desligamento.data_ultima_alteracao|date:"d/m/Y H:i" }}</td>
-                        <td> 
+                        <td>{{ desligamento.usuario_ultima_alteracao }}</td>
+                        <td>{{ desligamento.backup_email|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.backup_onedrive|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.backup_desktop|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.devolucao_computador|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.devolucao_celular|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.bloqueio_email|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.bloqueio_fluig|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.bloqueio_datasul|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.bloqueio_monday|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.bloqueio_qualiteam|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.bloqueio_portal_chamados|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.bloqueio_usuario_impressora|yesno:"Sim,Não" }}</td>
+                        <td>
                             <a class="mr-3" href="{% url 'usuario_desligamento_edit' desligamento.id %}">
                                 <i class="fa fa-edit"></i> Editar
                             </a>
@@ -40,7 +63,7 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="7">Nenhum desligamento de usuário cadastrado.</td>
+                        <td colspan="20">Nenhum desligamento de usuário cadastrado.</td>
                     </tr>
                 {% endfor %}
             </tbody>
