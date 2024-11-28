@@ -195,7 +195,7 @@
                     </div>
                 </div>
                 <div class="col-md-10">
-                    <textarea class="form-control" name="{{ form.observacao_email.name }}" placeholder="Observações sobre o backup do e-mail">{{ form.observacao_email.value }}</textarea>
+                    <textarea class="form-control" name="{{ form.observacao_email.name }}" placeholder="Observações sobre o backup do e-mail">{{ form.observacao_email.value|default_if_none:'' }}</textarea>
                 </div>
             </div>
         </div>
@@ -209,7 +209,7 @@
                     </div>
                 </div>
                 <div class="col-md-10">
-                    <textarea class="form-control" name="{{ form.observacao_onedrive.name }}" placeholder="Observações sobre o backup do OneDrive">{{ form.observacao_onedrive.value }}</textarea>
+                    <textarea class="form-control" name="{{ form.observacao_onedrive.name }}" placeholder="Observações sobre o backup do OneDrive">{{ form.observacao_onedrive.value|default_if_none:''  }}</textarea>
                 </div>
             </div>
         </div>
@@ -223,7 +223,7 @@
                     </div>
                 </div>
                 <div class="col-md-10">
-                    <textarea class="form-control" name="{{ form.observacao_desktop.name }}" placeholder="Observações sobre o backup da Área de Trabalho">{{ form.observacao_desktop.value }}</textarea>
+                    <textarea class="form-control" name="{{ form.observacao_desktop.name }}" placeholder="Observações sobre o backup da Área de Trabalho">{{ form.observacao_desktop.value|default_if_none:''  }}</textarea>
                 </div>
             </div>
         </div>
@@ -237,7 +237,7 @@
                     </div>
                 </div>
                 <div class="col-md-10">
-                    <textarea class="form-control" name="{{ form.observacao_computador.name }}" placeholder="Observações sobre a devolução do computador">{{ form.observacao_computador.value }}</textarea>
+                    <textarea class="form-control" name="{{ form.observacao_computador.name }}" placeholder="Observações sobre a devolução do computador">{{ form.observacao_computador.value|default_if_none:''  }}</textarea>
                 </div>
             </div>
         </div>
@@ -251,7 +251,9 @@
                     </div>
                 </div>
                 <div class="col-md-10">
-                    <textarea class="form-control" name="{{ form.observacao_celular.name }}" placeholder="Observações sobre a devolução do celular">{{ form.observacao_celular.value }}</textarea>
+                </div>
+                </div>
+                    <textarea class="form-control" name="{{ form.observacao_celular.name }}" placeholder="Observações sobre a devolução do celular">{{ form.observacao_celular.value|default_if_none:'' }}</textarea>
                 </div>
             </div>
         </div>
