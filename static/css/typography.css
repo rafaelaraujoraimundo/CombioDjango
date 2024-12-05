@@ -53,10 +53,28 @@ import Css
 
 /*---------------------------------------------------------------------
 Font @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Kodchasan:wght@400;500;700&display=swap');
 -----------------------------------------------------------------------*/
 
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@font-face {
+  font-family: 'Kodchasan'; /* Nome da fonte Kodchasan */
+  src: url('/static/fonts/Kodchasan-Regular.ttf') format('truetype'); /* Caminho e formato */
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Varela Round'; /* Nome da fonte Varela Round */
+  src: url('/static/fonts/VarelaRound-Regular.ttf') format('truetype'); /* Caminho e formato */
+  font-weight: normal;
+  font-style: normal;
+}
+
+
 
 
 /*---------------------------------------------------------------------
@@ -65,7 +83,7 @@ General
 *::-moz-selection { background: var(--iq-primary); color: var(--iq-white); text-shadow: none; }
 ::-moz-selection { background: var(--iq-primary); color: var(--iq-white); text-shadow: none; }
 ::selection { background: var(--iq-primary); color: var(--iq-white); text-shadow: none; }
-body { font-family: 'Roboto', sans-serif; font-weight: 400; font-style: normal; font-size: 14px; line-height: 1.8; padding: 0; margin: 0; color: var(--iq-body-text); background: var(--iq-body-bg); }
+body { font-family: 'Kodchasan', 'Varela Round'; font-weight: 400; font-style: normal; font-size: 14px; line-height: 1.8; padding: 0; margin: 0; color: var(--iq-body-text); background: var(--iq-body-bg); }
 a, .btn { -webkit-transition: all 0.5s ease-out 0s; -moz-transition: all 0.5s ease-out 0s; -ms-transition: all 0.5s ease-out 0s; -o-transition: all 0.5s ease-out 0s; transition: all 0.5s ease-out 0s; }
 a, button, input, btn { outline: medium none !important; }
 a{color: var(--iq-primary);}
