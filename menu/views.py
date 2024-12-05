@@ -1,23 +1,15 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from menu.menu import GetGroup, GetMenu, backup_dados
 # Create your views here.
 
-
+@login_required(login_url='account_login')
 def index(request):
-    activegroup = 'index'
-    activemenu = 'index'
-    groups = GetGroup()
-    menus = GetMenu()
-    #a = backup_dados()
-    user_groups = request.user.groups.all()
+    title = 'Sistema Combio'
     context = {
-        "nome_pagina": "Página inicial", 'groups': groups,
-        'menus': menus, 'activegroup': activegroup,
-        'activemenu': activemenu, 'user_groups': user_groups
+        "title": title, 
     }
 
-    return render(request, "menu/index.html", context)
+    return render(request, "menu/principal.html", context)
 
 
 def erro_page(request):

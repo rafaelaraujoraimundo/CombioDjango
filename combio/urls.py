@@ -23,6 +23,7 @@ from django.conf import settings
 from .api import api
 from novosProjetos.views import novosprojetos_dashboard
 from django.views.generic.base import RedirectView
+from menu.views import index
 
 handler404 = 'menu.views.error_404_view'
 handler500 = 'menu.views.error_500_view'
@@ -31,7 +32,7 @@ urlpatterns = [
     path('admin/', admin.site.urls, name="admin1"),
     #path("api/", api.urls),
     path("logout/",auth_views.LogoutView.as_view(template_name="login/logout.html"),name="logout"),
-    path('', RedirectView.as_view(url='/inventario/dashboard/', permanent=True),name="index"),
+    path('', index,name="index"),
     #path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include('allauth.urls')),
     path('administration/', include('administration.urls')),
