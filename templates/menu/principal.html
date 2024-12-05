@@ -2,26 +2,74 @@
 
 {% extends 'menu/index.html' %}
 
+{% load static %}
 {% block content %}
-<header>
-    <h1>Bem-vindo ao Sistema Combio</h1>
-</header>
-<main>
     <section>
-        <h2>Olá, usuário!</h2>
-        <p>Estamos felizes em tê-lo aqui. Explore as funcionalidades do sistema e aproveite as ferramentas que criamos para facilitar o seu trabalho.</p>
+        <h2>Olá, {{ request.user.nome_completo }}!</h2>
+        <h4>Bem vindo ao Sistema Combio.</h4>
     </section>
-    <section>
-        <h3>O que você pode fazer:</h3>
-        <ul>
-            <li>Gerenciar dados de forma eficiente</li>
-            <li>Acompanhar relatórios em tempo real</li>
-            <li>Colaborar com sua equipe</li>
-            <li>Automatizar processos complexos</li>
-        </ul>
-    </section>
-    <section>
-        <p><strong>Precisa de ajuda?</strong> Entre em contato com nosso suporte técnico sempre que precisar.</p>
-    </section>
-</main>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <div class="iq-header-title">
+                        <h4 class="card-title">Telas de Bloqueio e Papel de Parede Aplicados na Combio</h4>
+                    </div>
+                </div>
+                <div class="iq-card-body">
+                    <div class="row mb-4">
+                        <!-- Papel de Parede Padrão -->
+                        <div class="col-lg-6">
+                            <div class="card iq-mb-3">
+                                <div class="row no-gutters">
+                                    <div class="col-md-4">
+                                        <img src="/media/papeldeparede/papelparede.jpg" class="card-img" alt="Papel de Parede Padrão">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h4 class="card-title">Papel de Parede Padrão</h4>
+                                            <p class="card-text">Esta imagem está definida como o papel de parede padrão para o sistema.</p>
+                                            <p class="card-text"><small class="text-muted">Atualizada recentemente</small></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Bloqueio de Tela Padrão -->
+                        <div class="col-lg-6">
+                            <div class="card iq-mb-3">
+                                <div class="row no-gutters">
+                                    <div class="col-md-4">
+                                        <img src="/media/papeldeparede/bloqueio.jpg" class="card-img" alt="Bloqueio de Tela Padrão">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h4 class="card-title">Bloqueio de Tela Padrão</h4>
+                                            <p class="card-text">Esta imagem está definida como o bloqueio de tela padrão para o sistema.</p>
+                                            <p class="card-text"><small class="text-muted">Atualizada recentemente</small></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% for item in totals_with_colors %}
+        <div class="col-lg-2">
+            <div class="card" style="background-color: var({{ item.color }}); color: white !important;">
+                <div class="card-body">
+                    <h3 class="card-title text-center"style="color: white !important;">{{ item.count }}</h3>
+                    <p class="card-text text-center">{{ item.model }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+  
+
 {% endblock %}
