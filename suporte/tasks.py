@@ -15,6 +15,7 @@ from decouple import config
 from django.core.mail import send_mail
 from django.conf import settings
 import json
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 

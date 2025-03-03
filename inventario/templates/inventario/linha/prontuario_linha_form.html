@@ -1,0 +1,49 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row align-items-start">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-2"><strong>Número da Linha:</strong> {{ linha.numero_linha }}</div>
+                <div class="col-md-2"><strong>Status:</strong> {{ linha.status }}</div>
+                <div class="col-md-2">
+                    <strong>Termo:</strong>
+                    {% if linha.arquivo_linha %}
+                        <a href="{{ linha.arquivo_linha.url }}" target="_blank" class="btn btn-sm btn-info">Download</a>
+                    {% else %}
+                        <span class="text-muted">Nenhum arquivo</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-4"><strong>Usuário:</strong> {{ linha.usuario }}</div>
+                <div class="col-md-4"><strong>Estabelecimento:</strong> {{ linha.estabelecimento }}</div>
+                <div class="col-md-4"><strong>Centro de Custo:</strong> {{ linha.centro_custo }}</div>
+            </div>
+            <div class="row mt-2">
+               
+                
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-3"><strong>Usuário de Inclusão:</strong> {{ linha.usuario_inclusao }}</div>
+                <div class="col-md-3"><strong>Data de Inclusão:</strong> {{ linha.data_inclusao|date:"d/m/Y H:i" }}</div>
+                <div class="col-md-3"><strong>Usuário de Alteração:</strong> {{ linha.usuario_alteracao|default:"-" }}</div>
+                <div class="col-md-3"><strong>Data de Alteração:</strong> {{ linha.data_alteracao|date:"d/m/Y H:i"|default:"-" }}</div>
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'linha_list' %}" class="btn btn-secondary">Voltar para Lista de Linhas</a>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <h4>Adicionar Ação</h4>
+    <form method="post">
+        {% csrf_token %}
+        {% include "inventario/linha/partials/prontuario_form_fields.html" %}
+
+
+    </form>
+</div>
+{% endblock %}

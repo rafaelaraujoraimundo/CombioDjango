@@ -2,53 +2,46 @@
 
 {% block content %}
 <div class="container-fluid">
-
-    <!-- Detalhes do Celular e Imagem -->
-    <h2>Detalhes do Celular</h2>
     <div class="row align-items-start">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="row">
-                <div class="col-md-4"><strong>Modelo:</strong> {{ celular.modelo }}</div>
-                <div class="col-md-4"><strong>Fabricante:</strong> {{ celular.fabricante }}</div>
-                <div class="col-md-4"><strong>Número de Série:</strong> {{ celular.numero_serie }}</div>
+                <div class="col-md-2"><strong>Número da Linha:</strong> {{ linha.numero_linha }}</div>
+                <div class="col-md-2"><strong>Status:</strong> {{ linha.status }}</div>
+                <div class="col-md-2">
+                    <strong>Termo:</strong>
+                    {% if linha.arquivo_linha %}
+                        <a href="{{ linha.arquivo_linha.url }}" target="_blank" class="btn btn-sm btn-info">Download</a>
+                    {% else %}
+                        <span class="text-muted">Nenhum arquivo</span>
+                    {% endif %}
+                </div>
             </div>
             <div class="row mt-2">
-                <div class="col-md-4"><strong>IMEI:</strong> {{ celular.imei }}</div>
-                <div class="col-md-4"><strong>Número da Linha:</strong> {{ celular.numero_linha }}</div>
-                <div class="col-md-4"><strong>Status:</strong> {{ celular.status }}</div>
-            </div>
-            
-            <!-- Novos campos de auditoria -->
-            <div class="row mt-2">
-                <div class="col-md-6"><strong>Usuário de Inclusão:</strong> {{ celular.usuario_inclusao }}</div>
-                <div class="col-md-6"><strong>Data de Inclusão:</strong> {{ celular.data_inclusao|date:"d/m/Y H:i" }}</div>
+                <div class="col-md-4"><strong>Usuário:</strong> {{ linha.usuario }}</div>
+                <div class="col-md-4"><strong>Estabelecimento:</strong> {{ linha.estabelecimento }}</div>
+                <div class="col-md-4"><strong>Centro de Custo:</strong> {{ linha.centro_custo }}</div>
             </div>
             <div class="row mt-2">
-                <div class="col-md-6"><strong>Usuário de Alteração:</strong> {{ celular.usuario_alteracao|default:"-" }}</div>
-                <div class="col-md-6"><strong>Data de Alteração:</strong> {{ celular.data_alteracao|date:"d/m/Y H:i"|default:"-" }}</div>
+               
+                
             </div>
-    
+            <div class="row mt-2">
+                <div class="col-md-3"><strong>Usuário de Inclusão:</strong> {{ linha.usuario_inclusao }}</div>
+                <div class="col-md-3"><strong>Data de Inclusão:</strong> {{ linha.data_inclusao|date:"d/m/Y H:i" }}</div>
+                <div class="col-md-3"><strong>Usuário de Alteração:</strong> {{ linha.usuario_alteracao|default:"-" }}</div>
+                <div class="col-md-3"><strong>Data de Alteração:</strong> {{ linha.data_alteracao|date:"d/m/Y H:i"|default:"-" }}</div>
+            </div>
             <div class="mt-4">
-                <a href="{% url 'celular_list' %}" class="btn btn-secondary">Voltar para Lista de Celulares</a>
+                <a href="{% url 'linha_list' %}" class="btn btn-secondary">Voltar para Lista de Linhas</a>
             </div>
-        </div>
-        
-        <!-- Imagem do Celular -->
-        <div class="col-md-4 text-right">
-            {% if celular.arquivo_celular %}
-                <img src="{{ celular.arquivo_celular.url }}" alt="Foto do Celular" class="img-fluid" style="max-height: 200px; border: 1px solid #ddd;">
-            {% else %}
-                <p class="text-muted">Sem imagem disponível</p>
-            {% endif %}
         </div>
     </div>
     
     <hr>
 
-    <!-- Tabela de Ações do Prontuário -->
     <h2>Ações do Prontuário</h2>
     <hr>
-    <a href="{% url 'prontuario_celular_create' celular.id %}" class="btn btn-primary mb-3">Adicionar Ação</a>
+    <a href="{% url 'prontuario_linha_create' linha.id %}" class="btn btn-primary mb-3">Adicionar Ação</a>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
@@ -71,7 +64,7 @@
                 <td>{{ prontuario.unidade_destino }}</td>
                 <td>{{ prontuario.local }}</td>
                 <td>
-                    <a href="{% url 'prontuario_celular_edit' prontuario.id %}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="{% url 'prontuario_linha_edit' prontuario.id %}" class="btn btn-sm btn-warning">Editar</a>
                     <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ prontuario.id }}" data-item="{{ prontuario.acao }}">Excluir</a>
                 </td>
             </tr>
@@ -79,7 +72,6 @@
         </tbody>
     </table>
 
-    <!-- Modal de Exclusão -->
     <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -117,6 +109,5 @@
             });
         });
     </script>
-
 </div>
 {% endblock %}

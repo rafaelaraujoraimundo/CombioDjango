@@ -14,7 +14,7 @@ staticfiles/
 
 # Backup files #
 *.bak
-
+suporte.zip
 # If you are using PyCharm #
 .idea/**/workspace.xml
 .idea/**/tasks.xml

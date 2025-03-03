@@ -33,6 +33,9 @@
     </div>
 
     <div class="col-md-6">
+ 
+
+       
         <div class="form-group">
             <label for="{{ form.data.id_for_label }}">Data</label>
             {% for error in form.data.errors %}
@@ -87,6 +90,9 @@
     <textarea class="form-control {% if form.motivo_ocorrencia.errors %}is-invalid{% endif %}" 
           id="{{ form.motivo_ocorrencia.id_for_label }}" name="{{ form.motivo_ocorrencia.name }}">{{ form.motivo_ocorrencia.value|default_if_none:'' }}</textarea>
 </div>
+
+<button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'prontuario_linha_list' linha.id %}" class="btn btn-secondary">Voltar</a>
 
 <!-- Script de Autocomplete -->
 <script>

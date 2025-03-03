@@ -1,6 +1,7 @@
 from django import forms
 from .models import (AcoesProntuario, Celular, Computador, ControleFones, Controlekit, Estoque,
-    Monitor, ProntuarioCelular, ProntuarioComputador, ProntuarioMonitor, Status, TipoItem)
+    Linha, Monitor, ProntuarioCelular, ProntuarioComputador, ProntuarioLinha, ProntuarioMonitor,
+    Status, TipoItem)
 from dashboard.models import BiFuncionariosCombio
 from django.utils.timezone import now
 
@@ -273,3 +274,34 @@ class ProntuarioComputadorForm(forms.ModelForm):
         }
 
 
+class LinhaForm(forms.ModelForm):
+    class Meta:
+        model = Linha
+        fields = ['numero_linha', 'usuario', 'status', 'estabelecimento', 'centro_custo', 'arquivo_linha']
+        labels = {
+            'numero_linha': 'Número da Linha',
+            'usuario': 'Usuário',
+            'status': 'Status',
+            'estabelecimento': 'Estabelecimento',
+            'centro_custo': 'Centro de Custo',
+            'arquivo_linha': 'Upload de Arquivo'
+        }
+        widgets = {
+            'arquivo_linha': forms.FileInput(attrs={'class': 'form-control-file'})
+        }
+
+class ProntuarioLinhaForm(forms.ModelForm):
+    class Meta:
+        model = ProntuarioLinha
+        fields = ['usuario', 'data', 'motivo_ocorrencia', 'acao', 'unidade_destino', 'local']
+        labels = {
+            'usuario': 'Usuário',
+            'data': 'Data',
+            'motivo_ocorrencia': 'Motivo da Ocorrência',
+            'acao': 'Ação',
+            'unidade_destino': 'Unidade de Destino',
+            'local': 'Local',
+        }
+        widgets = {
+            'data': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'})
+        }

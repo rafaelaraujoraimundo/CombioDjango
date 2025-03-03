@@ -32,7 +32,7 @@
             <input type="date" class="form-control {% if form.data.errors %}is-invalid{% endif %}" 
                    id="{{ form.data.id_for_label }}" 
                    name="{{ form.data.name }}" 
-                   value="{{ form.data.value|date:'Y-m-d'|default_if_none:'' }}">
+                   value="{% if form.errors %}{{ form.data.data }}{% else %}{{ form.data.value|date:'Y-m-d'|default_if_none:'' }}{% endif %}">
             {% for error in form.data.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
             {% endfor %}

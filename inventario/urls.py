@@ -12,7 +12,8 @@ from .views import (acoesprontuario_delete, acoesprontuario_edit, AcoesProntuari
     ProntuarioMonitorListView, ProntuarioMonitorUpdate, status_delete, status_edit, StatusCreate,
     StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate, TipoItemList, export_computadores_excel, export_estoque_excel,
     export_controlekit_excel, export_controlefones_excel,
-    export_monitor_excel,export_celular_excel)
+    export_monitor_excel,export_celular_excel,LinhaListView, LinhaCreateView, LinhaUpdateView, linha_delete, export_linha_excel,
+    ProntuarioLinhaListView, ProntuarioLinhaCreateView, ProntuarioLinhaUpdateView, prontuario_linha_delete)
 
 urlpatterns = [
     path('tipoitem/', TipoItemList.as_view(), name='tipoitem_list'),
@@ -84,5 +85,18 @@ urlpatterns = [
     path('controlefones/export', export_controlefones_excel, name='export_controlefones_excel'),
     path('monitor/export', export_monitor_excel, name='export_monitor_excel'),
     path('celular/export', export_celular_excel, name='export_celular_excel'),
+
+        # URLs para Linhas
+    path('linha/', LinhaListView.as_view(), name='linha_list'),
+    path('linha/new/', LinhaCreateView.as_view(), name='linha_create'),
+    path('linha/edit/<int:pk>/', LinhaUpdateView.as_view(), name='linha_edit'),
+    path('linha/delete/<int:pk>/', linha_delete, name='linha_delete'),
+    path('linha/export/', export_linha_excel, name='export_linha_excel'),
+
+    # URLs para Prontuário da Linha
+    path('linha/<int:linha_id>/prontuario/', ProntuarioLinhaListView.as_view(), name='prontuario_linha_list'),
+    path('linha/<int:linha_id>/prontuario/novo/', ProntuarioLinhaCreateView.as_view(), name='prontuario_linha_create'),
+    path('prontuario/linha/<int:pk>/editar/', ProntuarioLinhaUpdateView.as_view(), name='prontuario_linha_edit'),
+    path('prontuario/linha/<int:pk>/excluir/', prontuario_linha_delete, name='prontuario_linha_delete'),
 
 ]

@@ -1,0 +1,155 @@
+<div class="container-fluid">
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Número da Linha -->
+        <div class="form-group">
+            <label for="numeroLinhaInput">Número da Linha <span class="text-danger">*</span></label>
+            <input type="text" class="form-control {% if form.numero_linha.errors %}is-invalid{% endif %}" id="numeroLinhaInput" required name="numero_linha" maxlength="11" placeholder="Digite o número da linha" value="{{ form.numero_linha.value|default_if_none:'' }}">
+        {% for error in form.numero_linha.errors %}
+            <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+        </div>
+
+        <!-- Usuário -->
+        <div class="form-group position-relative">
+            <label for="usuarioInput">Nome do Usuário</label>
+            <input type="text" class="form-control {% if form.usuario.errors %}is-invalid{% endif %}" id="usuarioInput" name="usuario" placeholder="Digite o nome do usuário" autocomplete="off" value="{{ form.usuario.value|default_if_none:'' }}">
+            <input type="hidden" id="usuarioCode" name="matricula" value="{{ form.matricula.value|default_if_none:'' }}">
+            
+            {% for error in form.usuario.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+            <ul class="suggestions-list" id="usuarioSuggestions"></ul>
+        </div>
+
+        <!-- Estabelecimento -->
+        <div class="form-group position-relative">
+            <label for="estabelecimentoInput">Estabelecimento</label>
+           
+            <input type="text" class="form-control {% if form.estabelecimento.errors %}is-invalid{% endif %}" id="estabelecimentoInput" name="estabelecimento" placeholder="Digite o estabelecimento" autocomplete="off" value="{{ form.estabelecimento.value|default_if_none:'' }}">
+            <input type="hidden" id="estabelecimentoCode" name="estabelecimento_code" value="{{ form.estabelecimento_code.value|default_if_none:'' }}">
+            {% for error in form.estabelecimento.errors %}
+            <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+            <ul class="suggestions-list" id="estabelecimentoSuggestions"></ul>
+        </div>
+
+        <!-- Centro de Custo -->
+        <div class="form-group position-relative">
+            <label for="centroCustoInput">Centro de Custo</label>
+           
+            <input type="text" class="form-control {% if form.centro_custo.errors %}is-invalid{% endif %}" id="centroCustoInput" name="centro_custo" placeholder="Digite o centro de custo" autocomplete="off" value="{{ form.centro_custo.value|default_if_none:'' }}">
+            <input type="hidden" id="centroCustoCode" name="centro_custo_code" value="{{ form.centro_custo_code.value|default_if_none:'' }}">
+            {% for error in form.centro_custo.errors %}
+            <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+            <ul class="suggestions-list" id="centroCustoSuggestions"></ul>
+        </div>
+
+        <!-- Status -->
+        <div class="form-group">
+            <label for="statusInput">Status</label>
+            <select class="form-control" id="statusInput" name="status">
+                {% for status in status_list %}
+                    <option value="{{ status.id }}" {% if form.status.value == status.id %}selected{% endif %}>{{ status.nome_status }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Upload de Arquivo -->
+        <div class="form-group">
+            <label for="arquivoLinhaInput">Upload de Arquivo</label>
+            <input type="file" class="form-control-file" id="arquivoLinhaInput" name="arquivo_linha">
+            {% if form.instance.arquivo_linha %}
+            <p>
+                <h5><a href="{{ form.instance.arquivo_linha.url }}" target="_blank">Termo atual</a><h5>
+            </p>
+        {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'linha_list' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<!-- Script de Autocomplete -->
+<script>
+    const usuariosList = [
+        {% for user in usuarios_list %}
+            { display: "{{ user.nom_funcionario }}", value: "{{ user.cdn_funcionario }}" },
+        {% endfor %}
+    ];
+
+    const estabelecimentosList = [
+        {% for est in estabelecimentos_list %}
+            { display: "{{ est.estabelecimento }} - {{ est.sigla_unidade }}", value: "{{ est.estabelecimento }}" },
+        {% endfor %}
+    ];
+
+    const centrosCustoList = [
+        {% for cc in centros_custo_list %}
+            { display: "{{ cc.centrocusto }} - {{ cc.descricaocusto }}", value: "{{ cc.centrocusto }}" },
+        {% endfor %}
+    ];
+
+    document.addEventListener("DOMContentLoaded", function () {
+        function setupAutocomplete(inputElement, suggestionsListElement, data, hiddenFieldId) {
+            inputElement.addEventListener("input", function () {
+                const query = this.value.toLowerCase();
+                suggestionsListElement.innerHTML = "";
+                if (query) {
+                    const filteredData = data.filter(item =>
+                        item.display.toLowerCase().includes(query)
+                    );
+                    filteredData.forEach(item => {
+                        const li = document.createElement("li");
+                        li.textContent = item.display;
+                        li.classList.add("suggestion-item");
+                        li.addEventListener("mousedown", function () {
+                            inputElement.value = item.display;
+                            document.getElementById(hiddenFieldId).value = item.value;
+                            suggestionsListElement.style.display = "none";
+                        });
+                        suggestionsListElement.appendChild(li);
+                    });
+                    suggestionsListElement.style.display = "block";
+                } else {
+                    suggestionsListElement.style.display = "none";
+                }
+            });
+
+            inputElement.addEventListener("blur", function () {
+                setTimeout(() => { suggestionsListElement.style.display = "none"; }, 100);
+            });
+
+            inputElement.addEventListener("focus", function () {
+                if (this.value) {
+                    suggestionsListElement.style.display = "block";
+                }
+            });
+        }
+
+        setupAutocomplete(
+            document.getElementById("usuarioInput"),
+            document.getElementById("usuarioSuggestions"),
+            usuariosList,
+            "usuarioCode"
+        );
+
+        setupAutocomplete(
+            document.getElementById("estabelecimentoInput"),
+            document.getElementById("estabelecimentoSuggestions"),
+            estabelecimentosList,
+            "estabelecimentoCode"
+        );
+
+        setupAutocomplete(
+            document.getElementById("centroCustoInput"),
+            document.getElementById("centroCustoSuggestions"),
+            centrosCustoList,
+            "centroCustoCode"
+        );
+    });
+</script>

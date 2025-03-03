@@ -6,11 +6,11 @@ from dashboard.models import BiCentroCusto, BiEstabelecimento, BiFuncionariosCom
 from api_v1.schema import Memory
 from inventario.tasks import populate_hardware_data
 from .models import (AccountInfo, AcoesProntuario, BIOS, Celular, Computador, ControleFones,
-    Controlekit, CPU, Estoque, Hardware, Monitor, ProntuarioCelular, ProntuarioComputador,
-    ProntuarioMonitor, Software, Status, Storage, TipoItem)
+    Controlekit, CPU, Estoque, Hardware, Linha, Monitor, ProntuarioCelular, ProntuarioComputador,
+    ProntuarioLinha, ProntuarioMonitor, Software, Status, Storage, TipoItem)
 from .forms import (AcoesProntuarioForm, CelularForm, ComputadorForm, ControleFonesForm,
     ControlekitForm, EstoqueForm, MonitorForm, ProntuarioCelularForm, ProntuarioComputadorForm,
-    ProntuarioMonitorForm, StatusForm, TipoItemForm)
+    ProntuarioMonitorForm, StatusForm, TipoItemForm, LinhaForm, ProntuarioLinhaForm)
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
@@ -410,6 +410,13 @@ class CelularCreate(CreateView):
     template_name = 'inventario/celular/celular_form.html'
     success_url = reverse_lazy('celular_list')
 
+    def form_valid(self, form):
+        form.instance.usuario_inclusao = self.request.user  # Define o usuário logado como inclusor
+        form.instance.data_inclusao = now()  # Define a data atual como inclusão
+        form.instance.usuario_alteracao = self.request.user  # Define o mesmo usuário para alteração na criação
+        form.instance.data_alteracao = now()  # Define a mesma data para alteração
+        return super().form_valid(form)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Inclusão de Celulares'
@@ -431,6 +438,7 @@ class CelularCreate(CreateView):
         
         return context
 
+
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
 class CelularUpdate(UpdateView):
@@ -438,6 +446,11 @@ class CelularUpdate(UpdateView):
     form_class = CelularForm
     template_name = 'inventario/celular/celular_form.html'
     success_url = reverse_lazy('celular_list')
+
+    def form_valid(self, form):
+        form.instance.usuario_alteracao = self.request.user  # Atualiza usuário de alteração
+        form.instance.data_alteracao = now()  # Atualiza data da última alteração
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -450,15 +463,20 @@ class CelularUpdate(UpdateView):
         context['activegroup'] = 'inventario'
         return context
 
-
 @login_required(login_url='account_login')
-@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+@permission_required('global_permissions.combio_inventario', login_url='celular_list')
 def celular_delete(request, celular_id):
     celular = get_object_or_404(Celular, pk=celular_id)
+
+    # Verifica se o usuário tem permissão de administrador antes de excluir
+    if not request.user.has_perm('global_permissions.combio_admin_admin'):
+        messages.error(request, 'Você não tem permissão para excluir este celular. Favor entrar em contato com o Admin.')
+        return redirect('celular_list')  # Agora redireciona para a lista de celulares
+
     if request.method == "POST":
         celular.delete()
         messages.success(request, 'Celular excluído com sucesso.')
-        return redirect('celular_list')
+    
     return redirect('celular_list')
 
 class AcoesProntuarioList(ListView):
@@ -550,13 +568,19 @@ class ProntuarioCelularCreate(CreateView):
 
     def form_valid(self, form):
         form.instance.celular_id = self.kwargs['celular_id']
-        
+        form.instance.usuario_inclusao = self.request.user  # Define o usuário logado como inclusor
+        form.instance.data_inclusao = now()  # Define a data atual como inclusão
+        form.instance.usuario_alteracao = self.request.user  # Define o mesmo usuário para alteração na criação
+        form.instance.data_alteracao = now()  # Define a mesma data para alteração
+
         # Verifica se a ação é do tipo 2 (Transferência)
         if form.cleaned_data['acao'].tipo == 2:
             celular = form.instance.celular
             # Atualiza o estabelecimento e o centro de custo do celular
             celular.estabelecimento = form.cleaned_data['unidade_destino']
             celular.centro_custo = form.cleaned_data['local']
+            celular.usuario = form.cleaned_data['usuario']
+            celular.usuario_alteracao = self.request.user
             celular.save()  # Salva as alterações no celular
 
         return super().form_valid(form)
@@ -588,6 +612,19 @@ class ProntuarioCelularUpdate(UpdateView):
     form_class = ProntuarioCelularForm
     template_name = 'inventario/celular/prontuario_celular_edit.html'
     
+    def form_valid(self, form):
+        if form.cleaned_data['acao'].tipo == 2:
+            celular = form.instance.celular
+            # Atualiza o estabelecimento e o centro de custo do celular
+            celular.estabelecimento = form.cleaned_data['unidade_destino']
+            celular.centro_custo = form.cleaned_data['local']
+            celular.usuario = form.cleaned_data['usuario']
+            celular.usuario_alteracao = self.request.user
+            celular.save()  # Salva as alterações no celular
+        form.instance.usuario_alteracao = self.request.user  # Atualiza usuário de alteração
+        form.instance.data_alteracao = now()  # Atualiza data da última alteração
+        return super().form_valid(form)
+
     def get_success_url(self):
         return reverse_lazy('prontuario_celular_list', kwargs={'celular_id': self.object.celular.id})
 
@@ -604,7 +641,6 @@ class ProntuarioCelularUpdate(UpdateView):
         context['centros_custo_list'] = BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
 
         return context
-
 # View para excluir um registro de ação do prontuário do celular
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
@@ -1443,3 +1479,254 @@ def export_celular_excel(request):
     return response
 
 
+# Listagem de Linhas
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+class LinhaListView(ListView):
+    model = Linha
+    template_name = 'inventario/linha/linha_list.html'
+    context_object_name = 'linhas'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        if search_query:
+            queryset = queryset.filter(
+                Q(numero_linha__icontains=search_query) |
+                Q(usuario__icontains=search_query) |
+                Q(estabelecimento__icontains=search_query) |
+                Q(centro_custo__icontains=search_query)
+            )
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super(LinhaListView, self).get_context_data(**kwargs)
+        context['title'] = 'Controle de Linhas'
+        context['activegroup'] = 'inventario'
+        context['search'] = self.request.GET.get('search', '')
+        return context
+    
+# Criação de Linha
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+class LinhaCreateView(CreateView):
+    model = Linha
+    form_class = LinhaForm
+    template_name = 'inventario/linha/linha_form.html'
+    success_url = reverse_lazy('linha_list')
+
+    def form_valid(self, form):
+        form.instance.usuario_inclusao = self.request.user
+        return super().form_valid(form)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Inclusão de Linha'
+        context['activegroup'] = 'inventario'
+        
+        # Listas para autocomplete
+        context['status_list'] = Status.objects.all()
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(
+            mes=now().month, ano=now().year
+        ).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values(
+            'estabelecimento', 'sigla_unidade'
+        )
+        
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values(
+            'centrocusto', 'descricaocusto'
+        )
+        
+        return context
+
+
+# Edição de Linha
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+class LinhaUpdateView(UpdateView):
+    model = Linha
+    form_class = LinhaForm
+    template_name = 'inventario/linha/linha_edit.html'
+    success_url = reverse_lazy('linha_list')
+
+    def form_valid(self, form):
+        form.instance.usuario_alteracao = self.request.user
+        form.instance.data_alteracao = now()
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Alteração de Linha'
+        context['activegroup'] = 'inventario'
+        
+        # Listas para autocomplete
+        context['status_list'] = Status.objects.all()
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(
+            mes=now().month, ano=now().year
+        ).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values(
+            'estabelecimento', 'sigla_unidade'
+        )
+        
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values(
+            'centrocusto', 'descricaocusto'
+        )
+        
+        return context
+
+# Exclusão de Linha
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def linha_delete(request, pk):
+    if not request.user.has_perm('global_permissions.combio_admin_admin'):
+        messages.error(request, 'Você não tem permissão para excluir este celular. Favor entrar em contato com o Admin.')
+        return redirect('linha_list') 
+    
+    linha = get_object_or_404(Linha, pk=pk)
+     # Agora redireciona para a lista de celulares
+    
+    if request.method == "POST":
+        linha.delete()
+        messages.success(request, 'Linha excluída com sucesso.')
+        return redirect('linha_list')
+    return redirect('linha_list')
+
+# Listagem de Ações do Prontuário da Linha
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+class ProntuarioLinhaListView(ListView):
+    model = ProntuarioLinha
+    template_name = 'inventario/linha/prontuario_linha_list.html'
+    context_object_name = 'prontuarios'
+
+    def get_queryset(self):
+        self.linha = get_object_or_404(Linha, id=self.kwargs['linha_id'])
+        return ProntuarioLinha.objects.filter(linha=self.linha)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['linha'] = self.linha
+        context['title'] = 'Prontuário da Linha: ' + self.linha.numero_linha
+        context['activegroup'] = 'inventario'
+        return context
+
+# Criação de Ação no Prontuário
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+class ProntuarioLinhaCreateView(CreateView):
+    model = ProntuarioLinha
+    form_class = ProntuarioLinhaForm
+    template_name = 'inventario/linha/prontuario_linha_form.html'
+
+    def form_valid(self, form):
+        form.instance.linha_id = self.kwargs['linha_id']
+        form.instance.usuario_inclusao = self.request.user
+
+        if form.cleaned_data['acao'].tipo == 2:
+            linha = form.instance.linha
+            # Atualiza o estabelecimento e o centro de custo do celular
+            linha.estabelecimento = form.cleaned_data['unidade_destino']
+            linha.centro_custo = form.cleaned_data['local']
+            linha.usuario = form.cleaned_data['usuario']
+            linha.usuario_alteracao = self.request.user
+            linha.save()  # Salva as alterações no celular
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('prontuario_linha_list', kwargs={'linha_id': self.kwargs['linha_id']})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        linha = get_object_or_404(Linha, pk=self.kwargs['linha_id'])
+        context['title'] = 'Criação de Ações no Prontuário'
+        context['activegroup'] = 'inventario'
+        context['linha'] = linha
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(mes=now().month, ano=now().year).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values('estabelecimento', 'sigla_unidade')
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
+        return context
+    
+# Edição de Ação do Prontuário
+@method_decorator(permission_required('global_permissions.combio_inventario', login_url='erro_page'), name='dispatch')
+@method_decorator(login_required(login_url='account_login'), name='dispatch')
+class ProntuarioLinhaUpdateView(UpdateView):
+    model = ProntuarioLinha
+    form_class = ProntuarioLinhaForm
+    template_name = 'inventario/linha/prontuario_linha_form.html'
+
+    def form_valid(self, form):
+        form.instance.usuario_alteracao = self.request.user
+        form.instance.data_alteracao = now()
+        if form.cleaned_data['acao'].tipo == 2:
+            linha = form.instance.linha
+            # Atualiza o estabelecimento e o centro de custo do celular
+            linha.estabelecimento = form.cleaned_data['unidade_destino']
+            linha.centro_custo = form.cleaned_data['local']
+            linha.usuario = form.cleaned_data['usuario']
+            linha.usuario_alteracao = self.request.user
+            linha.save()  # Salva as alterações no celular
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('prontuario_linha_list', kwargs={'linha_id': self.object.linha.id})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['linha'] = self.object.linha
+        context['title'] = 'Edição de Ações no Prontuário'
+        context['activegroup'] = 'inventario'
+        context['usuarios_list'] = BiFuncionariosCombio.objects.filter(mes=now().month, ano=now().year).values('cdn_funcionario', 'nom_funcionario', 'cdn_estab')
+        context['estabelecimentos_list'] = BiEstabelecimento.objects.all().values('estabelecimento', 'sigla_unidade')
+        context['centros_custo_list'] = BiCentroCusto.objects.all().values('centrocusto', 'descricaocusto')
+        return context
+
+# Exclusão de Ação do Prontuário
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def prontuario_linha_delete(request, pk):
+    prontuario = get_object_or_404(ProntuarioLinha, pk=pk)
+    linha_id = prontuario.linha.id
+    if request.method == "POST":
+        prontuario.delete()
+        messages.success(request, 'Ação do prontuário excluída com sucesso.')
+        return redirect('prontuario_linha_list', linha_id=linha_id)
+    return redirect('prontuario_linha_list', linha_id=linha_id)
+
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def export_linha_excel(request):
+    search_query = request.GET.get('search', '')
+
+    if search_query:
+        linhas = Linha.objects.filter(
+            Q(numero_linha__icontains=search_query) |
+            Q(usuario__icontains=search_query) |
+            Q(estabelecimento__icontains=search_query) |
+            Q(centro_custo__icontains=search_query)
+        )
+    else:
+        linhas = Linha.objects.all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Linhas'
+
+    columns = ['Número da Linha', 'Usuário', 'Estabelecimento', 'Centro de Custo', 'Usuário de Inclusão', 'Data de Inclusão', 'Usuário de Alteração', 'Data de Alteração']
+    ws.append(columns)
+
+    for linha in linhas:
+        ws.append([
+            linha.numero_linha, linha.usuario, linha.estabelecimento, linha.centro_custo,
+            linha.usuario_inclusao.email if linha.usuario_inclusao else '',
+            linha.data_inclusao.strftime('%d/%m/%Y %H:%M') if linha.data_inclusao else '',
+            linha.usuario_alteracao.email if linha.usuario_alteracao else '-',
+            linha.data_alteracao.strftime('%d/%m/%Y %H:%M') if linha.data_alteracao else '-'
+        ])
+
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="linhas.xlsx"'
+    wb.save(response)
+
+    return response

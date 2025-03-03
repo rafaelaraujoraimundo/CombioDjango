@@ -89,19 +89,34 @@ class Celular(models.Model):
     centro_custo = models.CharField(max_length=100)
     arquivo_celular = models.FileField(upload_to=upload_to, blank=True, null=True)
 
+    # Novos campos de auditoria
+    usuario_inclusao = models.ForeignKey(User, on_delete=models.PROTECT, related_name='celular_inclusao')
+    data_inclusao = models.DateTimeField(auto_now_add=True)
+    usuario_alteracao = models.ForeignKey(User, on_delete=models.PROTECT, related_name='celular_alteracao', null=True, blank=True)
+    data_alteracao = models.DateTimeField(auto_now=True)
+
     def save(self, *args, **kwargs):
+        if not self.pk:  # Se for um novo registro
+            self.usuario_alteracao = self.usuario_inclusao  # Define o mesmo usuário para ambos
+            self.data_alteracao = self.data_inclusao  # Define a mesma data para ambos
+
         temp_arquivo = self.arquivo_celular
         if self.pk:
             previous = Celular.objects.get(pk=self.pk)
             if not self.arquivo_celular:
                 self.arquivo_celular = previous.arquivo_celular
-        super().save(*args, **kwargs)  # Chamada do super() aqui garante que o ID seja atualizado antes de renomear o arquivo
+        
+        super().save(*args, **kwargs)  # Chamada do super() para salvar antes de renomear arquivo
 
         if temp_arquivo:
             # Renomear o arquivo para garantir que ele siga o formato desejado
             new_name = os.path.join(f'celular/{self.pk}', f'arquivo{os.path.splitext(temp_arquivo.name)[1]}')
             temp_arquivo.name = new_name
             self.arquivo_celular.save(temp_arquivo.name, temp_arquivo, save=False)  # Atualizar o arquivo sem salvar novamente o modelo
+        if temp_arquivo:
+            new_name = f'celular/{self.pk}/arquivo{os.path.splitext(self.arquivo_celular.name)[1]}'
+            self.arquivo_celular.name = new_name
+            super().save(update_fields=['arquivo_celular'])  # Atualizar o arquivo sem salvar novamente o modelo
 
     def delete(self, *args, **kwargs):
         if self.arquivo_celular:
@@ -109,6 +124,9 @@ class Celular(models.Model):
             if file_path.exists():
                 file_path.unlink()  # Deletar o arquivo físico se existir
         super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.fabricante} {self.modelo} ({self.imei})"
 
 class ProntuarioCelular(models.Model):
     celular = models.ForeignKey(Celular, on_delete=models.CASCADE)
@@ -119,10 +137,19 @@ class ProntuarioCelular(models.Model):
     unidade_destino = models.CharField(max_length=100)
     local = models.CharField(max_length=100)
 
+    usuario_inclusao = models.ForeignKey(User, on_delete=models.PROTECT, related_name='prontuario_inclusao')
+    data_inclusao = models.DateTimeField(auto_now_add=True)
+    usuario_alteracao = models.ForeignKey(User, on_delete=models.PROTECT, related_name='prontuario_alteracao', null=True, blank=True)
+    data_alteracao = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return f'Prontuário de {self.celular.modelo} - {self.data}'
 
-
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Se for um novo registro
+            self.usuario_alteracao = self.usuario_inclusao  # Define o mesmo usuário para ambos
+            self.data_alteracao = self.data_inclusao  # Define a mesma data para ambos
+        super().save(*args, **kwargs)
 # -----------------------------
 # Tabelas relacionadas à Resposta da API
 # -----------------------------
@@ -404,3 +431,76 @@ class ProntuarioComputador(models.Model):
         return f'Prontuário de {self.computador.hostname} - {self.data}'
 
 
+class Linha(models.Model):
+    numero_linha = models.CharField( 
+        max_length=11,
+        validators=[MinLengthValidator(11), RegexValidator(r'^\d{11}$', 'O número da linha deve conter 11 dígitos numéricos')]
+    )
+    usuario = models.CharField(max_length=100)
+    status = models.ForeignKey('Status', on_delete=models.PROTECT)
+    estabelecimento = models.CharField(max_length=100)
+    centro_custo = models.CharField(max_length=100)
+    arquivo_linha = models.FileField(upload_to=upload_to, blank=True, null=True) 
+
+    # Novos campos de auditoria
+    usuario_inclusao = models.ForeignKey(User, on_delete=models.PROTECT, related_name='linha_inclusao') 
+    data_inclusao = models.DateTimeField(auto_now_add=True)
+    usuario_alteracao = models.ForeignKey(User, on_delete=models.PROTECT, related_name='linha_alteracao', null=True, blank=True)
+    data_alteracao = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Se for um novo registro
+            self.usuario_alteracao = self.usuario_inclusao  # Define o mesmo usuário para ambos
+            self.data_alteracao = self.data_inclusao  # Define a mesma data para ambos
+
+        temp_arquivo = self.arquivo_linha
+        if self.pk:
+            previous = Linha.objects.get(pk=self.pk)
+            if not self.arquivo_linha:
+                self.arquivo_linha = previous.arquivo_linha
+        
+        super().save(*args, **kwargs)  # Chamada do super() para salvar antes de renomear arquivo
+
+        if temp_arquivo:
+            # Renomear o arquivo para garantir que ele siga o formato desejado
+            new_name = os.path.join(f'linha/{self.pk}', f'arquivo{os.path.splitext(temp_arquivo.name)[1]}')
+            temp_arquivo.name = new_name
+            self.arquivo_linha.save(temp_arquivo.name, temp_arquivo, save=False) 
+        
+        if self.arquivo_linha:
+            new_name = f'linha/{self.pk}/arquivo{os.path.splitext(self.arquivo_linha.name)[1]}'
+            self.arquivo_linha.name = new_name
+            super().save(update_fields=['arquivo_linha'])
+
+    def delete(self, *args, **kwargs):
+        if self.arquivo_linha:
+            file_path = Path(self.arquivo_linha.path)
+            if file_path.exists():
+                file_path.unlink()  # Deletar o arquivo físico se existir
+        super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.numero_linha}"
+
+class ProntuarioLinha(models.Model):
+    linha = models.ForeignKey(Linha, on_delete=models.CASCADE)
+    usuario = models.CharField(max_length=100)
+    data = models.DateField()
+    motivo_ocorrencia = models.TextField()
+    acao = models.ForeignKey('AcoesProntuario', on_delete=models.PROTECT)
+    unidade_destino = models.CharField(max_length=100)
+    local = models.CharField(max_length=100)
+
+    usuario_inclusao = models.ForeignKey(User, on_delete=models.PROTECT, related_name='prontuario_linha_inclusao')
+    data_inclusao = models.DateTimeField(auto_now_add=True)
+    usuario_alteracao = models.ForeignKey(User, on_delete=models.PROTECT, related_name='prontuario_linha_alteracao', null=True, blank=True)
+    data_alteracao = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'Prontuário da Linha {self.linha.numero_linha} - {self.data}'
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.usuario_alteracao = self.usuario_inclusao
+            self.data_alteracao = self.data_inclusao
+        super().save(*args, **kwargs)

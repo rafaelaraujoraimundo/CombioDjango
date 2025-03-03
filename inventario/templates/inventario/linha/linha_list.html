@@ -1,0 +1,95 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h4>Lista de Linhas</h4>
+    
+    <form method="get" action="" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="search" placeholder="Pesquisar linhas..." class="form-control" value="{{ request.GET.search }}">
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Pesquisar</button>
+            </div>
+        </div>
+    </form>
+
+    <a href="{% url 'linha_create' %}" class="btn btn-primary mb-4">Adicionar Linha</a>
+    <a href="{% url 'export_linha_excel' %}?search={{ request.GET.search }}" class="btn btn-success mb-4">Exportar Linhas para Excel</a>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Número da Linha</th>
+                <th>Usuário</th>
+                <th>Status</th>
+                <th>Estabelecimento</th>
+                <th>Centro de Custo</th>
+                <th>Termo</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for linha in object_list %}
+            <tr>
+                <td>{{ linha.id }}</td>
+                <td>{{ linha.numero_linha }}</td>
+                <td>{{ linha.usuario }}</td>
+                <td>{{ linha.status.nome_status }}</td>
+                <td>{{ linha.estabelecimento }}</td>
+                <td>{{ linha.centro_custo }}</td>
+                <td>
+                    {% if linha.arquivo_linha %}
+                        <a href="{{ linha.arquivo_linha.url }}" target="_blank" class="btn btn-sm btn-info">Download</a>
+                    {% else %}
+                        <span class="text-muted">Nenhum arquivo</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'linha_edit' linha.id %}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="{% url 'prontuario_linha_list' linha.id %}" class="btn btn-sm btn-info">Prontuário</a>
+                    <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ linha.id }}" data-item="{{ linha.numero_linha }}">Excluir</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- Modal de Exclusão -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Tem certeza de que deseja excluir <strong id="deleteItemName"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <form method="post" id="deleteForm">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteTriggers = document.querySelectorAll('.delete-trigger');
+            deleteTriggers.forEach(trigger => {
+                trigger.addEventListener('click', function () {
+                    const itemId = this.getAttribute('data-id');
+                    const itemName = this.getAttribute('data-item');
+                    document.getElementById('deleteItemName').textContent = itemName;
+                    document.getElementById('deleteForm').action = `/inventario/linha/delete/${itemId}/`;
+                    $('#confirmDeleteModal').modal('show');
+                });
+            });
+        });
+    </script>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    
+        {% csrf_token %}
+        {% include "inventario/linha/partials/linha_form_fields.html" %}
+
+</div>
+{% endblock %}
