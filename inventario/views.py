@@ -7,10 +7,10 @@ from api_v1.schema import Memory
 from inventario.tasks import populate_hardware_data
 from .models import (AccountInfo, AcoesProntuario, BIOS, Celular, Computador, ControleFones,
     Controlekit, CPU, Estoque, Hardware, Linha, Monitor, ProntuarioCelular, ProntuarioComputador,
-    ProntuarioLinha, ProntuarioMonitor, Software, Status, Storage, TipoItem)
+    ProntuarioLinha, ProntuarioMonitor, Software, Status, Storage, TipoItem, EstoqueMovimentacao)
 from .forms import (AcoesProntuarioForm, CelularForm, ComputadorForm, ControleFonesForm,
     ControlekitForm, EstoqueForm, MonitorForm, ProntuarioCelularForm, ProntuarioComputadorForm,
-    ProntuarioMonitorForm, StatusForm, TipoItemForm, LinhaForm, ProntuarioLinhaForm)
+    ProntuarioMonitorForm, StatusForm, TipoItemForm, LinhaForm, ProntuarioLinhaForm, EstoqueMovimentacaoForm)
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
@@ -1313,13 +1313,13 @@ def export_estoque_excel(request):
     ws = wb.active
     ws.title = 'Itens de Estoque'
 
-    columns = ['Tipo de Item', 'Modelo', 'Fabricante', 'Status', 'Observação', 'Local']
+    columns = ['Tipo de Item', 'Modelo', 'Fabricante', 'Status', 'Observação', 'Local','Quantidade']
     ws.append(columns)
 
     for item in itens_estoque:
         ws.append([
             item.tipo_item.nome, item.modelo, item.fabricante,
-            item.status.nome_status, item.observacao, item.local
+            item.status.nome_status, item.observacao, item.local, item.quantidade
         ])
 
     response = HttpResponse(content_type='application/ms-excel')
@@ -1730,3 +1730,42 @@ def export_linha_excel(request):
     wb.save(response)
 
     return response
+
+
+
+    #View Movimentação EStoque
+class EstoqueMovimentacaoList(ListView):
+    model = EstoqueMovimentacao
+    template_name = 'inventario/estoque/estoque_movimentacao_list.html'
+    context_object_name = 'movimentacoes'
+    ordering = ['-data_movimentacao']
+    
+    def get_queryset(self):
+        estoque_id = self.kwargs.get('estoque_id')
+        return EstoqueMovimentacao.objects.filter(estoque_id=estoque_id).order_by('-data_movimentacao')
+    
+    def get_context_data(self, **kwargs):
+         context = super().get_context_data(**kwargs)
+         context['estoque'] = Estoque.objects.get(id=self.kwargs.get('estoque_id'))
+         context['title'] = 'Histórico de Movimentações'
+         return context
+    
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def estoque_movimentacao_create(request, estoque_id):
+    estoque = get_object_or_404(Estoque, pk=estoque_id)
+
+    if request.method == "POST":
+        form = EstoqueMovimentacaoForm(request.POST, user=request.user, estoque=estoque)
+        if form.is_valid():
+            movimentacao = form.save(commit=False)
+            movimentacao.estoque = estoque
+            movimentacao.usuario = request.user  # Define automaticamente o usuário logado
+            movimentacao.save()
+            messages.success(request, 'Movimentação registrada com sucesso!')
+            return redirect('estoque_movimentacao_list', estoque_id=estoque.id)
+    else:
+        form = EstoqueMovimentacaoForm(user=request.user)
+
+    return render(request, 'inventario/estoque/estoque_movimentacao_form.html', {'form': form, 'estoque': estoque})

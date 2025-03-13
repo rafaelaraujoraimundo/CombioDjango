@@ -1,7 +1,7 @@
 from django import forms
 from .models import (AcoesProntuario, Celular, Computador, ControleFones, Controlekit, Estoque,
     Linha, Monitor, ProntuarioCelular, ProntuarioComputador, ProntuarioLinha, ProntuarioMonitor,
-    Status, TipoItem)
+    Status, TipoItem, EstoqueMovimentacao)
 from dashboard.models import BiFuncionariosCombio
 from django.utils.timezone import now
 
@@ -305,3 +305,75 @@ class ProntuarioLinhaForm(forms.ModelForm):
         widgets = {
             'data': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'})
         }
+
+class EstoqueMovimentacaoForm(forms.ModelForm):
+    MOTIVO_CHOICES = [
+        ('Monday', 'Monday'),
+        ('Chamado', 'Chamado'),
+        ('Inventário', 'Inventário'),
+    ]
+
+    class Meta:
+        model = EstoqueMovimentacao
+        fields = ['data_movimentacao', 'tipo_movimentacao', 'quantidade', 'motivo', 'nova_contratacao', 'hostname', 'patrimonio', 'observacao']
+        labels = {
+            'data_movimentacao': 'Data da Movimentação',
+            'tipo_movimentacao': 'Tipo de Movimentação',
+            'quantidade': 'Quantidade',
+            'motivo': 'Motivo',
+            'nova_contratacao': 'Nova Contratação (Opcional)',
+            'hostname': 'Hostname (Opcional)',
+            'patrimonio': 'Patrimônio (Opcional)',
+            'observacao': 'Observação (Opcional)',
+        }
+        widgets = {
+            'data_movimentacao': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
+            'tipo_movimentacao': forms.Select(attrs={'class': 'form-control'}),
+            'motivo': forms.Select(attrs={'class': 'form-control'}),
+            'quantidade': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'nova_contratacao': forms.TextInput(attrs={'class': 'form-control', 'required': True}),
+            'hostname': forms.TextInput(attrs={'class': 'form-control', 'required': False}),
+            'patrimonio': forms.TextInput(attrs={'class': 'form-control', 'required': False}),
+            'observacao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None) 
+        self.estoque = kwargs.pop('estoque', None) # Captura o usuário logado
+        super().__init__(*args, **kwargs)
+
+        # Define a data padrão para hoje caso seja um novo registro
+        if not self.instance.pk:
+            self.fields['data_movimentacao'].initial = now().date()
+            self.fields['quantidade'].initial = 1
+        # Tornar os campos opcionais
+        self.fields['hostname'].required = False
+        self.fields['patrimonio'].required = False
+
+    def clean_quantidade(self):
+        quantidade = self.cleaned_data.get('quantidade')
+        tipo_movimentacao = self.cleaned_data.get('tipo_movimentacao') 
+        estoque = self.estoque
+        print(tipo_movimentacao)
+        if quantidade is None:
+            raise forms.ValidationError("")
+
+        if quantidade < 1:
+            raise forms.ValidationError("A quantidade deve ser maior que 0.")
+        
+        if tipo_movimentacao == 'saida':  # Se for uma saída, verifica a quantidade em estoque
+            if not estoque:
+                raise forms.ValidationError("Erro ao verificar o estoque.")
+            
+            if estoque.quantidade < quantidade:
+                raise forms.ValidationError("Quantidade insuficiente em estoque.")
+
+        return quantidade
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if self.user:
+            instance.usuario = self.user  # Define automaticamente o usuário logado
+        if commit:
+            instance.save()
+        return instance

@@ -91,28 +91,11 @@ def execute_stage_action(wa_id, stage, message_body, message_id, timestamp_receb
             return
 
         cnpj = cnpj.zfill(14)
-        contato_data = consulta_contato_datasul(cnpj)
-        if contato_data:
-            contatos_validos = [item for item in contato_data['items'] if item['telefone'] == wa_id]
-            contato_model = Contatos.objects.filter(telefone=wa_id).first()
-            if not contatos_validos and not contato_model:
-                send_message(wa_id, "Nenhum telefone correspondente encontrado para o CNPJ fornecido. Por favor, solicite o cadastro para a equipe de compras.")
-                WhatsAppMessage.objects.create(
-                    wa_id=wa_id,
-                    message_id=message_id,
-                    message_body=message_body,
-                    timestamp_recebido=timezone.now(),
-                    stage='send_info'
-                )
-                send_message(wa_id, f"Obrigado por utilizar nosso ChatBot...")
-                return
-            nome_contato = contatos_validos[0]['nome_contato'] if contatos_validos else contato_model.nome
-            #nome_emit = contatos_validos[0]['nome_emit']
-            #codigo_emit = contatos_validos[0]['codigo']
+        
         titulos = consulta_titulos_api(cnpj)
         if titulos:
             nome_emit = titulos[0]['nome_fornecedor']
-            mensagem = f"Olá {nome_contato}, segue informações de NF abertas em nosso sistema:\n\n Empresa: *{nome_emit}* \n"
+            mensagem = f"Olá, segue informações de NF abertas em nosso sistema:\n\n Empresa: *{nome_emit}* \n"
             for titulo in titulos:
                 cod_tit_ap = str(titulo['cod_tit_ap'])
                 cod_parcela = str(titulo['cod_parcela'])
@@ -153,7 +136,17 @@ def execute_stage_action(wa_id, stage, message_body, message_id, timestamp_receb
             )
             return
     elif stage == 'send_info':
-        send_message(wa_id, f"Obrigado por utilizar nosso ChatBot...")
+        # Sempre que o usuário enviar uma nova mensagem após a resposta final, enviamos a mensagem inicial novamente
+        send_template_message(wa_id, "modelo_inicio", language="pt_BR")
+
+        # Atualiza o estágio para 'initial' novamente
+        WhatsAppMessage.objects.create(
+            wa_id=wa_id,
+            message_id=message_id,
+            message_body="Reiniciando atendimento...",
+            timestamp_recebido=timestamp_recebido,
+            stage='initial'
+        )
 
 def send_message(to, text):
     token = config('TOKEN_WHATSAPP')

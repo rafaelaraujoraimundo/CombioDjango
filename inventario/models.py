@@ -1,9 +1,11 @@
 import datetime
+from django.utils.timezone import now
 from django.db import models
 from dashboard.models import BiCentroCusto, BiEstabelecimento, BiFuncionariosCombio
 from datetime import timedelta
 from django.utils import timezone
 
+from django.core.exceptions import ValidationError
 import django.utils
 import os
 from pathlib import Path
@@ -58,11 +60,56 @@ class Estoque(models.Model):
     status = models.ForeignKey(Status, on_delete=models.PROTECT)  # Usando o modelo Status como chave estrangeira
     observacao = models.TextField(blank=True, null=True)
     local = models.CharField(max_length=100)
+    quantidade = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f'{self.tipo_item.nome} - {self.modelo}'
 
 
+class EstoqueMovimentacao(models.Model):
+    TIPO_MOVIMENTACAO_CHOICES = [
+        ('entrada', 'Entrada'),
+        ('saida', 'Saída'),
+    ]
+
+    MOTIVO_CHOICES = [
+        ('Monday', 'Monday'),
+        ('Chamado', 'Chamado'),
+        ('Inventário', 'Inventário'),
+    ]
+
+    estoque = models.ForeignKey(Estoque, on_delete=models.CASCADE, related_name="movimentacoes")
+    data_movimentacao = models.DateField(default=now)  # Preenchido automaticamente com a data atual
+    tipo_movimentacao = models.CharField(max_length=10, choices=TIPO_MOVIMENTACAO_CHOICES)
+    quantidade = models.PositiveIntegerField()
+    motivo = models.CharField(max_length=20, choices=MOTIVO_CHOICES)  # Alterado de 'chamado' para 'motivo' com Choices
+    nova_contratacao = models.CharField(max_length=100, blank=False, null=False)
+    hostname = models.CharField(max_length=100, blank=True, null=True)
+    patrimonio = models.CharField(max_length=100, blank=True, null=True)
+    observacao = models.TextField(blank=True, null=True)
+    usuario = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return f'{self.tipo_movimentacao} - {self.estoque.modelo} ({self.quantidade}) - {self.motivo}'
+
+    def clean(self):
+        if self.quantidade is None:
+            raise ValidationError({'quantidade': ""})
+
+        if self.quantidade < 1:
+            raise ValidationError({'quantidade': "A quantidade deve ser maior que 0."})
+
+    def save(self, *args, **kwargs):
+        if self.tipo_movimentacao == 'entrada':
+            self.estoque.quantidade += self.quantidade
+        elif self.tipo_movimentacao == 'saida':
+            if self.estoque.quantidade >= self.quantidade:
+                self.estoque.quantidade -= self.quantidade
+            else:
+                raise ValidationError("Quantidade insuficiente em estoque.")
+        
+        self.estoque.save()
+        super().save(*args, **kwargs)
 
 # -----------------------------
 # Tabelas relacionadas a Celulares

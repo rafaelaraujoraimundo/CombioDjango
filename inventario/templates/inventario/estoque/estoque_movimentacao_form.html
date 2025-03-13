@@ -1,0 +1,148 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h3 class="mb-3">Criação de Movimentação de Estoque</h3>
+
+    <!-- Informações do item de estoque -->
+    <div class="row mb-3">
+        <div class="col-md-4"><strong>Item:</strong> {{ estoque.tipo_item.nome }} - {{ estoque.modelo }}</div>
+        <div class="col-md-4"><strong>Fabricante:</strong> {{ estoque.fabricante }}</div>
+        <div class="col-md-4"><strong>Local:</strong> {{ estoque.local }}</div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-4"><strong>Status:</strong> {{ estoque.status.nome_status }}</div>
+        <div class="col-md-4"><strong>Quantidade Atual:</strong> {{ estoque.quantidade }}</div>
+    </div>
+    <hr>
+
+    <!-- Exibir mensagens de erro gerais -->
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Formulário de Movimentação -->
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Linha 1: Data da Movimentação - Tipo de Movimentação - Quantidade -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="{{ form.data_movimentacao.id_for_label }}">Data da Movimentação</label>
+                    <input type="date" class="form-control {% if form.data_movimentacao.errors %}is-invalid{% endif %}" 
+                           id="{{ form.data_movimentacao.id_for_label }}" name="{{ form.data_movimentacao.name }}" 
+                           value="{% if form.errors %}{{ form.data_movimentacao.data }}{% else %}{{ form.data_movimentacao.value|date:'Y-m-d'|default_if_none:'' }}{% endif %}">
+                    {% for error in form.data_movimentacao.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="{{ form.tipo_movimentacao.id_for_label }}">Tipo de Movimentação</label>
+                    <select class="form-control {% if form.tipo_movimentacao.errors %}is-invalid{% endif %}" 
+                            id="{{ form.tipo_movimentacao.id_for_label }}" name="{{ form.tipo_movimentacao.name }}">
+                        {% for choice_value, choice_label in form.tipo_movimentacao.field.choices %}
+                            <option value="{{ choice_value }}" 
+                                    {% if form.tipo_movimentacao.value|stringformat:"s" == choice_value|stringformat:"s" %}selected{% endif %}>
+                                {{ choice_label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.tipo_movimentacao.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="{{ form.quantidade.id_for_label }}">Quantidade</label>
+                    <input type="number" class="form-control {% if form.quantidade.errors %}is-invalid{% endif %}" 
+                           id="{{ form.quantidade.id_for_label }}" name="{{ form.quantidade.name }}" 
+                           value="{{ form.quantidade.value|default_if_none:'' }}">
+                    {% for error in form.quantidade.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Linha 2: Motivo - Nova Contratação -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.motivo.id_for_label }}">Motivo</label>
+                    <select class="form-control {% if form.motivo.errors %}is-invalid{% endif %}" 
+                            id="{{ form.motivo.id_for_label }}" name="{{ form.motivo.name }}">
+                        {% for choice_value, choice_label in form.motivo.field.choices %}
+                            <option value="{{ choice_value }}" 
+                                    {% if form.motivo.value|stringformat:"s" == choice_value|stringformat:"s" %}selected{% endif %}>
+                                {{ choice_label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.motivo.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="{{ form.nova_contratacao.id_for_label }}">Nova Contratação / Número do Chamado</label>
+                    <input type="text" class="form-control {% if form.nova_contratacao.errors %}is-invalid{% endif %}" 
+                           id="{{ form.nova_contratacao.id_for_label }}" name="{{ form.nova_contratacao.name }}" 
+                           value="{{ form.nova_contratacao.value|default_if_none:'' }}">
+                    {% for error in form.nova_contratacao.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Linha 3: Hostname - Patrimônio -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group position-relative">
+                    <label for="hostnameInput">Hostname (Opcional)</label>
+                    {% for error in form.hostname.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                    <input type="text" class="form-control {% if form.hostname.errors %}is-invalid{% endif %}" 
+                           id="hostnameInput" name="hostname" placeholder="Digite o hostname" 
+                           autocomplete="off" value="{{ form.hostname.value|default_if_none:'' }}">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group position-relative">
+                    <label for="patrimonioInput">Patrimônio (Opcional)</label>
+                    {% for error in form.patrimonio.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                    <input type="text" class="form-control {% if form.patrimonio.errors %}is-invalid{% endif %}" 
+                           id="patrimonioInput" name="patrimonio" placeholder="Digite o patrimônio" 
+                           autocomplete="off" value="{{ form.patrimonio.value|default_if_none:'' }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Linha 4: Observação -->
+        <div class="form-group">
+            <label for="{{ form.observacao.id_for_label }}">Observação</label>
+            {% for error in form.observacao.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+            <textarea class="form-control {% if form.observacao.errors %}is-invalid{% endif %}" 
+                      id="{{ form.observacao.id_for_label }}" name="{{ form.observacao.name }}">{{ form.observacao.value|default_if_none:'' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Movimentação</button>
+        <a href="{% url 'estoque_movimentacao_list' estoque.id %}" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+{% endblock %}

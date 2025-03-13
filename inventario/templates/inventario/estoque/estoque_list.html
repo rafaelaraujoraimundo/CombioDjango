@@ -29,6 +29,7 @@
                 <th>Fabricante</th>
                 <th>Status</th>
                 <th>Local</th>
+                <th>Qtd.</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -41,6 +42,7 @@
                     <td>{{ estoque.fabricante }}</td>
                     <td>{{ estoque.status.nome_status }}</td>
                     <td>{{ estoque.local }}</td>
+                    <td>{{ estoque.quantidade }}</td>
                     <td> 
                         <a class="mr-3" href="{% url 'estoque_edit' estoque.id %}">
                             <i class="fa fa-edit"></i> Editar
@@ -48,6 +50,7 @@
                         <a href="#" class="delete-trigger mr-3" data-id="{{ estoque.id }}" data-item="{{ estoque.modelo }}">
                             <i class="fa fa-trash"></i> Excluir
                         </a>
+                        <a href="{% url 'estoque_movimentacao_list' estoque.id %}" class="btn btn-sm btn-info">Movimentações</a>
                     </td>
                 </tr>
             {% empty %}

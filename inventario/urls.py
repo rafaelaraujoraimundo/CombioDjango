@@ -13,7 +13,7 @@ from .views import (acoesprontuario_delete, acoesprontuario_edit, AcoesProntuari
     StatusList, tipoItem_delete, TipoItem_edit, TipoItemCreate, TipoItemList, export_computadores_excel, export_estoque_excel,
     export_controlekit_excel, export_controlefones_excel,
     export_monitor_excel,export_celular_excel,LinhaListView, LinhaCreateView, LinhaUpdateView, linha_delete, export_linha_excel,
-    ProntuarioLinhaListView, ProntuarioLinhaCreateView, ProntuarioLinhaUpdateView, prontuario_linha_delete)
+    ProntuarioLinhaListView, ProntuarioLinhaCreateView, ProntuarioLinhaUpdateView, prontuario_linha_delete, EstoqueMovimentacaoList, estoque_movimentacao_create)
 
 urlpatterns = [
     path('tipoitem/', TipoItemList.as_view(), name='tipoitem_list'),
@@ -98,5 +98,8 @@ urlpatterns = [
     path('linha/<int:linha_id>/prontuario/novo/', ProntuarioLinhaCreateView.as_view(), name='prontuario_linha_create'),
     path('prontuario/linha/<int:pk>/editar/', ProntuarioLinhaUpdateView.as_view(), name='prontuario_linha_edit'),
     path('prontuario/linha/<int:pk>/excluir/', prontuario_linha_delete, name='prontuario_linha_delete'),
-
+    
+    #URLS para movimentação de Estoque
+    path('estoque/movimentacao_list/<int:estoque_id>/', EstoqueMovimentacaoList.as_view(), name='estoque_movimentacao_list'),
+    path('estoque/movimentacao/create/<int:estoque_id>/', estoque_movimentacao_create, name='estoque_movimentacao_create'),
 ]
