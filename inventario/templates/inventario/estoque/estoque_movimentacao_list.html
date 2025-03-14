@@ -1,14 +1,15 @@
 {% extends "menu/index.html" %}
+{% load static %}
 
 {% block content %}
 <div class="container-fluid">
-  
-    <div class="row">
+   
+    <div class="row mb-3">
         <div class="col-md-4"><strong>Item:</strong> {{ estoque.tipo_item.nome }} - {{ estoque.modelo }}</div>
         <div class="col-md-4"><strong>Fabricante:</strong> {{ estoque.fabricante }}</div>
         <div class="col-md-4"><strong>Local:</strong> {{ estoque.local }}</div>
     </div>
-    <div class="row">
+    <div class="row mb-3">
         <div class="col-md-4"><strong>Status:</strong> {{ estoque.status.nome_status }}</div>
         <div class="col-md-4"><strong>Quantidade Atual:</strong> {{ estoque.quantidade }}</div>
     </div>
@@ -33,12 +34,11 @@
                     <th>Hostname</th>
                     <th>Patrimônio</th>
                     <th>Usuário</th>
+                    <th>Ações</th> <!-- Nova coluna para exclusão -->
                 </tr>
             </thead>
             <tbody>
-               
                 {% for movimentacao in movimentacoes %}
-                {{ movimentacoes.chamado }}
                 <tr>
                     <td>{{ movimentacao.data_movimentacao|date:"d/m/Y" }}</td>
                     <td>{{ movimentacao.get_tipo_movimentacao_display }}</td>
@@ -48,14 +48,67 @@
                     <td>{{ movimentacao.hostname }}</td>
                     <td>{{ movimentacao.patrimonio }}</td>
                     <td>{{ movimentacao.usuario.nome_completo }}</td>
+                    <td>
+                        <!-- Botão para abrir o modal de exclusão -->
+                        <a href="#" class="delete-trigger btn btn-sm btn-danger"
+                           data-id="{{ movimentacao.id }}" 
+                           data-item="{{ movimentacao.motivo }}">
+                            <i class="fa fa-trash"></i> Excluir
+                        </a>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="8" class="text-center">Nenhuma movimentação registrada.</td>
+                    <td colspan="9" class="text-center">Nenhuma movimentação registrada.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja excluir <strong id="deleteItemName"></strong> (ID: <span id="deleteItemId"></span>)?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para abrir o modal de exclusão -->
+<script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+<script>
+    $(document).ready(function() {
+        $('.delete-trigger').click(function(event) {
+            event.preventDefault();  // Evita que o link execute a navegação padrão
+            var itemId = $(this).data('id');
+            var itemName = $(this).data('item');
+            var formAction = '/inventario/estoque/movimentacao/delete/' + itemId + '/';  // Substitua pela URL correta
+
+            // Define os valores no modal
+            $('#deleteItemId').text(itemId);
+            $('#deleteItemName').text(itemName);
+            $('#deleteForm').attr('action', formAction);
+
+            // Mostra o modal
+            $('#confirmDeleteModal').modal('show');
+        });
+    });
+</script>
 {% endblock %}

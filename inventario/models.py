@@ -78,7 +78,7 @@ class EstoqueMovimentacao(models.Model):
         ('Inventário', 'Inventário'),
     ]
 
-    estoque = models.ForeignKey(Estoque, on_delete=models.CASCADE, related_name="movimentacoes")
+    estoque = models.ForeignKey(Estoque, on_delete=models.PROTECT, related_name="movimentacoes")
     data_movimentacao = models.DateField(default=now)  # Preenchido automaticamente com a data atual
     tipo_movimentacao = models.CharField(max_length=10, choices=TIPO_MOVIMENTACAO_CHOICES)
     quantidade = models.PositiveIntegerField()

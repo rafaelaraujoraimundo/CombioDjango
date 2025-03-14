@@ -16,8 +16,11 @@
             <i class="fa fa-plus"></i> Adicionar Item de Estoque
         </a>
         <a href="{% url 'export_estoque_excel' %}?search={{ request.GET.search }}" class="btn btn-success">
-    Exportar Estoque para Excel
-</a>
+            Exportar Estoque para Excel
+        </a>
+        <a href="{% url 'relatorio_movimentacoes' %}" class="btn btn-info">
+            <i class="fa fa-file-alt"></i> Relatório de Movimentações
+            </a>
     </div>
     <div class="table-responsive">
         <table class="table table-striped table-bordered">
@@ -44,13 +47,13 @@
                     <td>{{ estoque.local }}</td>
                     <td>{{ estoque.quantidade }}</td>
                     <td> 
-                        <a class="mr-3" href="{% url 'estoque_edit' estoque.id %}">
-                            <i class="fa fa-edit"></i> Editar
-                        </a>
-                        <a href="#" class="delete-trigger mr-3" data-id="{{ estoque.id }}" data-item="{{ estoque.modelo }}">
-                            <i class="fa fa-trash"></i> Excluir
-                        </a>
+
+                        <a href="{% url 'estoque_edit' estoque.id %}" class="btn btn-sm btn-warning">Editar</a>
+                        <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ estoque.id  }}" data-item="{{ estoque.modelo }}">Excluir</a>
                         <a href="{% url 'estoque_movimentacao_list' estoque.id %}" class="btn btn-sm btn-info">Movimentações</a>
+                        <a href="{% url 'estoque_movimentacao_create' estoque.id %}" class="btn btn-primary btn-sm">
+                            <i class="fa fa-plus"></i> Criar Nova Movimentação
+                        </a>
                     </td>
                 </tr>
             {% empty %}

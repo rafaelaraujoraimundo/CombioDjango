@@ -1,4 +1,5 @@
 from django.urls import reverse_lazy
+import openpyxl
 from django.db.models import Sum, Q, Count
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,7 +11,8 @@ from .models import (AccountInfo, AcoesProntuario, BIOS, Celular, Computador, Co
     ProntuarioLinha, ProntuarioMonitor, Software, Status, Storage, TipoItem, EstoqueMovimentacao)
 from .forms import (AcoesProntuarioForm, CelularForm, ComputadorForm, ControleFonesForm,
     ControlekitForm, EstoqueForm, MonitorForm, ProntuarioCelularForm, ProntuarioComputadorForm,
-    ProntuarioMonitorForm, StatusForm, TipoItemForm, LinhaForm, ProntuarioLinhaForm, EstoqueMovimentacaoForm)
+    ProntuarioMonitorForm, StatusForm, TipoItemForm, LinhaForm, ProntuarioLinhaForm, EstoqueMovimentacaoForm,
+    RelatorioMovimentacoesForm)
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
@@ -206,6 +208,10 @@ def estoque_edit(request, estoque_id):
 @login_required(login_url='account_login')
 @permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def estoque_delete(request, estoque_id):
+    if not request.user.has_perm('global_permissions.combio_admin_admin'):
+        messages.error(request, 'Você não tem permissão para excluir este celular. Favor entrar em contato com o Admin.')
+        return redirect('estoque_list')
+    
     estoque = get_object_or_404(Estoque, pk=estoque_id)
     if request.method == "POST":
         estoque.delete()
@@ -1768,4 +1774,126 @@ def estoque_movimentacao_create(request, estoque_id):
     else:
         form = EstoqueMovimentacaoForm(user=request.user)
 
-    return render(request, 'inventario/estoque/estoque_movimentacao_form.html', {'form': form, 'estoque': estoque})
+    return render(request, 'inventario/estoque/estoque_movimentacao_form.html', {'form': form, 'estoque': estoque, 'title': 'Nova Movimentação de Estoque'})
+
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def relatorio_movimentacoes(request):
+    form = RelatorioMovimentacoesForm(request.GET or None)
+    movimentacoes = EstoqueMovimentacao.objects.all()
+
+    if form.is_valid():
+        data_inicio = form.cleaned_data.get('data_inicio')
+        data_fim = form.cleaned_data.get('data_fim')
+        tipo_movimentacao = form.cleaned_data.get('tipo_movimentacao')
+        motivo = form.cleaned_data.get('motivo')
+        nova_contratacao = form.cleaned_data.get('nova_contratacao')
+        usuario = form.cleaned_data.get('usuario')
+        estoque = form.cleaned_data.get('estoque')
+
+        if data_inicio:
+            movimentacoes = movimentacoes.filter(data_movimentacao__gte=data_inicio)
+        if data_fim:
+            movimentacoes = movimentacoes.filter(data_movimentacao__lte=data_fim)
+        if tipo_movimentacao:
+            movimentacoes = movimentacoes.filter(tipo_movimentacao=tipo_movimentacao)
+        if motivo:
+            movimentacoes = movimentacoes.filter(motivo=motivo)
+        if nova_contratacao:
+            movimentacoes = movimentacoes.filter(nova_contratacao__icontains=nova_contratacao)
+        if usuario:
+            movimentacoes = movimentacoes.filter(usuario=usuario)
+        if estoque:
+            movimentacoes = movimentacoes.filter(estoque=estoque)
+
+    return render(request, "inventario/estoque/relatorio_movimentacoes.html", {
+        'form': form,
+        'movimentacoes': movimentacoes
+    })
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def export_movimentacoes_excel(request):
+    form = RelatorioMovimentacoesForm(request.GET or None)
+    movimentacoes = EstoqueMovimentacao.objects.all()
+
+    if form.is_valid():
+        data_inicio = form.cleaned_data.get('data_inicio')
+        data_fim = form.cleaned_data.get('data_fim')
+        tipo_movimentacao = form.cleaned_data.get('tipo_movimentacao')
+        motivo = form.cleaned_data.get('motivo')
+        nova_contratacao = form.cleaned_data.get('nova_contratacao')
+        usuario = form.cleaned_data.get('usuario')
+        estoque = form.cleaned_data.get('estoque')
+
+        if data_inicio:
+            movimentacoes = movimentacoes.filter(data_movimentacao__gte=data_inicio)
+        if data_fim:
+            movimentacoes = movimentacoes.filter(data_movimentacao__lte=data_fim)
+        if tipo_movimentacao:
+            movimentacoes = movimentacoes.filter(tipo_movimentacao=tipo_movimentacao)
+        if motivo:
+            movimentacoes = movimentacoes.filter(motivo=motivo)
+        if nova_contratacao:
+            movimentacoes = movimentacoes.filter(nova_contratacao__icontains=nova_contratacao)
+        if usuario:
+            movimentacoes = movimentacoes.filter(usuario=usuario)
+        if estoque:
+            movimentacoes = movimentacoes.filter(estoque=estoque)
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Relatório de Movimentações"
+
+    columns = ['Estoque', 'Data', 'Tipo de Movimentação', 'Quantidade', 'Motivo', 'Nova Contratação', 'Usuário']
+    ws.append(columns)
+
+    for movimentacao in movimentacoes:
+        ws.append([
+            movimentacao.estoque.tipo_item.nome + " - " + movimentacao.estoque.modelo,
+            movimentacao.data_movimentacao.strftime('%d/%m/%Y'),
+            movimentacao.get_tipo_movimentacao_display(),
+            movimentacao.quantidade,
+            movimentacao.motivo,
+            movimentacao.nova_contratacao,
+            movimentacao.usuario.nome_completo if movimentacao.usuario else "",
+        ])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="relatorio_movimentacoes.xlsx"'
+    wb.save(response)
+
+    return response
+
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_inventario', login_url='erro_page')
+def estoque_movimentacao_delete(request, movimentacao_id):
+
+    movimentacao = get_object_or_404(EstoqueMovimentacao, pk=movimentacao_id)
+    estoque = movimentacao.estoque  # Obtém o estoque associado à movimentação
+
+    if not request.user.has_perm('global_permissions.combio_admin_admin'):
+        messages.error(request, 'Você não tem permissão para excluir esta movimentação. Favor entrar em contato com o Admin.')
+        return redirect('estoque_movimentacao_list',  estoque_id=estoque.id)
+
+    if request.method == "POST":
+        # Verifica se a exclusão causará estoque negativo
+        if movimentacao.tipo_movimentacao == 'entrada':
+            novo_saldo = estoque.quantidade - movimentacao.quantidade
+            if novo_saldo < 0:
+                messages.error(request, f"A exclusão dessa movimentação deixaria o estoque com valor negativo ({novo_saldo}). Ação cancelada.")
+                return redirect('estoque_movimentacao_list', estoque_id=estoque.id)
+            estoque.quantidade = novo_saldo  # Reduz a entrada do estoque
+
+        elif movimentacao.tipo_movimentacao == 'saida':
+            estoque.quantidade += movimentacao.quantidade  # Reverte a saída do estoque
+
+        estoque.save()  # Salva a atualização no estoque
+
+        movimentacao.delete()  # Exclui a movimentação
+        messages.success(request, 'Movimentação excluída com sucesso e saldo ajustado.')
+        return redirect('estoque_movimentacao_list', estoque_id=estoque.id)
+
+    return redirect('estoque_movimentacao_list', estoque_id=estoque.id)

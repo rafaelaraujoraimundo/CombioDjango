@@ -4,6 +4,7 @@ from .models import (AcoesProntuario, Celular, Computador, ControleFones, Contro
     Status, TipoItem, EstoqueMovimentacao)
 from dashboard.models import BiFuncionariosCombio
 from django.utils.timezone import now
+from administration.models import User
 
 class TipoItemForm(forms.ModelForm):
     class Meta:
@@ -377,3 +378,39 @@ class EstoqueMovimentacaoForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+class RelatorioMovimentacoesForm(forms.Form):
+    data_inicio = forms.DateField(
+        required=False, 
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    data_fim = forms.DateField(
+        required=False, 
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    tipo_movimentacao = forms.ChoiceField(
+        choices=[('', 'Todos')] + EstoqueMovimentacao.TIPO_MOVIMENTACAO_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    motivo = forms.ChoiceField(
+        choices=[('', 'Todos')] + EstoqueMovimentacao.MOTIVO_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    nova_contratacao = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    usuario = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    estoque = forms.ModelChoiceField(
+        queryset=Estoque.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Estoque"
+    )
