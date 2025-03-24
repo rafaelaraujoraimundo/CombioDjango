@@ -6,6 +6,7 @@ import requests
 from .models import Contatos, WhatsAppMessage
 from datetime import datetime
 from .whatsapp_interno import process_internal_message
+from .whatsapp_combio import process_combio_message
 
 def process_incoming_message(message):
     try:
@@ -27,7 +28,7 @@ def process_incoming_message(message):
                                 contato_model = Contatos.objects.filter(telefone=wa_id).first()
                                 if contato_model:
                                     # Redireciona o processamento para o arquivo whatsapp_interno.py
-                                    process_internal_message(wa_id, msg)
+                                    process_combio_message(wa_id, msg)
                                     return
                                 naive_timestamp_recebido = datetime.fromtimestamp(int(msg.get('timestamp')))
                                 timestamp_recebido = timezone.make_aware(naive_timestamp_recebido, timezone.get_default_timezone())
