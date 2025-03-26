@@ -17,6 +17,7 @@
         <thead>
             <tr>
                  <th>Hostname</th>
+                 <th>Tipo</th>
                 <th>Fabricante</th>
                 <th>Modelo</th>
                 <th>Processador</th>
@@ -32,6 +33,7 @@
             {% for computador in object_list %}
             <tr>
                  <td>{{ computador.hostname }}</td>
+                 <td>{{ computador.tipo }}</td>
                 <td>{{ computador.fabricante }}</td>
                 <td>{{ computador.modelo }}</td>
                 <td>{{ computador.processador }}</td>

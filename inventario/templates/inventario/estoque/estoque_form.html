@@ -9,7 +9,7 @@
             <label for="{{ form.tipo_item.id_for_label }}">Tipo de Item</label>
             <select class="form-control" id="{{ form.tipo_item.id_for_label }}" name="{{ form.tipo_item.name }}">
                 {% for option in form.tipo_item.field.queryset %}
-                    <option value="{{ option.pk }}" {% if form.tipo_item.value == option.pk %}selected{% endif %}>{{ option.nome }}</option>
+                    <option value="{{ option.pk }}" {% if form.cleaned_data.tipo_item.id == option.pk %}selected{% endif %}>{{ option.nome }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -37,7 +37,7 @@
             <label for="{{ form.status.id_for_label }}">Status</label>
             <select class="form-control" id="{{ form.status.id_for_label }}" name="{{ form.status.name }}">
                 {% for option in form.status.field.queryset %}
-                    <option value="{{ option.pk }}" {% if form.status.value == option.pk %}selected{% endif %}>{{ option.nome_status }}</option>
+                    <option value="{{ option.pk }}" {% if form.cleaned_data.status.id == option.pk %}selected{% endif %}>{{ option.nome_status }}</option>
                 {% endfor %}
             </select>
         </div>

@@ -414,10 +414,15 @@ class ProntuarioMonitor(models.Model):
     
 
 
+TIPO_CHOICES_COMPUTADOR = (
+    ('Desktop', 'Desktop'),
+    ('Notebook', 'Notebook'),
+)
 
 
 class Computador(models.Model):
     patrimonio = models.CharField(max_length=100)
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES_COMPUTADOR, default='Notebook')
     hostname = models.CharField(max_length=100)
     numero_serie = models.CharField(max_length=100)
     fabricante = models.CharField(max_length=100)
