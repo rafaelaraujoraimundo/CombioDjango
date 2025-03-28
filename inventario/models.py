@@ -218,7 +218,7 @@ class Hardware(models.Model):
     last_come = models.DateTimeField(blank=True, null=True)
     last_date = models.DateTimeField(blank=True, null=True)
     memory = models.IntegerField(blank=True, null=True)  # Memória em MB
-    name = models.CharField(max_length=500, blank=True, null=True)
+    name = models.CharField(max_length=500, unique=True, blank=True, null=True)
     os_comments = models.CharField(max_length=500, blank=True, null=True)
     os_name = models.CharField(max_length=500, blank=True, null=True)
     os_version = models.CharField(max_length=100, blank=True, null=True)

@@ -40,7 +40,7 @@ def populate_hardware_data():
                 last_date = convert_to_aware(computer_data["hardware"].get("LASTDATE"))
                 
                 hardware, created = Hardware.objects.update_or_create(
-                    id=computer_data["hardware"].get("ID"),  # Assumindo que a chave principal seja ID
+                    name=computer_data["hardware"].get("NAME"),  # Assumindo que a chave principal seja ID
                     defaults={
                         "arch": computer_data["hardware"].get("ARCH"),
                         "checksum": computer_data["hardware"].get("CHECKSUM"),
