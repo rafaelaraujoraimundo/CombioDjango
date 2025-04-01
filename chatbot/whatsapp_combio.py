@@ -98,10 +98,12 @@ def process_combio_message(wa_id, msg):
 
     elif current_stage == 'consulta_menu':
         if message_body_lower in ['1', '1.1']:
+
+
             # 1.1) Previsão de Pagamento
             send_message(
                 wa_id,
-                "Previsão de Pagamento:\nPor favor, informe o CNPJ para consultar todas as notas em aberto:"
+                "Previsão de Pagamento:\nPor favor, informe o CNPJ/CPF para consultar todas as notas em aberto:"
             )
             WhatsAppMessage.objects.create(
                 wa_id=wa_id,
@@ -133,14 +135,30 @@ def process_combio_message(wa_id, msg):
     # ---------------------------
     elif current_stage == 'consulta_previsao':
         cnpj = message_body
+        if not cnpj_valido(cnpj):
+            send_message(wa_id, "❌ CNPJ/CPF inválido. Por favor, informe um CNPJ/CPF com 11 ou 14 dígitos numéricos.")
+            return
         # Aqui, integre a consulta real para retornar todas as notas em aberto para o CNPJ
-        send_message(
-            wa_id, 
-            f"Previsão de Pagamento:\nConsulta realizada para o CNPJ {cnpj}.\n\n"
-            "Exemplo de notas em aberto:\n"
-            "- NF 001, Emissão: 01/09/2025, Vencimento: 15/09/2025, Valor: R$ 1.000,00\n"
-            "- NF 002, Emissão: 05/09/2025, Vencimento: 30/09/2025, Valor: R$ 500,00"
-        )
+        send_message(wa_id, "Consultando informações no sistema, aguarde....")
+        titulos = consulta_titulos_api(cnpj)
+
+        if titulos:
+            nome_emitente = titulos[0]['nome_fornecedor']
+            mensagem = f"Previsão de Pagamento:\nConsulta realizada para o CNPJ/CPF {cnpj}\nFornecedor: *{nome_emitente}*\n\n"
+        
+            for titulo in titulos:
+                cod = titulo['cod_tit_ap']
+                parcela = titulo['cod_parcela']
+                emissao = datetime.strptime(titulo['dat_emis_docto'], '%Y-%m-%d').strftime('%d/%m/%Y')
+                vencimento = datetime.strptime(titulo['dat_vencto_tit_ap'], '%Y-%m-%d').strftime('%d/%m/%Y')
+                valor = f"R$ {titulo['val_sdo_tit_ap']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+        
+                mensagem += f"- NF {cod}-{parcela}, Emissão: {emissao}, Vencimento: {vencimento}, Valor: {valor}\n"
+        
+        else:
+            mensagem = "Nenhuma nota em aberto encontrada para o CNPJ/CPF informado."
+        
+        send_message(wa_id, mensagem)
         WhatsAppMessage.objects.create(
             wa_id=wa_id,
             message_id=message_id,
@@ -157,6 +175,9 @@ def process_combio_message(wa_id, msg):
     # ----------------------------------------------------
     elif current_stage == 'consulta_composicao_cnpj':
         cnpj = message_body
+        if not cnpj_valido(cnpj):
+            send_message(wa_id, "❌ CNPJ/CPF inválido. Por favor, informe um CNPJ/CPF com 11 ou 14 dígitos numéricos.")
+            return
         send_message(wa_id, "Passo 2/3:\nPor favor, informe a *data inicial* no formato dd/mm/yyyy:")
         WhatsAppMessage.objects.create(
             wa_id=wa_id,
@@ -170,6 +191,9 @@ def process_combio_message(wa_id, msg):
     # Passo 2: Coleta da data inicial
     elif current_stage == 'consulta_composicao_data_inicial':
         data_inicial = message_body
+        if not data_valida(data_inicial):
+            send_message(wa_id, "❌ Data inicial inválida. Use o formato dd/mm/yyyy, como 01/05/2025.")
+            return
         send_message(wa_id, "Passo 3/3:\nPor favor, informe a *data final* no formato dd/mm/yyyy:")
         WhatsAppMessage.objects.create(
             wa_id=wa_id,
@@ -183,21 +207,47 @@ def process_combio_message(wa_id, msg):
     # Passo 3: Coleta da data final
     elif current_stage == 'consulta_composicao_data_final':
         data_final = message_body
-        all_msgs = WhatsAppMessage.objects.filter(wa_id=wa_id).order_by('-id')
-        data_inicial_msg = all_msgs[1] if len(all_msgs) > 1 else None
-        data_inicial = data_inicial_msg.message_body if data_inicial_msg else 'N/A'
-        cnpj_msg = all_msgs[2] if len(all_msgs) > 2 else None
-        cnpj = cnpj_msg.message_body if cnpj_msg else 'N/A'
+        if not data_valida(data_final):
+            send_message(wa_id, "❌ Data inicial inválida. Use o formato dd/mm/yyyy, como 01/05/2025.")
+            return
+        mensagens = WhatsAppMessage.objects.filter(wa_id=wa_id).order_by('-id')
 
-        send_message(
-            wa_id,
-            f"Composição de Notas de Pagamento (Títulos Pagos)\n\n"
-            f"CNPJ: {cnpj}\n"
-            f"Período: {data_inicial} a {data_final}\n\n"
-            f"Exemplo de resultado:\n"
-            f"- Nota 001, Valor: R$ 1.000,00 (Pago em 10/08/2025)\n"
-            f"- Nota 002, Valor: R$ 500,00 (Pago em 15/08/2025)"
-        )
+        cnpj = next((m.message_body for m in mensagens if m.stage == 'consulta_composicao_data_inicial'), 'N/A')
+        data_inicial = next((m.message_body for m in mensagens if m.stage == 'consulta_composicao_data_final'), 'N/A')
+        data_final = message_body
+
+        
+        data_inicial_fmt = datetime.strptime(data_inicial, '%d/%m/%Y').strftime('%Y-%m-%d')
+        data_final_fmt = datetime.strptime(data_final, '%d/%m/%Y').strftime('%Y-%m-%d')
+
+        send_message(wa_id, "Consultando títulos pagos, aguarde...")
+
+        titulos = consulta_titulos_pagos_api(cnpj, data_inicial_fmt, data_final_fmt)
+
+        if titulos:
+            nome_emitente = titulos[0]['nome_fornecedor']
+            mensagem = (
+                f"Composição de Notas de Pagamento (Títulos Pagos)\n\n"
+                f"Fornecedor: *{nome_emitente}*\n"
+                f"CNPJ: {cnpj}\n"
+                f"Período: {data_inicial} a {data_final}\n\n"
+                f"*{'NF':<10} {'Parcela':<8} {'Emissão':<12} {'Vencimento':<12} {'Pagamento':<12} {'Valor':<10}*\n"
+            )
+            for titulo in titulos:
+                cod = titulo['cod_tit_ap']
+                parcela = titulo['cod_parcela']
+                emissao = datetime.strptime(titulo['dat_emis_docto'], '%Y-%m-%d').strftime('%d/%m/%Y')
+                vencimento = datetime.strptime(titulo['dat_vencto_tit_ap'], '%Y-%m-%d').strftime('%d/%m/%Y')
+                pagamento = datetime.strptime(titulo['data_pagamento'], '%Y-%m-%d').strftime('%d/%m/%Y')
+                valor = f"R$ {titulo['val_sdo_tit_ap']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+
+                linha = f"{cod:<10} {parcela:<8} {emissao:<12} {vencimento:<12} {pagamento:<12} {valor:<10}"
+                mensagem += linha + '\n'
+        else:
+            mensagem = "Nenhum título pago encontrado no período informado."
+
+        send_message(wa_id, mensagem)
+
         WhatsAppMessage.objects.create(
             wa_id=wa_id,
             message_id=message_id,
@@ -205,7 +255,9 @@ def process_combio_message(wa_id, msg):
             timestamp_recebido=timestamp,
             stage='final'
         )
+
         send_message(wa_id, "Posso ajudar com mais alguma coisa? Digite 'menu' para voltar ou 'sair' para encerrar.")
+
         return
 
     # -------------------------
@@ -263,7 +315,7 @@ def process_combio_message(wa_id, msg):
             subject=subject,
             message=message_text,  # Texto do e-mail (simples)
             from_email=settings.EMAIL_HOST_USER,
-            recipient_list=["rafael.araujo@combio.com.br"],
+            recipient_list=["chatbot@combio.com.br"],
         # Caso queira enviar em HTML, inclua 'html_message=html_conteudo' e um texto HTML
         )
 
@@ -329,7 +381,15 @@ def send_message(to, text):
         'type': 'text',
         'text': {'preview_url': False, 'body': text}
     }
+
     response = requests.post(url, headers=headers, json=data)
+
+    if response.status_code != 200:
+        print("❌ Erro ao enviar mensagem para o WhatsApp:")
+        print("Status:", response.status_code)
+        print("Resposta:", response.text)
+        print("Payload enviado:", json.dumps(data, indent=2))
+
     return response.json()
 
 def should_send_initial_message(wa_id):
@@ -343,3 +403,51 @@ def should_send_initial_message(wa_id):
         time_diff = current_timestamp - last_message.timestamp_recebido
         return time_diff >= timedelta(minutes=2)
     return True
+
+def consulta_titulos_api(cnpj):
+    url = f"{config('DATASUL_HOST')}/esp/combio/v1/api_chatbot/piBuscatitulosCNPJ/"
+    payload = json.dumps({"cnpj": cnpj})
+    headers = {
+        'Authorization': f'Basic {config('DATASUL_TOKEN')}',
+        'Content-Type': 'application/json',
+    }
+    response = requests.post(url, headers=headers, data=payload)
+    if response.status_code == 200:
+        return response.json().get('items', [])
+    return []
+
+def cnpj_valido(cnpj):
+    return cnpj.isdigit() and len(cnpj) in [11, 14]
+
+def data_valida(data_str):
+    try:
+        datetime.strptime(data_str, "%d/%m/%Y")
+        return True
+    except ValueError:
+        return False
+    
+
+def consulta_titulos_pagos_api(cnpj, data_inicial, data_final):
+    url = f"{config('DATASUL_HOST')}/esp/combio/v1/api_chatbot/piBuscatitulosPagosCNPJ/"
+    payload = json.dumps({
+        "cnpj": cnpj,
+        "dataInicial": data_inicial,
+        "dataFinal": data_final
+    })
+    headers = {
+        'Authorization': f'Basic {config("DATASUL_TOKEN")}',
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.post(url, headers=headers, data=payload)
+
+    if response.status_code != 200:
+        print("❌ Erro ao consultar títulos pagos:")
+        print("Status:", response.status_code)
+        print("Resposta:", response.text)
+        print("Payload enviado:", payload)
+
+    if response.status_code == 200:
+        return response.json().get('items', [])
+
+    return []
