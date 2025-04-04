@@ -6,6 +6,7 @@ import requests
 from .models import Contatos
 from .whatsapp_combio import process_combio_message
 from .whatsapp_externo import process_externo_message
+from .models import WhatsAppMessage
 
 def process_incoming_message(message):
     try:
@@ -20,14 +21,20 @@ def process_incoming_message(message):
                         message_details = value.get('messages', [])
                         for msg in message_details:
                             if 'text' in msg and 'body' in msg['text']:
-                                wa_id = msg.get('from')
-                                print(f'wa_id {wa_id}')
                                 
-                                contato_model = Contatos.objects.filter(telefone=wa_id).first()
-                                if contato_model:
-                                    process_combio_message(wa_id, msg)
-                                else:
-                                    process_externo_message(wa_id, msg)
+                                wa_id = msg.get('from')
+                                message_id = msg.get('id')
+
+                                print(f'wa_id {wa_id}')
+                                print(f'message_id {message_id}')
+                                print(message)
+                                # Verifica se a mensagem já foi registrada
+                                if WhatsAppMessage.objects.filter(message_id=message_id).exists():
+                                    print(f"❗ Mensagem com ID {message_id} já registrada. Ignorando.")
+                                    return  # Sai da função sem processar de novo
+
+                                # Caso não exista, continua com o processamento
+                                process_combio_message(wa_id, msg)
                                 return
     except (KeyError, IndexError) as e:
         print(f"❌ Erro ao processar mensagem recebida: {str(e)}")

@@ -132,16 +132,18 @@ def process_externo_message(wa_id, msg):
             if titulos:
                 nome_emitente = titulos[0]['nome_fornecedor']
                 mensagem = f"Previsão de Pagamento:\nConsulta realizada para o CNPJ/CPF {cnpj}\nFornecedor: *{nome_emitente}*\n\n"
+                send_message(wa_id, mensagem)
                 for titulo in titulos:
                     cod = titulo['cod_tit_ap']
                     parcela = titulo['cod_parcela']
                     emissao = datetime.strptime(titulo['dat_emis_docto'], '%Y-%m-%d').strftime('%d/%m/%Y')
                     vencimento = datetime.strptime(titulo['dat_vencto_tit_ap'], '%Y-%m-%d').strftime('%d/%m/%Y')
                     valor = f"R$ {titulo['val_sdo_tit_ap']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-                    mensagem += f"- NF {cod}-{parcela}, Emissão: {emissao}, Vencimento: {vencimento}, Valor: {valor}\n"
+                    send_message(f"- NF {cod}-{parcela}, Emissão: {emissao}, Vencimento: {vencimento}, Valor: {valor}\n")
+                    #mensagem += f"- NF {cod}-{parcela}, Emissão: {emissao}, Vencimento: {vencimento}, Valor: {valor}\n"
             else:
                 mensagem = "Nenhuma nota em aberto encontrada para o CNPJ/CPF informado."
-            send_message(wa_id, mensagem)
+                send_message(wa_id, mensagem)
             WhatsAppMessage.objects.create(
                 wa_id=wa_id,
                 message_id=message_id,

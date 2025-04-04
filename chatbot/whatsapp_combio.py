@@ -6,6 +6,7 @@ from .models import WhatsAppMessage
 import requests
 from django.core.mail import send_mail
 from django.conf import settings
+from .utils import formatar_titulos_em_blocos, formatar_titulos_pagos_em_blocos
 
 def process_combio_message(wa_id, msg):
     message_id = msg.get('id')
@@ -138,27 +139,6 @@ def process_combio_message(wa_id, msg):
         if not cnpj_valido(cnpj):
             send_message(wa_id, "❌ CNPJ/CPF inválido. Por favor, informe um CNPJ/CPF com 11 ou 14 dígitos numéricos.")
             return
-        # Aqui, integre a consulta real para retornar todas as notas em aberto para o CNPJ
-        send_message(wa_id, "Consultando informações no sistema, aguarde....")
-        titulos = consulta_titulos_api(cnpj)
-
-        if titulos:
-            nome_emitente = titulos[0]['nome_fornecedor']
-            mensagem = f"Previsão de Pagamento:\nConsulta realizada para o CNPJ/CPF {cnpj}\nFornecedor: *{nome_emitente}*\n\n"
-        
-            for titulo in titulos:
-                cod = titulo['cod_tit_ap']
-                parcela = titulo['cod_parcela']
-                emissao = datetime.strptime(titulo['dat_emis_docto'], '%Y-%m-%d').strftime('%d/%m/%Y')
-                vencimento = datetime.strptime(titulo['dat_vencto_tit_ap'], '%Y-%m-%d').strftime('%d/%m/%Y')
-                valor = f"R$ {titulo['val_sdo_tit_ap']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-        
-                mensagem += f"- NF {cod}-{parcela}, Emissão: {emissao}, Vencimento: {vencimento}, Valor: {valor}\n"
-        
-        else:
-            mensagem = "Nenhuma nota em aberto encontrada para o CNPJ/CPF informado."
-        
-        send_message(wa_id, mensagem)
         WhatsAppMessage.objects.create(
             wa_id=wa_id,
             message_id=message_id,
@@ -166,6 +146,32 @@ def process_combio_message(wa_id, msg):
             timestamp_recebido=timestamp,
             stage='final'
         )
+        # Aqui, integre a consulta real para retornar todas as notas em aberto para o CNPJ
+        send_message(wa_id, "Consultando informações no sistema, aguarde....")
+        titulos = consulta_titulos_api(cnpj)
+
+        if titulos:
+            nome_emitente = titulos[0]['nome_fornecedor']
+            mensagem = f"Prezado fornecedor, segue a relação dos títulos que temos em aberto até o momento:\n\nConsulta realizada para o CNPJ/CPF {cnpj}\nFornecedor: *{nome_emitente}*\n\n"
+            send_message(wa_id, mensagem)
+            blocos = formatar_titulos_em_blocos(titulos)
+
+            for bloco in blocos:
+                send_message(wa_id, bloco)
+
+            
+            mensagem = f"*Lembre-se: nossos pagamentos são realizados nos dias 15 e 30, conforme nossa política interna:*\n"
+            mensagem += f"Títulos com vencimento entre os dias 1 e 15 serão pagos no dia 15 do mesmo mês.\n"   
+            mensagem += f"Títulos com vencimento entre os dias 16 e 31 serão pagos no dia 30 do mesmo mês.\n" 
+            mensagem += f"Caso a data de pagamento caia em um dia não útil, o pagamento será efetuado no próximo dia útil.\n" 
+            mensagem += f"*Sentiu falta de alguma NF?*\n Fique ligado nesta Dica: Se a nota foi emitida há menos de 15 dias, ela pode estar em processo de lançamento interno e, em breve, entrará em nossa programação de pagamento. Caso tenha sido emitida há mais de 15 dias, recomendamos que entre em contato com o comprador para mais informações."
+            send_message(wa_id, mensagem)
+        else:
+            mensagem = "Não foram encontrados títulos em aberto no momento, mas fique tranquilo!\n Se a nota foi emitida há menos de 15 dias, ela pode estar em processo de lançamento interno e, em breve, entrará em nossa programação de pagamento. \nCaso tenha sido emitida há mais de 15 dias, recomendamos que entre em contato com o comprador para mais informações."
+            send_message(wa_id, mensagem)
+            
+        
+        
         send_message(wa_id, "Posso ajudar com mais alguma coisa? Digite 'menu' para voltar ao menu principal ou 'sair' para encerrar.")
         return
 
@@ -223,30 +229,32 @@ def process_combio_message(wa_id, msg):
         send_message(wa_id, "Consultando títulos pagos, aguarde...")
 
         titulos = consulta_titulos_pagos_api(cnpj, data_inicial_fmt, data_final_fmt)
-
         if titulos:
             nome_emitente = titulos[0]['nome_fornecedor']
-            mensagem = (
-                f"Composição de Notas de Pagamento (Títulos Pagos)\n\n"
-                f"Fornecedor: *{nome_emitente}*\n"
-                f"CNPJ: {cnpj}\n"
-                f"Período: {data_inicial} a {data_final}\n\n"
-                f"*{'NF':<10} {'Parcela':<8} {'Emissão':<12} {'Vencimento':<12} {'Pagamento':<12} {'Valor':<10}*\n"
-            )
-            for titulo in titulos:
-                cod = titulo['cod_tit_ap']
-                parcela = titulo['cod_parcela']
-                emissao = datetime.strptime(titulo['dat_emis_docto'], '%Y-%m-%d').strftime('%d/%m/%Y')
-                vencimento = datetime.strptime(titulo['dat_vencto_tit_ap'], '%Y-%m-%d').strftime('%d/%m/%Y')
-                pagamento = datetime.strptime(titulo['data_pagamento'], '%Y-%m-%d').strftime('%d/%m/%Y')
-                valor = f"R$ {titulo['val_sdo_tit_ap']:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+            cabecalho = (
+                    f"Composição de Notas de Pagamento (Títulos Pagos)\n\n"
+                    f"Fornecedor: *{nome_emitente}*\n"
+                    f"CNPJ: {cnpj}\n"
+                    f"Período: {data_inicial} a {data_final}\n"
+                )
+            send_message(wa_id, cabecalho)
 
-                linha = f"{cod:<10} {parcela:<8} {emissao:<12} {vencimento:<12} {pagamento:<12} {valor:<10}"
-                mensagem += linha + '\n'
+            blocos = formatar_titulos_pagos_em_blocos(titulos)
+            for bloco in blocos:
+                send_message(wa_id, bloco)
+
+
+
+            mensagem = f"\n*Lembre-se: nossos pagamentos são realizados nos dias 15 e 30, conforme nossa política interna:*\n"
+            mensagem += f"Títulos com vencimento entre os dias 1 e 15 serão pagos no dia 15 do mesmo mês.\n"   
+            mensagem += f"Títulos com vencimento entre os dias 16 e 31 serão pagos no dia 30 do mesmo mês.\n" 
+            mensagem += f"Caso a data de pagamento caia em um dia não útil, o pagamento será efetuado no próximo dia útil.\n" 
+            send_message(wa_id, mensagem)
         else:
-            mensagem = "Nenhum título pago encontrado no período informado."
-
-        send_message(wa_id, mensagem)
+            mensagem = "Nenhum título pago encontrado no período informado.\n   "
+            mensagem += "Em caso de dúvida, entrar em contato através do email: *contasapagar@combio.com.br* em breve um de nossos analistas irá atender sua solicitação."
+            send_message(wa_id, mensagem)
+        
 
         WhatsAppMessage.objects.create(
             wa_id=wa_id,
@@ -265,13 +273,12 @@ def process_combio_message(wa_id, msg):
     # -------------------------
     elif current_stage == 'duvidas_menu':
         if message_body_lower in ['1', '2.1']:
+            mensagem = f"\n*Nossos pagamentos são realizados nos dias 15 e 30, conforme nossa política interna:*\n"
+            mensagem += f"Títulos com vencimento entre os dias 1 e 15 serão pagos no dia 15 do mesmo mês.\n"   
+            mensagem += f"Títulos com vencimento entre os dias 16 e 31 serão pagos no dia 30 do mesmo mês.\n" 
+            mensagem += f"Caso a data de pagamento caia em um dia não útil, o pagamento será efetuado no próximo dia útil.\n" 
             send_message(
-                wa_id, 
-                "Regras do Processo de Pagamento:\n"
-                "- Pagamentos programados após aprovação de Pedido e Recebimento físico e fiscal da NF\n"
-                "- Pagamentos realizados nos dias 15 e 30 de cada mês\n"
-                "- Pagamento via transferência bancária\n"
-                "Para mais informações, entre em contato: contasapagar@combio.com.br"
+                wa_id, mensagem
             )
             WhatsAppMessage.objects.create(
                 wa_id=wa_id,
@@ -284,7 +291,7 @@ def process_combio_message(wa_id, msg):
         elif message_body_lower in ['2', '2.2']:
             send_message(
                 wa_id, 
-                "Para ajustes ou correções, por favor, informe os detalhes do erro, incluindo CNPJ, NF e um contato para retorno."
+                "Para ajustes ou correções, por favor, informe o CNPJ, NF, contato para retorno e conte-nos brevemente a inconsistência encontrada"
             )
             WhatsAppMessage.objects.create(
                 wa_id=wa_id,
@@ -401,7 +408,7 @@ def should_send_initial_message(wa_id):
     last_message = WhatsAppMessage.objects.filter(wa_id=wa_id).order_by('-id').first()
     if last_message:
         time_diff = current_timestamp - last_message.timestamp_recebido
-        return time_diff >= timedelta(minutes=2)
+        return time_diff >= timedelta(minutes=5)
     return True
 
 def consulta_titulos_api(cnpj):
@@ -413,6 +420,7 @@ def consulta_titulos_api(cnpj):
     }
     response = requests.post(url, headers=headers, data=payload)
     if response.status_code == 200:
+        print(response)
         return response.json().get('items', [])
     return []
 

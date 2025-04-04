@@ -96,3 +96,59 @@ def send_message(to, text):
         print("Payload enviado:", json.dumps(data, indent=2))
 
     return response.json()
+
+MAX_WHATSAPP_CHAR = 4000
+
+def formatar_titulos_em_blocos(titulos):
+    """
+    Agrupa títulos em blocos de até 4000 caracteres para envio via WhatsApp,
+    removendo o campo de valor e formatando cada linha como:
+    Cód        Parcela  Emissão      Vencimento
+    123456     01       01/04/2025   10/04/2025
+    """
+    blocos = []
+    bloco_atual = ''
+    cabecalho = f"{'Cód':<10} {'Parcela':<8} {'Emissão':<12} {'Vencimento':<12}\n"
+
+    for titulo in titulos:
+        cod = titulo["cod_tit_ap"]
+        parcela = titulo["cod_parcela"]
+        emissao = datetime.strptime(titulo["dat_emis_docto"], "%Y-%m-%d").strftime("%d/%m/%Y")
+        vencimento = datetime.strptime(titulo["dat_vencto_tit_ap"], "%Y-%m-%d").strftime("%d/%m/%Y")
+        linha = f"{cod:<10} {parcela:<8} {emissao:<12} {vencimento:<12}\n"
+
+        if len(bloco_atual) + len(linha) + len(cabecalho) > MAX_WHATSAPP_CHAR:
+            blocos.append(cabecalho + bloco_atual.strip())
+            bloco_atual = linha
+        else:
+            bloco_atual += linha
+
+    if bloco_atual.strip():
+        blocos.append(cabecalho + bloco_atual.strip())
+
+    return blocos
+
+def formatar_titulos_pagos_em_blocos(titulos):
+    blocos = []
+    bloco_atual = ''
+    cabecalho = f"{'NF.':<10} {'Parcela':<8} {' Emissão':<12} {'  Vencimento':<12} {'  Pagamento':<12}\n"
+    
+    for titulo in titulos:
+        cod = titulo['cod_tit_ap']
+        parcela = titulo['cod_parcela']
+        emissao = datetime.strptime(titulo['dat_emis_docto'], '%Y-%m-%d').strftime('%d/%m/%Y')
+        vencimento = datetime.strptime(titulo['dat_vencto_tit_ap'], '%Y-%m-%d').strftime('%d/%m/%Y')
+        pagamento = datetime.strptime(titulo['data_pagamento'], '%Y-%m-%d').strftime('%d/%m/%Y')
+        linha = f"{cod:<10} {parcela:<8} {emissao:<12} {vencimento:<12} {pagamento:<12}\n"
+
+        # Verifica se ao adicionar a linha e o cabeçalho ultrapassa o limite
+        if len(bloco_atual) + len(linha) + len(cabecalho) > MAX_WHATSAPP_CHAR:
+            blocos.append(cabecalho + bloco_atual.strip())
+            bloco_atual = linha
+        else:
+            bloco_atual += linha
+
+    if bloco_atual.strip():
+        blocos.append(cabecalho + bloco_atual.strip())
+
+    return blocos
