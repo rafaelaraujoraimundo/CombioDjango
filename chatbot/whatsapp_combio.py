@@ -67,8 +67,8 @@ def process_combio_message(wa_id, msg):
                 wa_id, 
                 "Você deseja consultar informações sobre um pagamento específico?\n"
                 "Escolha uma opção:\n"
-                "1.1) Previsão de Pagamento (Títulos em aberto)\n"
-                "1.2) Composição de Notas de Pagamento (Títulos Pagos)"
+                "A) Previsão de Pagamento (Títulos em aberto)\n"
+                "B) Composição de Notas de Pagamento (Títulos Pagos)"
             )
             WhatsAppMessage.objects.create(
                 wa_id=wa_id,
@@ -83,8 +83,8 @@ def process_combio_message(wa_id, msg):
                 wa_id, 
                 "Como posso ajudar com suas dúvidas sobre contas a pagar?\n"
                 "Escolha uma opção:\n"
-                "2.1) Explicar as regras do Processo de Pagamento\n"
-                "2.2) Ajustes ou Correções em Pagamento"
+                "A) Explicar as regras do Processo de Pagamento\n"
+                "B) Ajustes ou Correções em Pagamento"
             )
             WhatsAppMessage.objects.create(
                 wa_id=wa_id,
@@ -98,13 +98,13 @@ def process_combio_message(wa_id, msg):
         return
 
     elif current_stage == 'consulta_menu':
-        if message_body_lower in ['1', '1.1']:
+        if message_body_lower in ['1', '1.1','a','A']:
 
 
             # 1.1) Previsão de Pagamento
             send_message(
                 wa_id,
-                "Previsão de Pagamento:\nPor favor, informe o CNPJ/CPF para consultar todas as notas em aberto:"
+                "Previsão de Pagamento:\nPor favor, informe o CNPJ/CPF (Apenas números) para consultar todas as notas em aberto:"
             )
             WhatsAppMessage.objects.create(
                 wa_id=wa_id,
@@ -113,12 +113,12 @@ def process_combio_message(wa_id, msg):
                 timestamp_recebido=timestamp,
                 stage='consulta_previsao'
             )
-        elif message_body_lower in ['2', '1.2']:
+        elif message_body_lower in ['2', '1.2','b','B']:
             # 1.2) Composição de Notas de Pagamento (Títulos Pagos)
             send_message(
                 wa_id,
                 "Composição de Notas de Pagamento (Títulos Pagos) - Passo 1/3:\n"
-                "Por favor, informe o CNPJ do fornecedor:"
+                "Por favor, informe o CNPJ/CPF (Apenas números) para consultar todas as notas em aberto:"
             )
             WhatsAppMessage.objects.create(
                 wa_id=wa_id,
@@ -137,7 +137,7 @@ def process_combio_message(wa_id, msg):
     elif current_stage == 'consulta_previsao':
         cnpj = message_body
         if not cnpj_valido(cnpj):
-            send_message(wa_id, "❌ CNPJ/CPF inválido. Por favor, informe um CNPJ/CPF com 11 ou 14 dígitos numéricos.")
+            send_message(wa_id, "❌ CNPJ/CPF inválido. Por favor, informe um CNPJ/CPF sem pontos, traço ou barra.")
             return
         WhatsAppMessage.objects.create(
             wa_id=wa_id,
@@ -182,7 +182,7 @@ def process_combio_message(wa_id, msg):
     elif current_stage == 'consulta_composicao_cnpj':
         cnpj = message_body
         if not cnpj_valido(cnpj):
-            send_message(wa_id, "❌ CNPJ/CPF inválido. Por favor, informe um CNPJ/CPF com 11 ou 14 dígitos numéricos.")
+            send_message(wa_id, "❌ CNPJ/CPF inválido. Por favor, informe um CNPJ/CPF sem pontos, traço ou barra.")
             return
         send_message(wa_id, "Passo 2/3:\nPor favor, informe a *data inicial* no formato dd/mm/yyyy:")
         WhatsAppMessage.objects.create(
@@ -272,7 +272,7 @@ def process_combio_message(wa_id, msg):
     # 2) Dúvidas sobre Contas a Pagar
     # -------------------------
     elif current_stage == 'duvidas_menu':
-        if message_body_lower in ['1', '2.1']:
+        if message_body_lower in ['1', '2.1','a','A']:
             mensagem = f"\n*Nossos pagamentos são realizados nos dias 15 e 30, conforme nossa política interna:*\n"
             mensagem += f"Títulos com vencimento entre os dias 1 e 15 serão pagos no dia 15 do mesmo mês.\n"   
             mensagem += f"Títulos com vencimento entre os dias 16 e 31 serão pagos no dia 30 do mesmo mês.\n" 
@@ -288,7 +288,7 @@ def process_combio_message(wa_id, msg):
                 stage='final'
             )
             send_message(wa_id, "Posso ajudar com mais alguma coisa? Digite 'menu' para voltar ou 'sair' para encerrar.")
-        elif message_body_lower in ['2', '2.2']:
+        elif message_body_lower in ['2', '2.2','b','B']:
             send_message(
                 wa_id, 
                 "Para ajustes ou correções, por favor, informe o CNPJ, NF, contato para retorno e conte-nos brevemente a inconsistência encontrada"
