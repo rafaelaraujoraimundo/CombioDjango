@@ -103,6 +103,18 @@
                     {% endfor %}
                 </div>
             </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="{{ form.tipo.id_for_label }}">Tipo</label>
+                    <select class="form-control {% if form.tipo.errors %}is-invalid{% endif %}" id="{{ form.tipo.id_for_label }}" name="{{ form.tipo.name }}">
+                        <option value="Desktop" {% if form.tipo.value == 'Desktop' %}selected{% endif %}>Desktop</option>
+                        <option value="Notebook" {% if form.tipo.value == 'Notebook' %}selected{% endif %}>Notebook</option>
+                    </select>
+                    {% for error in form.tipo.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
 
 
