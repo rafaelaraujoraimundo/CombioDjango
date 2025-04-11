@@ -344,26 +344,30 @@ def processar_bloco_e510(arquivos):
 def processar_bloco_c(arquivos):
     """
     Processa o bloco C conforme a regra especificada.
-    Ignora todas as linhas do bloco C dos arquivos de entrada, exceto as especificadas.
+    Move registros C500 e C590 para o final do bloco C (antes de C990).
     """
     blocos_c = []
+    blocos_c500_c590 = []
     bloco_c_presente = False
 
     for arquivo in arquivos:
         linhas = ler_arquivo_sped(arquivo)
         for linha in linhas:
             if linha.startswith('|C') and not linha.startswith('|C001|') and not linha.startswith('|C990|'):
-                blocos_c.append(linha)
-                bloco_c_presente = True
-    
-    if bloco_c_presente:
-        blocos_c.insert(0, '|C001|0|\n')
-        qtd_lin_c = len(blocos_c) + 1  # +1 para C990
-        blocos_c.append(f"|C990|{qtd_lin_c}|\n")
-    else:
-        blocos_c = ['|C001|1|\n', '|C990|2|\n']
+                if linha.startswith('|C500|') or linha.startswith('|C590|'):
+                    blocos_c500_c590.append(linha)
+                else:
+                    blocos_c.append(linha)
+                    bloco_c_presente = True
 
-    return blocos_c
+    if bloco_c_presente or blocos_c500_c590:
+        bloco_final = ['|C001|0|\n'] + blocos_c + blocos_c500_c590
+        qtd_lin_c = len(bloco_final) + 1  # +1 para C990
+        bloco_final.append(f"|C990|{qtd_lin_c}|\n")
+    else:
+        bloco_final = ['|C001|1|\n', '|C990|2|\n']
+
+    return bloco_final
 
 def processar_bloco_d(arquivos):
     """
