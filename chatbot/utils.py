@@ -11,7 +11,7 @@ def consulta_titulos_api_cnpj(cnpj):
         "cnpj": cnpj
     })
     headers = {
-        'Authorization': f'Basic cnB3OnJwdw==',
+        'Authorization': f'Basic {config("DATASUL_TOKEN")}',
         'Content-Type': 'application/json',
     }
 
