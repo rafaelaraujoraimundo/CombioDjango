@@ -399,35 +399,41 @@ def processar_bloco_d(arquivos):
 
 def processar_bloco_g110(arquivos):
     """
-    Processa o bloco G110 somando os campos 4, 5 e 9 (índices 3, 4, 8),
-    e mantendo os demais campos (1, 2, 3, 6, 7, 8) da primeira linha encontrada.
+    Processa o bloco G110:
+    - Soma campos 4, 5, 8
+    - Mantém campos 1, 2, 6, 7, 9 fixos da primeira linha encontrada
     """
-    soma_campos = [0.0, 0.0, 0.0]  # índices 3, 4, 8
-    campos_fixos = None  # manter os demais campos da primeira linha
+    soma_g110 = [0.0, 0.0, 0.0]  # índices 3, 4, 8
+    campos_fixos = None
 
     for arquivo in arquivos:
         linhas = ler_arquivo_sped(arquivo)
         for linha in linhas:
             if linha.startswith('|G110|'):
                 campos = linha.strip().split('|')
+                if len(campos) < 10:
+                    continue  # linha incompleta, ignora
+
                 if campos_fixos is None:
-                    campos_fixos = campos.copy()  # manter todos inicialmente
+                    campos_fixos = campos.copy()  # salva toda a linha original
+
                 try:
-                    soma_campos[0] += float(campos[3].replace(',', '.'))
-                    soma_campos[1] += float(campos[4].replace(',', '.'))
-                    soma_campos[2] += float(campos[8].replace(',', '.'))
+                    soma_g110[0] += float(campos[3].replace(',', '.'))  # valor_base
+                    soma_g110[1] += float(campos[4].replace(',', '.'))  # valor_imposto
+                    soma_g110[2] += float(campos[8].replace(',', '.'))  # valor_somar
                 except (IndexError, ValueError):
                     continue
 
     if campos_fixos:
-        campos_fixos[3] = f"{soma_campos[0]:.2f}".replace('.', ',')
-        campos_fixos[4] = f"{soma_campos[1]:.2f}".replace('.', ',')
-        campos_fixos[8] = f"{soma_campos[2]:.2f}".replace('.', ',')
+        campos_fixos[3] = f"{soma_g110[0]:.2f}".replace('.', ',')
+        campos_fixos[4] = f"{soma_g110[1]:.2f}".replace('.', ',')
+        campos_fixos[8] = f"{soma_g110[2]:.2f}".replace('.', ',')
 
         linha_final = '|' + '|'.join(campos_fixos[1:]) + '|\n'  # ignora primeiro vazio
         return [linha_final]
 
     return []
+
 
 def processar_bloco_g125(arquivos):
     """

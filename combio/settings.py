@@ -34,12 +34,12 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool)
 
 #ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['179.191.91.6', '127.0.0.1', 'localhost', '172.16.0.15', 'chat.combio.com.br', 'combiochatbot.share.zrok.io', '172.16.1.251', '172.16.3.251' ,'combiochatbotdesenvolvimento.share.zrok.io']
+ALLOWED_HOSTS = ['179.191.91.6', '127.0.0.1', 'localhost', '172.16.0.15', 'chat.combio.com.br', 'combiochatbot.share.zrok.io', '172.16.1.251', '172.16.3.251','172.17.3.251' ,'combiochatbotdesenvolvimento.share.zrok.io']
 
 #CRSF
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
-CSRF_TRUSTED_ORIGINS = ['https://combiochatbotdesenvolvimento.share.zrok.io', 'https://combiochatbot.share.zrok.io', 'http://127.0.0.1:810', 'http://localhost:810', 'http://172.16.0.15:810','http://chat.combio.com.br','http://179.191.91.6:810','http://179.191.91.6:8000','http://172.16.1.251:8000','http://0.0.0.0:8000','http://172.16.3.251:8000']
+CSRF_TRUSTED_ORIGINS = ['https://combiochatbotdesenvolvimento.share.zrok.io', 'https://combiochatbot.share.zrok.io', 'http://127.0.0.1:810', 'http://localhost:810', 'http://172.16.0.15:810','http://chat.combio.com.br','http://179.191.91.6:810','http://179.191.91.6:8000','http://172.16.1.251:8000','http://0.0.0.0:8000','http://172.17.3.251:8000']
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 SECURE_SSL_REDIRECT = False

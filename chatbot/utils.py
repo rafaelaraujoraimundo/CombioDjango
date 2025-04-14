@@ -11,7 +11,7 @@ def consulta_titulos_api_cnpj(cnpj):
         "cnpj": cnpj
     })
     headers = {
-        'Authorization': f'Basic {config('DATASUL_TOKEN')}',
+        'Authorization': f'Basic cnB3OnJwdw==',
         'Content-Type': 'application/json',
     }
 
@@ -54,7 +54,7 @@ def consulta_titulos_api(cnpj):
     url = f"{config('DATASUL_HOST')}/esp/combio/v1/api_chatbot/piBuscatitulosCNPJ/"
     payload = json.dumps({"cnpj": cnpj})
     headers = {
-        'Authorization': f'Basic {config('DATASUL_TOKEN')}',
+        'Authorization': f'Basic {config("DATASUL_TOKEN")}',
         'Content-Type': 'application/json',
     }
     response = requests.post(url, headers=headers, data=payload)
@@ -131,7 +131,7 @@ def formatar_titulos_em_blocos(titulos):
 def formatar_titulos_pagos_em_blocos(titulos):
     blocos = []
     bloco_atual = ''
-    cabecalho = f"{'NF.':<10} {'Parcela':<8} {'  Vencimento':<12} {'  Pagamento':<12}\n"
+    cabecalho = f"{'NF./Parc':<10}{'  Venc.':<10} {'  Pag.':<10}\n"
     
     for titulo in titulos:
         cod = titulo['cod_tit_ap']
@@ -139,7 +139,7 @@ def formatar_titulos_pagos_em_blocos(titulos):
         #emissao = datetime.strptime(titulo['dat_emis_docto'], '%Y-%m-%d').strftime('%d/%m/%Y')
         vencimento = datetime.strptime(titulo['dat_vencto_tit_ap'], '%Y-%m-%d').strftime('%d/%m/%Y')
         pagamento = datetime.strptime(titulo['data_pagamento'], '%Y-%m-%d').strftime('%d/%m/%Y')
-        linha = f"{cod:<10} {parcela:<8} {vencimento:<12} {pagamento:<12}\n"
+        linha = f"{cod:<8}/{cod:<2} {vencimento:<10} {pagamento:<10}\n"
 
         # Verifica se ao adicionar a linha e o cabeçalho ultrapassa o limite
         if len(bloco_atual) + len(linha) + len(cabecalho) > MAX_WHATSAPP_CHAR:

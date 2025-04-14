@@ -415,7 +415,7 @@ def consulta_titulos_api(cnpj):
     url = f"{config('DATASUL_HOST')}/esp/combio/v1/api_chatbot/piBuscatitulosCNPJ/"
     payload = json.dumps({"cnpj": cnpj})
     headers = {
-        'Authorization': f'Basic {config('DATASUL_TOKEN')}',
+        'Authorization': f'Basic {config("DATASUL_TOKEN")}',
         'Content-Type': 'application/json',
     }
     response = requests.post(url, headers=headers, data=payload)
