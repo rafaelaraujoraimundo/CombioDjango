@@ -108,14 +108,14 @@ def formatar_titulos_em_blocos(titulos):
     """
     blocos = []
     bloco_atual = ''
-    cabecalho = f"{'Cód':<10} {'Parcela':<8} {'Emissão':<12} {'Vencimento':<12}\n"
+    cabecalho = f"{'NF/ Parc':<15} {'Emissão':<16} {'Vencimento':<10}\n"
 
     for titulo in titulos:
         cod = titulo["cod_tit_ap"]
         parcela = titulo["cod_parcela"]
         emissao = datetime.strptime(titulo["dat_emis_docto"], "%Y-%m-%d").strftime("%d/%m/%Y")
         vencimento = datetime.strptime(titulo["dat_vencto_tit_ap"], "%Y-%m-%d").strftime("%d/%m/%Y")
-        linha = f"{cod:<10} {parcela:<8} {emissao:<12} {vencimento:<12}\n"
+        linha = f"{cod:<7}/{parcela:<3}  {emissao:<14} {vencimento:<10}\n"
 
         if len(bloco_atual) + len(linha) + len(cabecalho) > MAX_WHATSAPP_CHAR:
             blocos.append(cabecalho + bloco_atual.strip())
@@ -131,7 +131,7 @@ def formatar_titulos_em_blocos(titulos):
 def formatar_titulos_pagos_em_blocos(titulos):
     blocos = []
     bloco_atual = ''
-    cabecalho = f"{'NF./Parc':<10}{'  Venc.':<10} {'  Pag.':<10}\n"
+    cabecalho = f"{'NF./Parc':<14}{'  Venc.':<17} {'  Pag.':<10}\n"
     
     for titulo in titulos:
         cod = titulo['cod_tit_ap']
@@ -139,7 +139,7 @@ def formatar_titulos_pagos_em_blocos(titulos):
         #emissao = datetime.strptime(titulo['dat_emis_docto'], '%Y-%m-%d').strftime('%d/%m/%Y')
         vencimento = datetime.strptime(titulo['dat_vencto_tit_ap'], '%Y-%m-%d').strftime('%d/%m/%Y')
         pagamento = datetime.strptime(titulo['data_pagamento'], '%Y-%m-%d').strftime('%d/%m/%Y')
-        linha = f"{cod:<8}/{cod:<2} {vencimento:<10} {pagamento:<10}\n"
+        linha = f"{cod:<7}/{parcela:<3} {vencimento:<14} {pagamento:<10}\n"
 
         # Verifica se ao adicionar a linha e o cabeçalho ultrapassa o limite
         if len(bloco_atual) + len(linha) + len(cabecalho) > MAX_WHATSAPP_CHAR:
