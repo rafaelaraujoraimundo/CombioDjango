@@ -421,7 +421,7 @@ TIPO_CHOICES_COMPUTADOR = (
 
 
 class Computador(models.Model):
-    patrimonio = models.CharField(max_length=100, unique=True)
+    patrimonio = models.CharField(max_length=100)
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES_COMPUTADOR, default='Notebook')
     hostname = models.CharField(max_length=100, unique=True)
     numero_serie = models.CharField(max_length=100)
