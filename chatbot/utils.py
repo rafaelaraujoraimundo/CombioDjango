@@ -131,7 +131,7 @@ def formatar_titulos_em_blocos(titulos):
 def formatar_titulos_pagos_em_blocos(titulos):
     blocos = []
     bloco_atual = ''
-    cabecalho = f"{'NF./Parc':<14}{'  Venc.':<17} {'  Pag.':<10}\n"
+    cabecalho = f"{'NF./Parc':<14}{' Venc.':<19} {'  Pag.':<10}\n"
     
     for titulo in titulos:
         cod = titulo['cod_tit_ap']

@@ -14,10 +14,5 @@ class Migration(migrations.Migration):
             model_name='computador',
             name='hostname',
             field=models.CharField(max_length=100, unique=True),
-        ),
-        migrations.AlterField(
-            model_name='computador',
-            name='patrimonio',
-            field=models.CharField(max_length=100, unique=True),
-        ),
+        )
     ]
