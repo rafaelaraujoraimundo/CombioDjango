@@ -894,7 +894,8 @@ class ComputadorList(ListView):
                 Q(cargo__icontains=search_query) |
                 Q(numero_nota_fiscal__icontains=search_query) |
                 Q(fornecedor__icontains=search_query) |
-                Q(sistema_operacional__icontains=search_query) 
+                Q(sistema_operacional__icontains=search_query) |
+                Q(tipo__icontains=search_query) 
             )
         return queryset
 
@@ -1247,10 +1248,8 @@ def estabelecimento_chart(request):
 @login_required(login_url='account_login')
 @permission_required('global_permissions.combio_inventario', login_url='erro_page')
 def export_computadores_excel(request):
-    # Obter o termo de pesquisa do request
     search_query = request.GET.get('search', '')
 
-    # Filtrar os computadores conforme a pesquisa
     if search_query:
         computadores = Computador.objects.filter(
             Q(patrimonio__icontains=search_query) |
@@ -1267,35 +1266,42 @@ def export_computadores_excel(request):
             Q(cargo__icontains=search_query) |
             Q(numero_nota_fiscal__icontains=search_query) |
             Q(fornecedor__icontains=search_query) |
-            Q(sistema_operacional__icontains=search_query)
+            Q(sistema_operacional__icontains=search_query) |
+            Q(tipo__icontains=search_query)      # ← filtro por tipo
         )
     else:
         computadores = Computador.objects.all()
 
-    # Criação de um novo workbook do Excel
     wb = Workbook()
     ws = wb.active
     ws.title = 'Computadores'
 
-    # Adicionando cabeçalhos para as colunas
-    columns = ['Hostname', 'Fabricante', 'Modelo', 'Processador', 'Memória', 'HD', 'Usuário', 'Estabelecimento', 'Centro de Custo']
+    # Inclui 'Tipo' no cabeçalho
+    columns = [
+        'Hostname', 'Tipo',
+        'Fabricante', 'Modelo', 'Processador',
+        'Memória', 'HD', 'Usuário',
+        'Estabelecimento', 'Centro de Custo'
+    ]
     ws.append(columns)
 
-    # Preenchendo as linhas com os dados dos computadores
     for computador in computadores:
         ws.append([
-            computador.hostname, computador.fabricante, computador.modelo,
-            computador.processador, computador.memoria, computador.hd,
-            computador.usuario, computador.estabelecimento, computador.centro_custo
+            computador.hostname,
+            computador.get_tipo_display(),      # ← exibe a descrição (Notebook/Desktop)
+            computador.fabricante,
+            computador.modelo,
+            computador.processador,
+            computador.memoria,
+            computador.hd,
+            computador.usuario,
+            computador.estabelecimento,
+            computador.centro_custo
         ])
 
-    # Preparando a resposta HTTP para enviar o arquivo
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = 'attachment; filename="computadores.xlsx"'
-
-    # Salvar o arquivo Excel na resposta HTTP
     wb.save(response)
-
     return response
 
 @login_required(login_url='account_login')

@@ -417,6 +417,7 @@ class ProntuarioMonitor(models.Model):
 TIPO_CHOICES_COMPUTADOR = (
     ('Desktop', 'Desktop'),
     ('Notebook', 'Notebook'),
+    ('Servidor', 'Servidor'),
 )
 
 
