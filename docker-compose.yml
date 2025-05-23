@@ -53,8 +53,8 @@ services:
       - static-data:/app/staticfiles
       - media-data:/app/media
     environment:
-      BACKEND_URL: ${BACKEND_URL}  # Defina o valor da variável de ambiente diretamente aqui
-    command: /bin/sh -c "echo '\$BACKEND_URL' && envsubst '\$$BACKEND_URL' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+      BACKEND_URL: app:8000  # Defina o valor da variável de ambiente diretamente aqui
+    command: /bin/sh -c "envsubst '\$BACKEND_URL' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
     depends_on:
       - app
 

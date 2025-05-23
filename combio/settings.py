@@ -104,6 +104,9 @@ ROOT_URLCONF = 'combio.urls'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
+    "http://172.16.0.15:8000",
+    "http://179.191.91.6:810",
+
 ]
 
 TEMPLATES = [
