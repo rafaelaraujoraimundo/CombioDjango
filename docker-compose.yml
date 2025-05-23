@@ -89,7 +89,7 @@ services:
 
   # enable zrok environment
   zrok-enable:
-    image: ${ZROK_CONTAINER_IMAGE:-docker.io/openziti/zrok}
+    image: openziti/zrok
     depends_on:
       zrok-init:
         condition: service_completed_successfully
@@ -104,7 +104,7 @@ services:
 
   # reserve zrok frontend subdomain and start sharing the target
   zrok-share: 
-    image: ${ZROK_CONTAINER_IMAGE:-docker.io/openziti/zrok}
+    image: openziti/zrok
     restart: unless-stopped
     entrypoint: zrok-share.bash
     depends_on:
@@ -136,7 +136,7 @@ services:
 
   # demo server
   zrok-test:
-    image: ${ZROK_CONTAINER_IMAGE:-docker.io/openziti/zrok}
+    image: openziti/zrok
     command: test endpoint --address 0.0.0.0  # 9090
 
 volumes:

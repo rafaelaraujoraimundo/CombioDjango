@@ -23,8 +23,13 @@ def populate_hardware_data():
         response = requests.get(url, auth=HTTPBasicAuth(username, password))
         print(f"Inicio do populate_hardware_data")
         if response.status_code == 200:
+            print(f"Retorno da API - OK")
+            
             response_data = response.json()
             
+            quantidade = len(response_data)
+            print(f"Quantidade de computadores: {quantidade}")
+
             # Iterar pelos computadores (ID é a chave)
             for computer_id, computer_data in response_data.items():
                 
