@@ -14,7 +14,8 @@ from .views import (acoesprontuario_delete, acoesprontuario_edit, AcoesProntuari
     export_controlekit_excel, export_controlefones_excel,
     export_monitor_excel,export_celular_excel,LinhaListView, LinhaCreateView, LinhaUpdateView, linha_delete, export_linha_excel,
     ProntuarioLinhaListView, ProntuarioLinhaCreateView, ProntuarioLinhaUpdateView, prontuario_linha_delete, EstoqueMovimentacaoList, 
-    relatorio_movimentacoes, estoque_movimentacao_create, export_movimentacoes_excel, estoque_movimentacao_delete)
+    relatorio_movimentacoes, estoque_movimentacao_create, export_movimentacoes_excel, estoque_movimentacao_delete,
+    disparar_populate_hardware)
 
 urlpatterns = [
     path('tipoitem/', TipoItemList.as_view(), name='tipoitem_list'),
@@ -106,5 +107,7 @@ urlpatterns = [
     path('estoque/movimentacao/relatorio/', relatorio_movimentacoes, name='relatorio_movimentacoes'),
     path('estoque/movimentacao/export_excel/', export_movimentacoes_excel, name='export_movimentacoes_excel'),
     path('estoque/movimentacao/delete/<int:movimentacao_id>/', estoque_movimentacao_delete, name='estoque_movimentacao_delete'),
+
+    path('computador/disparar-importacao/', disparar_populate_hardware, name='disparar_populate_hardware'),
     
 ]

@@ -20,7 +20,7 @@ def populate_hardware_data():
     password = config("OCS_PASSWORD")
 
     try:
-        response = requests.get(url, auth=HTTPBasicAuth(username, password))
+        response = requests.get(url, auth=HTTPBasicAuth(username, password),timeout=300)
         print(f"Inicio do populate_hardware_data")
         if response.status_code == 200:
             print(f"Retorno da API - OK")

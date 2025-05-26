@@ -13,6 +13,10 @@
 
     <a href="{% url 'computador_create' %}" class="btn btn-primary mb-4">Adicionar Computador</a>
     <a href="{% url 'export_computadores_excel' %}?search={{ request.GET.search }}" class="btn btn-success mb-4">Exportar para Excel</a>
+    <a href="{% url 'disparar_populate_hardware' %}" class="btn btn-secondary mb-4"
+   onclick="return confirm('Deseja realmente iniciar a importação de dados do OCS?')">
+    Importar Dados do OCS
+</a>
     <table class="table table-bordered table-sm table-striped">
         <thead>
             <tr>
