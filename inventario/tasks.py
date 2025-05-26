@@ -185,6 +185,7 @@ def populate_hardware_data():
             logger.info("Dados de hardware e componentes atualizados com sucesso!")
         else:
             logger.error(f"Erro na requisição à API: {response.status_code}")
+            logger.exception("Erro ao processar os dados da API")
     
     except Exception as e:
         logger.error(f"Erro ao processar os dados da API: {str(e)}")
