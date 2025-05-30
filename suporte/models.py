@@ -1,6 +1,7 @@
 from django.db import models
 from administration.models import GroupProcess, User
 from django.utils import timezone
+from administration.encryptor import encrypt_password, decrypt_password
 
 # Create your models here.
 class UsuarioDesligamento(models.Model):
@@ -99,3 +100,204 @@ class Substituicao(models.Model):
 
     def __str__(self):
         return f"Substituição de {self.usuario_a_substituir} por {self.usuario_substituto} de {self.data_inicial} a {self.data_final}"
+
+
+
+
+class MS365Tenant(models.Model):
+    """Modelo para armazenar configurações de tenant Microsoft 365"""
+    
+    nome_empresa = models.CharField(
+        max_length=200, 
+        verbose_name="Nome da Empresa",
+        help_text="Nome identificador da empresa/tenant"
+    )
+    
+    tenant_id = models.CharField(
+        max_length=100, 
+        verbose_name="Tenant ID",
+        help_text="ID do tenant no Azure AD"
+    )
+    
+    client_id = models.CharField(
+        max_length=100, 
+        verbose_name="Client ID", 
+        help_text="Application (client) ID do app registration"
+    )
+    
+    encrypted_client_secret = models.TextField(
+        verbose_name="Client Secret",
+        help_text="Client secret criptografado"
+    )
+    
+    ativo = models.BooleanField(
+        default=True, 
+        verbose_name="Ativo",
+        help_text="Se este tenant está ativo para uso"
+    )
+    
+    data_criacao = models.DateTimeField(
+        default=timezone.now, 
+        verbose_name="Data de Criação"
+    )
+    
+    usuario_criacao = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name="m365_tenants_criados",
+        verbose_name="Usuário de Criação"
+    )
+    
+    data_ultima_alteracao = models.DateTimeField(
+        auto_now=True, 
+        verbose_name="Última Alteração"
+    )
+    
+    usuario_ultima_alteracao = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name="m365_tenants_alterados",
+        verbose_name="Último Usuário que Alterou"
+    )
+    
+    observacoes = models.TextField(
+        blank=True, 
+        null=True, 
+        verbose_name="Observações",
+        help_text="Observações sobre este tenant"
+    )
+
+    class Meta:
+        verbose_name = "Tenant Microsoft 365"
+        verbose_name_plural = "Tenants Microsoft 365"
+        ordering = ['nome_empresa']
+
+    def __str__(self):
+        return f"{self.nome_empresa} ({self.tenant_id})"
+
+    def set_client_secret(self, plain_secret):
+        """Criptografa e salva o client secret"""
+        self.encrypted_client_secret = encrypt_password(plain_secret)
+
+    def get_client_secret(self):
+        """Descriptografa e retorna o client secret"""
+        if self.encrypted_client_secret:
+            return decrypt_password(self.encrypted_client_secret)
+        return None
+
+
+class MS365UserSearchLog(models.Model):
+    """Log de buscas de usuários realizadas"""
+    
+    tenant = models.ForeignKey(
+        MS365Tenant, 
+        on_delete=models.CASCADE,
+        verbose_name="Tenant"
+    )
+    
+    usuario_pesquisador = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True,
+        verbose_name="Usuário que Pesquisou"
+    )
+    
+    termo_busca = models.CharField(
+        max_length=255, 
+        verbose_name="Termo de Busca",
+        help_text="Email ou ID do usuário pesquisado"
+    )
+    
+    encontrado = models.BooleanField(
+        default=False, 
+        verbose_name="Usuário Encontrado"
+    )
+    
+    dados_encontrados = models.JSONField(
+        blank=True, 
+        null=True, 
+        verbose_name="Dados Encontrados",
+        help_text="Dados do usuário encontrado (sem informações sensíveis)"
+    )
+    
+    data_pesquisa = models.DateTimeField(
+        default=timezone.now, 
+        verbose_name="Data da Pesquisa"
+    )
+    
+    ip_origem = models.GenericIPAddressField(
+        blank=True, 
+        null=True, 
+        verbose_name="IP de Origem"
+    )
+
+    class Meta:
+        verbose_name = "Log de Busca M365"
+        verbose_name_plural = "Logs de Busca M365"
+        ordering = ['-data_pesquisa']
+
+    def __str__(self):
+        status = "Encontrado" if self.encontrado else "Não encontrado"
+        return f"{self.termo_busca} - {status} ({self.data_pesquisa.strftime('%d/%m/%Y %H:%M')})"
+
+
+class MS365UserUpdateLog(models.Model):
+    """Log de atualizações de usuários realizadas"""
+    
+    tenant = models.ForeignKey(
+        MS365Tenant, 
+        on_delete=models.CASCADE,
+        verbose_name="Tenant"
+    )
+    
+    usuario_atualizador = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True,
+        verbose_name="Usuário que Atualizou"
+    )
+    
+    usuario_alvo = models.CharField(
+        max_length=255, 
+        verbose_name="Usuário Alvo",
+        help_text="Email ou ID do usuário que foi atualizado"
+    )
+    
+    campos_atualizados = models.JSONField(
+        verbose_name="Campos Atualizados",
+        help_text="Campos que foram alterados e seus novos valores"
+    )
+    
+    sucesso = models.BooleanField(
+        default=False, 
+        verbose_name="Atualização Bem-sucedida"
+    )
+    
+    erro_detalhes = models.TextField(
+        blank=True, 
+        null=True, 
+        verbose_name="Detalhes do Erro",
+        help_text="Detalhes do erro caso a atualização tenha falhado"
+    )
+    
+    data_atualizacao = models.DateTimeField(
+        default=timezone.now, 
+        verbose_name="Data da Atualização"
+    )
+    
+    ip_origem = models.GenericIPAddressField(
+        blank=True, 
+        null=True, 
+        verbose_name="IP de Origem"
+    )
+
+    class Meta:
+        verbose_name = "Log de Atualização M365"
+        verbose_name_plural = "Logs de Atualização M365" 
+        ordering = ['-data_atualizacao']
+
+    def __str__(self):
+        status = "Sucesso" if self.sucesso else "Falha"
+        return f"{self.usuario_alvo} - {status} ({self.data_atualizacao.strftime('%d/%m/%Y %H:%M')})"

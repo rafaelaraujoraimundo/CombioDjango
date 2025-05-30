@@ -1,0 +1,398 @@
+<!-- suporte/templates/suporte/m365/search_user.html -->
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>🔍 Buscar Usuário Microsoft 365</h4>
+                <a href="{% url 'm365_dashboard' %}" class="btn btn-secondary">
+                    <i class="fa fa-arrow-left"></i> Voltar ao Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulário de Busca -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="iq-card">
+                <div class="iq-card-header">
+                    <div class="iq-header-title">
+                        <h4 class="card-title">Parâmetros de Busca</h4>
+                    </div>
+                </div>
+                <div class="iq-card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.tenant.id_for_label }}">{{ form.tenant.label }}</label>
+                                    {{ form.tenant }}
+                                    {% if form.tenant.help_text %}
+                                        <small class="form-text text-muted">{{ form.tenant.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in form.tenant.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.termo_busca.id_for_label }}">{{ form.termo_busca.label }}</label>
+                                    <div class="input-group">
+                                        {{ form.termo_busca }}
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fa fa-search"></i> Buscar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% if form.termo_busca.help_text %}
+                                        <small class="form-text text-muted">{{ form.termo_busca.help_text }}</small>
+                                    {% endif %}
+                                    {% for error in form.termo_busca.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Erros gerais do formulário -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultado da Busca -->
+    {% if success and user_data %}
+    <div class="row">
+        <div class="col-12">
+            <div class="iq-card">
+                <div class="iq-card-header">
+                    <div class="iq-header-title">
+                        <h4 class="card-title">✅ Usuário Encontrado</h4>
+                    </div>
+                </div>
+                <div class="iq-card-body">
+                    <div class="row">
+                        <!-- Informações Básicas -->
+                        <div class="col-xl-6">
+                            <h5 class="mb-3">👤 Informações Pessoais</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Nome Completo:</strong></td>
+                                    <td>{{ user_data.displayName|default:"Não informado" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Nome:</strong></td>
+                                    <td>{{ user_data.givenName|default:"Não informado" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sobrenome:</strong></td>
+                                    <td>{{ user_data.surname|default:"Não informado" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>E-mail Principal:</strong></td>
+                                    <td>
+                                        {% if user_data.mail %}
+                                            <a href="mailto:{{ user_data.mail }}">{{ user_data.mail }}</a>
+                                        {% else %}
+                                            Não informado
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>UPN:</strong></td>
+                                    <td><code>{{ user_data.userPrincipalName|default:"Não informado" }}</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>ID do Usuário:</strong></td>
+                                    <td><code>{{ user_data.id|default:"Não informado" }}</code></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Informações Profissionais -->
+                        <div class="col-xl-6">
+                            <h5 class="mb-3">💼 Informações Profissionais</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Cargo:</strong></td>
+                                    <td>{{ user_data.jobTitle|default:"Não informado" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Departamento:</strong></td>
+                                    <td>{{ user_data.department|default:"Não informado" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Localização:</strong></td>
+                                    <td>{{ user_data.officeLocation|default:"Não informado" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Telefones:</strong></td>
+                                    <td>
+                                        {% if user_data.businessPhones %}
+                                            {% for phone in user_data.businessPhones %}
+                                                <div>{{ phone }}</div>
+                                            {% endfor %}
+                                        {% else %}
+                                            Não informado
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Celular:</strong></td>
+                                    <td>{{ user_data.mobilePhone|default:"Não informado" }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Tipo de Usuário:</strong></td>
+                                    <td>
+                                        <span class="badge badge-{% if user_data.userType == 'Member' %}primary{% else %}secondary{% endif %}">
+                                            {{ user_data.userType|default:"N/A" }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Informações de Status -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">📊 Status da Conta</h5>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card border-{% if user_data.accountEnabled %}success{% else %}danger{% endif %}">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-{% if user_data.accountEnabled %}check-circle{% else %}times-circle{% endif %} fa-2x text-{% if user_data.accountEnabled %}success{% else %}danger{% endif %}"></i>
+                                            <h6 class="mt-2">Conta {% if user_data.accountEnabled %}Ativa{% else %}Inativa{% endif %}</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-info">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-calendar fa-2x text-info"></i>
+                                            <h6 class="mt-2">Criada em</h6>
+                                            <small>{{ user_data.createdDateTime|default:"N/A" }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-warning">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-sign-in fa-2x text-warning"></i>
+                                            <h6 class="mt-2">Último Login</h6>
+                                            <small>{{ user_data.signInActivity.lastSignInDateTime|default:"N/A" }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-secondary">
+                                        <div class="card-body text-center">
+                                            <i class="fa fa-globe fa-2x text-secondary"></i>
+                                            <h6 class="mt-2">Preferência</h6>
+                                            <small>{{ user_data.preferredLanguage|default:"N/A" }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informações de Endereço -->
+                    {% if user_data.streetAddress or user_data.city or user_data.state or user_data.country %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">📍 Endereço</h5>
+                            <div class="card border-light">
+                                <div class="card-body">
+                                    <address class="mb-0">
+                                        {% if user_data.streetAddress %}{{ user_data.streetAddress }}<br>{% endif %}
+                                        {% if user_data.city %}{{ user_data.city }}{% endif %}
+                                        {% if user_data.state %}, {{ user_data.state }}{% endif %}
+                                        {% if user_data.postalCode %} {{ user_data.postalCode }}{% endif %}
+                                        {% if user_data.city or user_data.state %}<br>{% endif %}
+                                        {% if user_data.country %}{{ user_data.country }}{% endif %}
+                                    </address>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Ações Rápidas -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">⚡ Ações Rápidas</h5>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'm365_update_user' %}?tenant={{ form.tenant.value }}&usuario_alvo={{ user_data.userPrincipalName }}" 
+                                   class="btn btn-success">
+                                    <i class="fa fa-edit"></i> Atualizar Dados
+                                </a>
+                                <a href="{% url 'm365_manage_manager' %}?tenant={{ form.tenant.value }}&usuario={{ user_data.userPrincipalName }}" 
+                                   class="btn btn-warning">
+                                    <i class="fa fa-users"></i> Gerenciar Manager
+                                </a>
+                                <button type="button" class="btn btn-info" onclick="copyToClipboard('{{ user_data.userPrincipalName }}')">
+                                    <i class="fa fa-copy"></i> Copiar UPN
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="copyToClipboard('{{ user_data.id }}')">
+                                    <i class="fa fa-copy"></i> Copiar ID
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Mensagem de Erro -->
+    {% if error_message %}
+    <div class="row">
+        <div class="col-12">
+            <div class="iq-card">
+                <div class="iq-card-body">
+                    <div class="alert alert-danger">
+                        <h5><i class="fa fa-times-circle"></i> Usuário não encontrado</h5>
+                        <p class="mb-0">{{ error_message }}</p>
+                    </div>
+                    <div class="mt-3">
+                        <h6>💡 Dicas de busca:</h6>
+                        <ul>
+                            <li>Verifique se o e-mail ou ID está correto</li>
+                            <li>Tente buscar apenas pelo nome de usuário (parte antes do @)</li>
+                            <li>Certifique-se de que o tenant selecionado está correto</li>
+                            <li>O usuário pode estar em outro tenant ou ter sido excluído</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Ajuda -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="iq-card">
+                <div class="iq-card-header">
+                    <div class="iq-header-title">
+                        <h4 class="card-title">ℹ️ Como Usar</h4>
+                    </div>
+                </div>
+                <div class="iq-card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Formatos aceitos para busca:</h6>
+                            <ul>
+                                <li><code>usuario@dominio.com</code> - E-mail completo</li>
+                                <li><code>usuario</code> - Nome de usuário</li>
+                                <li><code>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code> - ID do usuário</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Outras funcionalidades:</h6>
+                            <ul>
+                                <li><a href="{% url 'm365_list_users' %}">Listar todos os usuários</a></li>
+                                <li><a href="{% url 'm365_update_user' %}">Atualizar dados de usuário</a></li>
+                                <li><a href="{% url 'm365_manage_manager' %}">Gerenciar hierarquia</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        // Use a API moderna do clipboard
+        navigator.clipboard.writeText(text).then(function() {
+            // Mostrar toast de sucesso
+            showToast('Copiado para a área de transferência!', 'success');
+        }).catch(function(err) {
+            console.error('Erro ao copiar: ', err);
+            fallbackCopyTextToClipboard(text);
+        });
+    } else {
+        // Fallback para navegadores mais antigos
+        fallbackCopyTextToClipboard(text);
+    }
+}
+
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        showToast(successful ? 'Copiado para a área de transferência!' : 'Erro ao copiar', 
+                 successful ? 'success' : 'danger');
+    } catch (err) {
+        console.error('Fallback copy failed: ', err);
+        showToast('Erro ao copiar', 'danger');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+function showToast(message, type) {
+    // Criar elemento de toast
+    const toast = $(`
+        <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+             style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="fa fa-${type === 'success' ? 'check' : 'times'}-circle"></i> ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `);
+    
+    // Adicionar ao body
+    $('body').append(toast);
+    
+    // Remover automaticamente após 3 segundos
+    setTimeout(function() {
+        toast.alert('close');
+    }, 3000);
+}
+
+$(document).ready(function() {
+    // Auto-focus no campo de busca se o formulário estiver vazio
+    {% if not success and not error_message %}
+        $('#{{ form.termo_busca.id_for_label }}').focus();
+    {% endif %}
+    
+    // Permitir busca com Enter
+    $('#{{ form.termo_busca.id_for_label }}').keypress(function(e) {
+        if (e.which == 13) {
+            $(this).closest('form').submit();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,200 @@
+<!-- suporte/templates/suporte/m365/tenant_form.html -->
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="iq-card">
+        <div class="iq-card-header d-flex justify-content-between">
+            <div class="iq-header-title">
+                <h4 class="card-title">{{ action }} Tenant Microsoft 365</h4>
+            </div>
+        </div>
+        <div class="iq-card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Informações Básicas -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.nome_empresa.id_for_label }}">{{ form.nome_empresa.label }}</label>
+                            {{ form.nome_empresa }}
+                            {% if form.nome_empresa.help_text %}
+                                <small class="form-text text-muted">{{ form.nome_empresa.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.nome_empresa.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.ativo.id_for_label }}">Status</label>
+                            <div class="custom-control custom-switch">
+                                {{ form.ativo }}
+                                <label class="custom-control-label" for="{{ form.ativo.id_for_label }}">
+                                    Tenant Ativo
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Credenciais Azure -->
+                <h5 class="mb-3">🔐 Credenciais Azure AD</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.tenant_id.id_for_label }}">{{ form.tenant_id.label }}</label>
+                            {{ form.tenant_id }}
+                            {% if form.tenant_id.help_text %}
+                                <small class="form-text text-muted">{{ form.tenant_id.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.tenant_id.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.client_id.id_for_label }}">{{ form.client_id.label }}</label>
+                            {{ form.client_id }}
+                            {% if form.client_id.help_text %}
+                                <small class="form-text text-muted">{{ form.client_id.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.client_id.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.client_secret.id_for_label }}">{{ form.client_secret.label }}</label>
+                            <div class="input-group">
+                                {{ form.client_secret }}
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-outline-secondary" id="toggleSecret">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% if form.client_secret.help_text %}
+                                <small class="form-text text-muted">{{ form.client_secret.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.client_secret.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.confirm_client_secret.id_for_label }}">{{ form.confirm_client_secret.label }}</label>
+                            <div class="input-group">
+                                {{ form.confirm_client_secret }}
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-outline-secondary" id="toggleConfirmSecret">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% if form.confirm_client_secret.help_text %}
+                                <small class="form-text text-muted">{{ form.confirm_client_secret.help_text }}</small>
+                            {% endif %}
+                            {% for error in form.confirm_client_secret.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="form-group">
+                    <label for="{{ form.observacoes.id_for_label }}">{{ form.observacoes.label }}</label>
+                    {{ form.observacoes }}
+                    {% if form.observacoes.help_text %}
+                        <small class="form-text text-muted">{{ form.observacoes.help_text }}</small>
+                    {% endif %}
+                </div>
+
+                <!-- Erros gerais do form -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Botões -->
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-save"></i> {{ action }}
+                    </button>
+                    <a href="{% url 'm365_tenant_list' %}" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Informações de Ajuda -->
+    <div class="iq-card mt-4">
+        <div class="iq-card-header">
+            <div class="iq-header-title">
+                <h4 class="card-title">ℹ️ Como obter as credenciais</h4>
+            </div>
+        </div>
+        <div class="iq-card-body">
+            <ol>
+                <li>Acesse <a href="https://portal.azure.com" target="_blank">portal.azure.com</a></li>
+                <li>Vá para <strong>Azure Active Directory → App registrations → New registration</strong></li>
+                <li>Anote o <strong>Tenant ID</strong> e <strong>Client ID</strong></li>
+                <li>Em <strong>Certificates & secrets → New client secret</strong></li>
+                <li>Configure as permissões necessárias:
+                    <ul>
+                        <li><code>User.ReadWrite.All</code></li>
+                        <li><code>Directory.ReadWrite.All</code></li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Toggle password visibility
+    $('#toggleSecret').click(function() {
+        const input = $('#{{ form.client_secret.id_for_label }}');
+        const icon = $(this).find('i');
+        
+        if (input.attr('type') === 'password') {
+            input.attr('type', 'text');
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            input.attr('type', 'password');
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+    
+    $('#toggleConfirmSecret').click(function() {
+        const input = $('#{{ form.confirm_client_secret.id_for_label }}');
+        const icon = $(this).find('i');
+        
+        if (input.attr('type') === 'password') {
+            input.attr('type', 'text');
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            input.attr('type', 'password');
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+});
+</script>
+{% endblock %}
+
+

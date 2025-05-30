@@ -1,0 +1,58 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="iq-card">
+        <div class="iq-card-header">
+            <div class="iq-header-title">
+                <h4 class="card-title">🗑️ Confirmar Exclusão de Tenant</h4>
+            </div>
+        </div>
+        <div class="iq-card-body">
+            <div class="alert alert-danger">
+                <h5><i class="fa fa-warning"></i> Atenção!</h5>
+                <p class="mb-0">Você está prestes a excluir o tenant <strong>{{ object.nome_empresa }}</strong>.</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Informações do Tenant:</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>Nome:</strong> {{ object.nome_empresa }}</li>
+                        <li><strong>Tenant ID:</strong> <code>{{ object.tenant_id }}</code></li>
+                        <li><strong>Client ID:</strong> <code>{{ object.client_id }}</code></li>
+                        <li><strong>Status:</strong> 
+                            {% if object.ativo %}
+                                <span class="badge badge-success">Ativo</span>
+                            {% else %}
+                                <span class="badge badge-secondary">Inativo</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Consequências da Exclusão:</h6>
+                    <ul class="text-danger">
+                        <li>Todos os logs de busca serão removidos</li>
+                        <li>Todos os logs de atualização serão removidos</li>
+                        <li>As credenciais serão permanentemente excluídas</li>
+                        <li>Esta ação <strong>não pode ser desfeita</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                <div class="form-group">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa fa-trash"></i> Sim, Excluir Permanentemente
+                    </button>
+                    <a href="{% url 'm365_tenant_list' %}" class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -10,6 +10,7 @@ from decouple import config
 from django.core.mail import send_mail
 from django.conf import settings
 from datetime import datetime
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -20,12 +21,12 @@ def populate_hardware_data():
     password = config("OCS_PASSWORD")
 
     try:
-        response = requests.get(url, auth=HTTPBasicAuth(username, password),timeout=300)
+        response = requests.get(url, auth=HTTPBasicAuth(username, password), timeout=600, stream=True)
         print(f"Inicio do populate_hardware_data")
         if response.status_code == 200:
             print(f"Retorno da API - OK")
             
-            response_data = response.json()
+            response_data = json.loads(response.raw.read())
             
             quantidade = len(response_data)
             print(f"Quantidade de computadores: {quantidade}")

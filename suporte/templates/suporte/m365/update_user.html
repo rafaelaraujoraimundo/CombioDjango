@@ -1,0 +1,101 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4>✏️ Atualizar Usuário Microsoft 365</h4>
+            <a href="{% url 'm365_dashboard' %}" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> Voltar ao Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="row">
+        <div class="col-12">
+            <div class="iq-card">
+                <div class="iq-card-header">
+                    <h5 class="card-title">📝 Dados do Usuário</h5>
+                </div>
+                <div class="iq-card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="form-row">
+                            <div class="col-md-6 mb-3">
+                                <label>{{ form.tenant.label }}</label>
+                                {{ form.tenant }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>{{ form.usuario_alvo.label }}</label>
+                                {{ form.usuario_alvo }}
+                                <small class="form-text text-muted">{{ form.usuario_alvo.help_text }}</small>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="form-row">
+                            <div class="col-md-6 mb-3">
+                                <label>{{ form.given_name.label }}</label>
+                                {{ form.given_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>{{ form.surname.label }}</label>
+                                {{ form.surname }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>{{ form.display_name.label }}</label>
+                                {{ form.display_name }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>{{ form.job_title.label }}</label>
+                                {{ form.job_title }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>{{ form.department.label }}</label>
+                                {{ form.department }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>{{ form.office_location.label }}</label>
+                                {{ form.office_location }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>{{ form.mobile_phone.label }}</label>
+                                {{ form.mobile_phone }}
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fa fa-save"></i> Atualizar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Mensagens -->
+            {% if updated_fields %}
+            <div class="alert alert-success mt-3">
+                <i class="fa fa-check-circle"></i> Dados atualizados com sucesso!
+            </div>
+            {% elif error_message %}
+            <div class="alert alert-danger mt-3">
+                <i class="fa fa-times-circle"></i> {{ error_message }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.querySelector('[name="usuario_alvo"]');
+        if (input) {
+            input.setAttribute("readonly", true);
+        }
+    });
+</script>
+{% endblock %}

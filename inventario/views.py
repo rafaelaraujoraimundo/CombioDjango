@@ -21,6 +21,13 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 
 
+@login_required
+@permission_required('global_permissions.combio_inventario', raise_exception=True)
+def disparar_populate_hardware(request):
+    populate_hardware_data.delay()  # Envia para o Celery
+    messages.success(request, 'Task para importar dados do OCS enviada com sucesso!')
+    return redirect('computador_list')
+
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_admin_admin', login_url='erro_page'), name='dispatch')
 class TipoItemList(ListView):

@@ -1,0 +1,143 @@
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4>📋 Lista de Usuários Microsoft 365</h4>
+            <a href="{% url 'm365_dashboard' %}" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> Voltar ao Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulário de Filtro -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="iq-card">
+                <div class="iq-card-header">
+                    <h5 class="card-title">🔎 Filtro</h5>
+                </div>
+                <div class="iq-card-body">
+                <form method="post" action="{% url 'm365_list_users' %}">
+    {% csrf_token %}
+    <div class="form-row">
+        <div class="col-md-6">
+            <label>{{ form.tenant.label }}</label>
+            {{ form.tenant }}
+        </div>
+        <div class="col-md-6">
+            <label>{{ form.filtro.label }}</label>
+            {{ form.filtro }}
+            <small class="form-text text-muted">{{ form.filtro.help_text }}</small>
+        </div>
+    </div>
+
+    <!-- Campo oculto com a ação -->
+    <input type="hidden" name="acao" id="acao" value="listar">
+
+    <div class="form-row mt-3">
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary" onclick="document.getElementById('acao').value='listar'">
+                <i class="fa fa-filter"></i> Listar Usuários
+            </button>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-success" onclick="document.getElementById('acao').value='exportar'">
+                <i class="fa fa-download"></i> Exportar CSV
+            </button>
+        </div>
+    </div>
+</form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultado da Lista -->
+    {% if success %}
+    <div class="row">
+        <div class="col-12">
+            <div class="iq-card">
+                <div class="iq-card-header">
+                    <h5 class="card-title">👥 {{ users_count }} Usuários Encontrados</h5>
+                </div>
+                <div class="iq-card-body table-responsive">
+                    <table class="table table-hover table-bordered table-sm">
+    <thead class="thead-light">
+        <tr>
+            <th>Nome Completo</th>
+            <th>Email</th>
+            <th>UPN</th>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Sobrenome</th>
+            <th>Cargo</th>
+            <th>Departamento</th>
+            <th>Localização</th>
+            <th>Telefone</th>
+            <th>Celular</th>
+            <th>Tipo</th>
+            <th>Ativo</th>
+            <th>Criado em</th>
+            <th>Último Login</th>
+            <th>Idioma</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users_list %}
+        <tr>
+            <td>{{ user.displayName|default:"-" }}</td>
+            <td>{{ user.mail|default:user.userPrincipalName }}</td>
+            <td><code>{{ user.userPrincipalName }}</code></td>
+            <td><code>{{ user.id }}</code></td>
+            <td>{{ user.givenName|default:"-" }}</td>
+            <td>{{ user.surname|default:"-" }}</td>
+            <td>{{ user.jobTitle|default:"-" }}</td>
+            <td>{{ user.department|default:"-" }}</td>
+            <td>{{ user.officeLocation|default:"-" }}</td>
+            <td>
+                {% if user.businessPhones %}
+                    {% for phone in user.businessPhones %}
+                        <div>{{ phone }}</div>
+                    {% endfor %}
+                {% else %} - {% endif %}
+            </td>
+            <td>{{ user.mobilePhone|default:"-" }}</td>
+            <td>
+                <span class="badge badge-{% if user.userType == 'Member' %}primary{% else %}secondary{% endif %}">
+                    {{ user.userType|default:"-" }}
+                </span>
+            </td>
+            <td>
+                {% if user.accountEnabled %}
+                    <span class="badge badge-success">Sim</span>
+                {% else %}
+                    <span class="badge badge-danger">Não</span>
+                {% endif %}
+            </td>
+            <td>{{ user.createdDateTime|default:"-" }}</td>
+            <td>{{ user.signInActivity.lastSignInDateTime|default:"-" }}</td>
+            <td>{{ user.preferredLanguage|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Erros -->
+    {% if error_message %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-danger">
+                <i class="fa fa-times-circle"></i> {{ error_message }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

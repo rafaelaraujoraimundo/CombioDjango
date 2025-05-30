@@ -1,0 +1,204 @@
+<!-- suporte/templates/suporte/m365/dashboard.html -->
+{% extends "menu/index.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Dashboard -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <div class="iq-header-title">
+                        <h4 class="card-title">🏢 Microsoft 365 - Dashboard</h4>
+                    </div>
+                    <div class="iq-card-header-toolbar d-flex align-items-center">
+                        <a href="{% url 'm365_tenant_list' %}" class="btn btn-primary">
+                            <i class="fa fa-cog"></i> Gerenciar Tenants
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-sm-6">
+            <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                <div class="iq-card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle iq-card-icon bg-primary">
+                            <i class="ri-building-line"></i>
+                        </div>
+                        <div class="text-left ml-3">
+                            <h2 class="counter">{{ tenants_count }}</h2>
+                            <p class="mb-0 text-secondary">Tenants Ativos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-sm-6">
+            <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                <div class="iq-card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle iq-card-icon bg-info">
+                            <i class="ri-search-line"></i>
+                        </div>
+                        <div class="text-left ml-3">
+                            <h2 class="counter">{{ recent_searches.count }}</h2>
+                            <p class="mb-0 text-secondary">Buscas Recentes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6">
+            <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                <div class="iq-card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle iq-card-icon bg-success">
+                            <i class="ri-edit-line"></i>
+                        </div>
+                        <div class="text-left ml-3">
+                            <h2 class="counter">{{ recent_updates.count }}</h2>
+                            <p class="mb-0 text-secondary">Atualizações Recentes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6">
+            <div class="iq-card iq-card-block iq-card-stretch iq-card-height">
+                <div class="iq-card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle iq-card-icon bg-warning">
+                            <i class="ri-shield-check-line"></i>
+                        </div>
+                        <div class="text-left ml-3">
+                            <h2 class="counter">100</h2>
+                            <p class="mb-0 text-secondary">% Uptime</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu de Ações -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <div class="iq-header-title">
+                        <h4 class="card-title">🚀 Ações Rápidas</h4>
+                    </div>
+                </div>
+                <div class="iq-card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'm365_search_user' %}" class="btn btn-outline-primary btn-block h-100 d-flex flex-column justify-content-center">
+                                <i class="ri-search-2-line mb-2" style="font-size: 2rem;"></i>
+                                <span>Buscar Usuário</span>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'm365_list_users' %}" class="btn btn-outline-info btn-block h-100 d-flex flex-column justify-content-center">
+                                <i class="ri-group-line mb-2" style="font-size: 2rem;"></i>
+                                <span>Listar Usuários</span>
+                            </a>
+                        </div>
+                       
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <a href="{% url 'm365_manage_manager' %}" class="btn btn-outline-warning btn-block h-100 d-flex flex-column justify-content-center">
+                                <i class="ri-team-line mb-2" style="font-size: 2rem;"></i>
+                                <span>Gerenciar Manager</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs Recentes -->
+    <div class="row">
+        <!-- Buscas Recentes -->
+        <div class="col-xl-6">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <div class="iq-header-title">
+                        <h4 class="card-title">🔍 Buscas Recentes</h4>
+                    </div>
+                    <div class="iq-card-header-toolbar d-flex align-items-center">
+                        <a href="{% url 'm365_search_logs' %}" class="btn btn-sm btn-primary">Ver Todos</a>
+                    </div>
+                </div>
+                <div class="iq-card-body">
+                    <ul class="iq-timeline">
+                        {% for search in recent_searches %}
+                        <li>
+                            <div class="timeline-dots {% if search.encontrado %}border-success{% else %}border-danger{% endif %}"></div>
+                            <h6 class="float-left mb-1">{{ search.termo_busca }}</h6>
+                            <small class="float-right mt-1 text-muted">{{ search.data_pesquisa|date:"d/m/Y H:i" }}</small>
+                            <div class="d-block w-100">
+                                <p class="mb-0">
+                                    {% if search.encontrado %}
+                                        <i class="ri-check-line text-success"></i> Encontrado
+                                    {% else %}
+                                        <i class="ri-close-line text-danger"></i> Não encontrado
+                                    {% endif %}
+                                    - {{ search.tenant.nome_empresa }}
+                                </p>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="text-center text-muted">Nenhuma busca recente</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Atualizações Recentes -->
+        <div class="col-xl-6">
+            <div class="iq-card">
+                <div class="iq-card-header d-flex justify-content-between">
+                    <div class="iq-header-title">
+                        <h4 class="card-title">✏️ Atualizações Recentes</h4>
+                    </div>
+                    <div class="iq-card-header-toolbar d-flex align-items-center">
+                        <a href="{% url 'm365_update_logs' %}" class="btn btn-sm btn-primary">Ver Todos</a>
+                    </div>
+                </div>
+                <div class="iq-card-body">
+                    <ul class="iq-timeline">
+                        {% for update in recent_updates %}
+                        <li>
+                            <div class="timeline-dots {% if update.sucesso %}border-success{% else %}border-danger{% endif %}"></div>
+                            <h6 class="float-left mb-1">{{ update.usuario_alvo }}</h6>
+                            <small class="float-right mt-1 text-muted">{{ update.data_atualizacao|date:"d/m/Y H:i" }}</small>
+                            <div class="d-block w-100">
+                                <p class="mb-0">
+                                    {% if update.sucesso %}
+                                        <i class="ri-check-line text-success"></i> Sucesso
+                                    {% else %}
+                                        <i class="ri-close-line text-danger"></i> Falha
+                                    {% endif %}
+                                    - {{ update.tenant.nome_empresa }}
+                                </p>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="text-center text-muted">Nenhuma atualização recente</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
