@@ -1,4 +1,5 @@
 {% extends "menu/index.html" %}
+{% load static %}
 
 {% block content %}
 <div class="container-fluid">
@@ -36,18 +37,21 @@
     <!-- Campo oculto com a ação -->
     <input type="hidden" name="acao" id="acao" value="listar">
 
-    <div class="form-row mt-3">
-        <div class="col-auto">
-            <button type="submit" class="btn btn-primary" onclick="document.getElementById('acao').value='listar'">
-                <i class="fa fa-filter"></i> Listar Usuários
-            </button>
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-success" onclick="document.getElementById('acao').value='exportar'">
-                <i class="fa fa-download"></i> Exportar CSV
-            </button>
-        </div>
+<div class="form-row mt-3">
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary" id="btn-listar">
+            <i class="fa fa-filter"></i> Listar Usuários
+        </button>
     </div>
+    <div class="col-auto">
+        <button type="button" class="btn btn-success" id="btn-exportar">
+            <i class="fa fa-download"></i> Exportar CSV
+        </button>
+    </div>
+    <a href="{% url 'm365_update_massivo' %}" class="btn btn-outline-dark ml-2">
+        <i class="fa fa-upload"></i> Atualização em Massa
+    </a>
+</div>
 </form>
                 </div>
             </div>
@@ -82,6 +86,9 @@
             <th>Criado em</th>
             <th>Último Login</th>
             <th>Idioma</th>
+            <th>Gestor</th>
+            <th>Email do Gestor</th>
+            <th>Cargo do Gestor</th>
         </tr>
     </thead>
     <tbody>
@@ -119,6 +126,9 @@
             <td>{{ user.createdDateTime|default:"-" }}</td>
             <td>{{ user.signInActivity.lastSignInDateTime|default:"-" }}</td>
             <td>{{ user.preferredLanguage|default:"-" }}</td>
+            <td>{{ user.managerDisplayName|default:"-" }}</td>
+            <td>{{ user.managerMail|default:"-" }}</td>
+            <td>{{ user.managerJobTitle|default:"-" }}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -140,4 +150,76 @@
     </div>
     {% endif %}
 </div>
+
+<div id="loading-overlay" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(255,255,255,0.7);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+">
+    <img src="{% static 'images/Logo.png' %}" alt="Carregando..." style="width: 300px; height: 66px;">
+    <p class="mt-3 text-dark font-weight-bold">Aguarde, processando usuários... </p>
+    <p class="mt-3 text-dark font-weight-bold">Favor aguardar, pode-se demorar devido a quantidade de Usuarios Pesquisados. </p>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('form');
+    const overlay = document.getElementById('loading-overlay');
+    const btnExportar = document.getElementById('btn-exportar');
+    const acaoInput = document.getElementById('acao');
+    const tenantInput = document.querySelector('[name="tenant"]');
+    const filtroInput = document.querySelector('[name="filtro"]');
+
+    document.getElementById('btn-listar')?.addEventListener('click', () => {
+        acaoInput.value = 'listar';
+        overlay.style.display = 'flex';
+    });
+
+    form.addEventListener('submit', function (e) {
+        overlay.style.display = 'flex';
+    });
+
+    btnExportar?.addEventListener('click', () => {
+        const tenant = tenantInput.value;
+        const filtro = filtroInput.value;
+
+        overlay.style.display = 'flex';
+
+        fetch(`/suporte/m365/export_csv/?tenant=${tenant}&filtro=${encodeURIComponent(filtro)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/csv'
+            }
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("Erro ao exportar: " + res.statusText);
+            }
+            return res.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'usuarios_m365.csv';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            overlay.style.display = 'none';
+        })
+        .catch(err => {
+            alert("Erro ao exportar: " + err.message);
+            overlay.style.display = 'none';
+        });
+    });
+});
+</script>
+
 {% endblock %}

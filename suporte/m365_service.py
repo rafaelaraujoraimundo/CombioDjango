@@ -97,10 +97,10 @@ class MS365ApiService:
                 return None, f"Falha na autenticação: {auth_error}"
         
         url = f"{self.base_url}/users/{user_id}?$select=id,displayName,givenName,surname,jobTitle,department,mail,userPrincipalName,MobilePhone,businessPhones,officeLocation,userType,accountEnabled,createdDateTime,preferredLanguage"
-        print('url: '+ url)
+
         try:
             response = requests.get(url, headers=self._get_headers(), timeout=30)
-            print('response: '+ response.text)
+
             if response.status_code == 200:
                 user_data = response.json()
                 
@@ -156,6 +156,16 @@ class MS365ApiService:
 
                 data = response.json()
                 users = data.get('value', [])
+                for user in users:
+                    print(user)
+                    try:
+                        manager_data, _ = self.get_user_manager(user['id'])
+                        if manager_data:
+                            user['managerDisplayName'] = manager_data.get('displayName')
+                            user['managerMail'] = manager_data.get('mail') or manager_data.get('userPrincipalName')
+                            user['managerJobTitle'] = manager_data.get('jobTitle')
+                    except Exception as e:
+                        logger.warning(f"Erro ao buscar gerente para {user.get('userPrincipalName')}: {e}")
                 all_users.extend(users)
 
                 # Verifica se há próxima página
@@ -183,7 +193,7 @@ class MS365ApiService:
         
         try:
             response = requests.patch(url, headers=self._get_headers(), json=updates, timeout=30)
-            print(updates)
+           
             if response.status_code == 204:  # No Content - sucesso
                 # Log da atualização bem-sucedida
                 self._log_update(user_id, updates, True, None, requesting_user, ip_address)
@@ -226,33 +236,7 @@ class MS365ApiService:
             error_msg = f"Erro na requisição: {str(e)}"
             return None, error_msg
     
-    def set_user_manager(self, user_id: str, manager_id: str) -> Tuple[bool, str]:
-        """
-        Define o manager de um usuário
-        Returns: (success: bool, error_message: str)
-        """
-        if not self.access_token:
-            auth_success, auth_error = self.authenticate()
-            if not auth_success:
-                return False, f"Falha na autenticação: {auth_error}"
-        
-        url = f"{self.base_url}/users/{user_id}/manager/$ref"
-        manager_url = f"{self.base_url}/users/{manager_id}"
-        data = {"@odata.id": manager_url}
-        
-        try:
-            response = requests.put(url, headers=self._get_headers(), json=data, timeout=30)
-            
-            if response.status_code == 204:  # No Content - sucesso
-                return True, "Manager definido com sucesso"
-            else:
-                error_msg = f"Erro na API: {response.status_code} - {response.text}"
-                return False, error_msg
-                
-        except requests.exceptions.RequestException as e:
-            error_msg = f"Erro na requisição: {str(e)}"
-            return False, error_msg
-    
+   
     def remove_user_manager(self, user_id: str) -> Tuple[bool, str]:
         """
         Remove o manager de um usuário
@@ -317,3 +301,24 @@ class MS365ApiService:
             )
         except Exception as e:
             logger.error(f"Erro ao salvar log de atualização: {e}")
+    
+    def set_user_manager(self, user_id: str, manager_upn: str, requesting_user=None, ip_address=None) -> Tuple[bool, str]:
+        """
+        Define o gerente (manager) de um usuário
+        """
+        if not self.access_token:
+            auth_success, auth_error = self.authenticate()
+            if not auth_success:
+                return False, f"Falha na autenticação: {auth_error}"
+
+        url = f"{self.base_url}/users/{user_id}/manager/$ref"
+        body = {
+            "@odata.id": f"{self.base_url}/users/{manager_upn}"
+        }
+
+        try:
+            response = requests.put(url, headers=self._get_headers(), json=body, timeout=30)
+            response.raise_for_status()
+            return True, ""
+        except requests.exceptions.RequestException as e:
+            return False, f"Erro ao atualizar gerente: {e}"

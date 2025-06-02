@@ -16,6 +16,11 @@ from administration .models import GroupProcess, GroupProcessSelection
 from django.db.models import Count
 from django.http import HttpResponse
 import csv
+import logging
+from django.utils.encoding import smart_str
+import codecs
+
+logger = logging.getLogger(__name__)
 
 # suporte/views.py - Adicionar ao arquivo existente
 
@@ -185,10 +190,14 @@ def m365_search_user(request):
                     context['user_data'] = user_data
                     context['success'] = True
                     messages.success(request, 'Usuário encontrado com sucesso!')
-                else:
-                    context['error_message'] = error_msg
-                    messages.error(request, f'Erro: {error_msg}')
-                    
+
+                    # Buscar manager
+                    try:
+                        manager_data, _ = service.get_user_manager(user_data['id'])
+                        if manager_data:
+                            context['manager_data'] = manager_data
+                    except Exception as e:
+                        logger.warning(f"Não foi possível obter o manager: {e}")
             except Exception as e:
                 error_msg = f'Erro interno: {str(e)}'
                 context['error_message'] = error_msg
@@ -219,17 +228,24 @@ def m365_list_users(request):
             users_list, error_msg = service.list_users(filtro)
 
             if acao == 'exportar' and users_list:
-                # Exportar para CSV
-                response = HttpResponse(content_type='text/csv')
+                # Exportar para CSV com delimitador ; e UTF-8 BOM
+                from io import StringIO
+
+                response = HttpResponse(content_type='text/csv; charset=utf-8')
                 response['Content-Disposition'] = 'attachment; filename="usuarios_m365.csv"'
 
-                writer = csv.writer(response)
+                csv_buffer = StringIO()
+                writer = csv.writer(csv_buffer, delimiter=';')
+
+                # Cabeçalho
                 writer.writerow([
                     'Nome Completo', 'Email', 'UPN', 'ID', 'Nome', 'Sobrenome',
                     'Cargo', 'Departamento', 'Localização', 'Telefone(s)',
-                    'Celular', 'Tipo', 'Ativo', 'Criado em', 'Último Login', 'Idioma'
+                    'Celular', 'Tipo', 'Ativo', 'Criado em', 'Último Login', 'Idioma',
+                    'Gerente', 'Email do Gerente', 'Cargo do Gerente'
                 ])
 
+                # Linhas de dados
                 for user in users_list:
                     writer.writerow([
                         user.get('displayName', ''),
@@ -247,10 +263,19 @@ def m365_list_users(request):
                         'Sim' if user.get('accountEnabled') else 'Não',
                         user.get('createdDateTime', ''),
                         user.get('signInActivity', {}).get('lastSignInDateTime', ''),
-                        user.get('preferredLanguage', '')
+                        user.get('preferredLanguage', ''),
+                        user.get('managerDisplayName', ''),
+                        user.get('managerMail', ''),
+                        user.get('managerJobTitle', '')
                     ])
 
+                # Escreve BOM + CSV no response
+                response.write('\ufeff')  # UTF-8 BOM
+                response.write(csv_buffer.getvalue())
+                csv_buffer.close()
+
                 return response
+
 
             elif users_list:
                 context['users_list'] = users_list
@@ -305,6 +330,9 @@ def m365_update_user(request):
                     'business_phone': ', '.join(user_data.get('businessPhones', [])),
                     'mobile_phone': user_data.get('mobilePhone'),
                 }
+                manager_data, _ = service.get_user_manager(usuario_id)
+                if manager_data:
+                    initial_data['manager_email'] = manager_data.get('mail') or manager_data.get('userPrincipalName')
 
                 form = MS365UserUpdateForm(initial=initial_data)
                 form.fields['usuario_alvo'].widget.attrs['readonly'] = True
@@ -349,11 +377,27 @@ def m365_update_user(request):
                     requesting_user=request.user,
                     ip_address=get_client_ip(request)
                 )
+                manager_email = form.cleaned_data.get('manager_email')
+                if manager_email:
+                    try:
+                        success_mgr, error_mgr = service.set_user_manager(
+                            usuario_alvo,
+                            manager_email,
+                            requesting_user=request.user,
+                            ip_address=get_client_ip(request)
+                        )
+                        if not success_mgr:
+                            messages.warning(request, f"Usuário atualizado, mas não foi possível alterar o gerente: {error_mgr}")
+                    except Exception as e:
+                        messages.warning(request, f"Erro ao atualizar gerente: {e}")
 
                 if success:
-                    context['success'] = True
-                    context['updated_fields'] = updates
-                    messages.success(request, 'Usuário atualizado com sucesso!')
+                    display_name = updates.get('displayName') or usuario_alvo
+                    messages.success(
+                    request,
+                    f"✅ Usuário {display_name} atualizado com sucesso!"
+                    )
+                    return redirect('m365_dashboard')
                 else:
                     context['error_message'] = error_msg
                     messages.error(request, f'Erro: {error_msg}')
@@ -706,7 +750,7 @@ class SubstituicaoDetailView(DetailView):
 @login_required(login_url='account_login')
 @permission_required('global_permissions.combio_suporte', login_url='erro_page')
 def m365_export_users_csv(request):
-    """Exporta usuários do M365 para CSV"""
+    """Exporta usuários do M365 para CSV com acentos e separador ;"""
     if request.method == 'POST':
         form = MS365ListUsersForm(request.POST)
         if form.is_valid():
@@ -716,16 +760,23 @@ def m365_export_users_csv(request):
             users_list, error_msg = service.list_users(filtro)
 
             if users_list:
-                response = HttpResponse(content_type='text/csv')
+                # Resposta e cabeçalhos
+                response = HttpResponse(content_type='text/csv; charset=utf-8')
                 response['Content-Disposition'] = 'attachment; filename="usuarios_m365.csv"'
 
-                writer = csv.writer(response)
+                # Buffer intermediário para escrita CSV
+                csv_buffer = StringIO()
+                writer = csv.writer(csv_buffer, delimiter=';')  # <- ponto e vírgula
+
+                # Cabeçalho
                 writer.writerow([
                     'Nome Completo', 'Email', 'UPN', 'ID', 'Nome', 'Sobrenome',
                     'Cargo', 'Departamento', 'Localização', 'Telefone(s)',
-                    'Celular', 'Tipo', 'Ativo', 'Criado em', 'Último Login', 'Idioma'
+                    'Celular', 'Tipo', 'Ativo', 'Criado em', 'Último Login', 'Idioma',
+                    'Gerente', 'Email do Gerente', 'Cargo do Gerente'
                 ])
 
+                # Dados
                 for user in users_list:
                     writer.writerow([
                         user.get('displayName', ''),
@@ -743,12 +794,170 @@ def m365_export_users_csv(request):
                         'Sim' if user.get('accountEnabled') else 'Não',
                         user.get('createdDateTime', ''),
                         user.get('signInActivity', {}).get('lastSignInDateTime', ''),
-                        user.get('preferredLanguage', '')
+                        user.get('preferredLanguage', ''),
+                        user.get('managerDisplayName', ''),
+                        user.get('managerMail', ''),
+                        user.get('managerJobTitle', '')
                     ])
 
+                # Escreve o BOM + conteúdo CSV no response
+                response.write('\ufeff')  # UTF-8 BOM
+                response.write(csv_buffer.getvalue())
+                csv_buffer.close()
                 return response
             else:
                 messages.error(request, error_msg or 'Nenhum dado para exportar.')
 
     messages.error(request, 'Formulário inválido.')
     return redirect('m365_list_users')
+
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_suporte', login_url='erro_page')
+def m365_update_massivo(request):
+    context = {
+        'title': 'Atualização em Massa de Usuários M365',
+        'activegroup': 'suporte',
+    }
+
+    if request.method == 'POST' and request.FILES.get('arquivo_csv'):
+        arquivo = request.FILES['arquivo_csv']
+        tenant_id = request.POST.get('tenant')
+        tenant = get_object_or_404(MS365Tenant, id=tenant_id)
+        service = MS365ApiService(tenant)
+
+        decoded_file = arquivo.read().decode('utf-8-sig').splitlines()
+        reader = csv.DictReader(decoded_file, delimiter=';')
+
+        resultados = []
+        for linha in reader:
+            usuario = linha.get('Email') or linha.get('UPN')
+            updates = {
+                'displayName': linha.get('Nome Completo'),
+                'givenName': linha.get('Nome'),
+                'surname': linha.get('Sobrenome'),
+                'jobTitle': linha.get('Cargo'),
+                'department': linha.get('Departamento'),
+                'officeLocation': linha.get('Localização'),
+                'mobilePhone': linha.get('Celular'),
+                'businessPhones': [linha.get('Telefone(s)')] if linha.get('Telefone(s)') else []
+            }
+
+            updates = {k: v for k, v in updates.items() if v}  # Remove vazios
+
+            success, error = service.update_user_profile(
+                usuario, updates,
+                requesting_user=request.user,
+                ip_address=get_client_ip(request)
+            )
+
+            # Atualizar gerente se fornecido
+            gerente = linha.get('Email do Gerente')
+            if gerente:
+                service.set_user_manager(usuario, gerente)
+
+            resultados.append({
+                'usuario': usuario,
+                'status': 'OK' if success else 'Erro',
+                'mensagem': error if error else 'Atualizado com sucesso'
+            })
+
+        context['resultados'] = resultados
+
+    context['form'] = MS365ListUsersForm()
+    return render(request, 'suporte/m365/update_massivo.html', context)
+
+
+@csrf_exempt
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_suporte', login_url='erro_page')
+def m365_update_usuario_api(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            tenant_id = data.get('tenant')
+            usuario = data.get('usuario')
+
+            tenant = get_object_or_404(MS365Tenant, id=tenant_id)
+            service = MS365ApiService(tenant)
+
+            updates = data.get('updates', {})
+            gerente = data.get('gerente')
+
+            success, error = service.update_user_profile(usuario, updates)
+
+            if gerente:
+                service.set_user_manager(usuario, gerente)
+
+            return JsonResponse({
+                'usuario': usuario,
+                'status': 'OK' if success else 'Erro',
+                'mensagem': error if error else 'Atualizado com sucesso'
+            })
+
+        except Exception as e:
+            return JsonResponse({'status': 'Erro', 'mensagem': str(e)}, status=400)
+
+
+
+@csrf_exempt
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_suporte', login_url='erro_page')
+def m365_export_csv_api(request):
+    tenant_id = request.GET.get('tenant')
+    filtro = request.GET.get('filtro', '')
+
+    if not tenant_id:
+        return JsonResponse({'erro': 'Tenant não informado'}, status=400)
+
+    try:
+        tenant = MS365Tenant.objects.get(id=tenant_id)
+    except MS365Tenant.DoesNotExist:
+        return JsonResponse({'erro': 'Tenant inválido'}, status=400)
+
+    service = MS365ApiService(tenant)
+    users_list, error_msg = service.list_users(filtro)
+
+    if not users_list:
+        return JsonResponse({'erro': error_msg or 'Nenhum usuário encontrado'}, status=404)
+
+    # Gerar CSV em memória
+    from io import StringIO
+    import csv
+
+    buffer = StringIO()
+    writer = csv.writer(buffer, delimiter=';')
+    writer.writerow([
+        'Nome Completo', 'Email', 'UPN', 'ID', 'Nome', 'Sobrenome',
+        'Cargo', 'Departamento', 'Localização', 'Telefone(s)',
+        'Celular', 'Tipo', 'Ativo', 'Criado em', 'Último Login', 'Idioma',
+        'Gerente', 'Email do Gerente', 'Cargo do Gerente'
+    ])
+
+    for user in users_list:
+        writer.writerow([
+            user.get('displayName', ''),
+            user.get('mail') or user.get('userPrincipalName'),
+            user.get('userPrincipalName', ''),
+            user.get('id', ''),
+            user.get('givenName', ''),
+            user.get('surname', ''),
+            user.get('jobTitle', ''),
+            user.get('department', ''),
+            user.get('officeLocation', ''),
+            ', '.join(user.get('businessPhones', [])),
+            user.get('mobilePhone', ''),
+            user.get('userType', ''),
+            'Sim' if user.get('accountEnabled') else 'Não',
+            user.get('createdDateTime', ''),
+            user.get('signInActivity', {}).get('lastSignInDateTime', ''),
+            user.get('preferredLanguage', ''),
+            user.get('managerDisplayName', ''),
+            user.get('managerMail', ''),
+            user.get('managerJobTitle', '')
+        ])
+
+    csv_data = buffer.getvalue()
+    buffer.close()
+
+    return HttpResponse('\ufeff' + csv_data, content_type='text/csv; charset=utf-8')

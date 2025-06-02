@@ -1,0 +1,113 @@
+{% extends "menu/index.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4>📤 Atualização em Massa de Usuários M365</h4>
+            <a href="{% url 'm365_dashboard' %}" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> Voltar ao Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulário -->
+    <form id="form-massa">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Tenant</label>
+            {{ form.tenant }}
+        </div>
+        <div class="form-group">
+            <label>Arquivo CSV</label>
+            <input type="file" id="csv-file" class="form-control-file" accept=".csv" required>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <i class="fa fa-play"></i> Iniciar Atualização
+        </button>
+    </form>
+
+    <!-- Tabela de resultados -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="iq-card">
+                <div class="iq-card-header">
+                    <h5 class="card-title">📊 Resultados</h5>
+                </div>
+                <div class="iq-card-body">
+                    <table class="table table-sm table-bordered" id="resultado-tabela">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Usuário</th>
+                                <th>Status</th>
+                                <th>Mensagem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- linhas inseridas via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('form');
+    const overlay = document.getElementById('loading-overlay');
+    const btnExportar = document.getElementById('btn-exportar');
+    const acaoInput = document.getElementById('acao');
+    const tenantInput = document.querySelector('[name="tenant"]');
+    const filtroInput = document.querySelector('[name="filtro"]');
+
+    document.getElementById('btn-listar')?.addEventListener('click', () => {
+        acaoInput.value = 'listar';
+        overlay.style.display = 'flex';
+    });
+
+    form.addEventListener('submit', function (e) {
+        overlay.style.display = 'flex';
+    });
+
+    btnExportar?.addEventListener('click', () => {
+        const tenant = tenantInput.value;
+        const filtro = filtroInput.value;
+
+        overlay.style.display = 'flex';
+
+        fetch(`/suporte/m365/export_csv/?tenant=${tenant}&filtro=${encodeURIComponent(filtro)}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/csv'
+            }
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("Erro ao exportar: " + res.statusText);
+            }
+            return res.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'usuarios_m365.csv';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            overlay.style.display = 'none';
+        })
+        .catch(err => {
+            alert("Erro ao exportar: " + err.message);
+            overlay.style.display = 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

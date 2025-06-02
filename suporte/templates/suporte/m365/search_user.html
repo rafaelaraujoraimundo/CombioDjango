@@ -2,6 +2,8 @@
 {% extends "menu/index.html" %}
 
 {% block content %}
+
+
 <div class="container-fluid">
     <!-- Header -->
     <div class="row mb-4">
@@ -77,97 +79,120 @@
 
     <!-- Resultado da Busca -->
     {% if success and user_data %}
-    <div class="row">
-        <div class="col-12">
-            <div class="iq-card">
-                <div class="iq-card-header">
-                    <div class="iq-header-title">
-                        <h4 class="card-title">✅ Usuário Encontrado</h4>
+   <div class="row">
+    <div class="col-12">
+        <div class="iq-card">
+            <div class="iq-card-header">
+                <div class="iq-header-title">
+                    <h4 class="card-title">✅ Usuário Encontrado</h4>
+                </div>
+            </div>
+            <div class="iq-card-body">
+                <div class="row">
+                    <!-- Coluna 1: Informações Pessoais -->
+                    <div class="col-md-4">
+                        <h5 class="mb-3">👤 Informações Pessoais</h5>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Nome Completo:</strong></td>
+                                <td>{{ user_data.displayName|default:"Não informado" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Nome:</strong></td>
+                                <td>{{ user_data.givenName|default:"Não informado" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sobrenome:</strong></td>
+                                <td>{{ user_data.surname|default:"Não informado" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>E-mail Principal:</strong></td>
+                                <td>
+                                    {% if user_data.mail %}
+                                        <a href="mailto:{{ user_data.mail }}">{{ user_data.mail }}</a>
+                                    {% else %}
+                                        Não informado
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>UPN:</strong></td>
+                                <td><code>{{ user_data.userPrincipalName|default:"Não informado" }}</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>ID do Usuário:</strong></td>
+                                <td><code>{{ user_data.id|default:"Não informado" }}</code></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Coluna 2: Informações Profissionais -->
+                    <div class="col-md-4">
+                        <h5 class="mb-3">💼 Informações Profissionais</h5>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Cargo:</strong></td>
+                                <td>{{ user_data.jobTitle|default:"Não informado" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Departamento:</strong></td>
+                                <td>{{ user_data.department|default:"Não informado" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Localização:</strong></td>
+                                <td>{{ user_data.officeLocation|default:"Não informado" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Telefones:</strong></td>
+                                <td>
+                                    {% if user_data.businessPhones %}
+                                        {% for phone in user_data.businessPhones %}
+                                            <div>{{ phone }}</div>
+                                        {% endfor %}
+                                    {% else %}
+                                        Não informado
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Celular:</strong></td>
+                                <td>{{ user_data.mobilePhone|default:"Não informado" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tipo de Usuário:</strong></td>
+                                <td>
+                                    <span class="badge badge-{% if user_data.userType == 'Member' %}primary{% else %}secondary{% endif %}">
+                                        {{ user_data.userType|default:"N/A" }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Coluna 3: Gerente Imediato -->
+                    <div class="col-md-4">
+                        <h5 class="mb-3">👤 Gerente Imediato</h5>
+                        {% if manager_data %}
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Nome:</strong></td>
+                                <td>{{ manager_data.displayName|default:"-" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>{{ manager_data.mail|default:manager_data.userPrincipalName }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cargo:</strong></td>
+                                <td>{{ manager_data.jobTitle|default:"-" }}</td>
+                            </tr>
+                        </table>
+                        {% else %}
+                        <p><em>Não definido.</em></p>
+                        {% endif %}
                     </div>
                 </div>
-                <div class="iq-card-body">
-                    <div class="row">
-                        <!-- Informações Básicas -->
-                        <div class="col-xl-6">
-                            <h5 class="mb-3">👤 Informações Pessoais</h5>
-                            <table class="table table-borderless">
-                                <tr>
-                                    <td><strong>Nome Completo:</strong></td>
-                                    <td>{{ user_data.displayName|default:"Não informado" }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Nome:</strong></td>
-                                    <td>{{ user_data.givenName|default:"Não informado" }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Sobrenome:</strong></td>
-                                    <td>{{ user_data.surname|default:"Não informado" }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>E-mail Principal:</strong></td>
-                                    <td>
-                                        {% if user_data.mail %}
-                                            <a href="mailto:{{ user_data.mail }}">{{ user_data.mail }}</a>
-                                        {% else %}
-                                            Não informado
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><strong>UPN:</strong></td>
-                                    <td><code>{{ user_data.userPrincipalName|default:"Não informado" }}</code></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>ID do Usuário:</strong></td>
-                                    <td><code>{{ user_data.id|default:"Não informado" }}</code></td>
-                                </tr>
-                            </table>
-                        </div>
-
-                        <!-- Informações Profissionais -->
-                        <div class="col-xl-6">
-                            <h5 class="mb-3">💼 Informações Profissionais</h5>
-                            <table class="table table-borderless">
-                                <tr>
-                                    <td><strong>Cargo:</strong></td>
-                                    <td>{{ user_data.jobTitle|default:"Não informado" }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Departamento:</strong></td>
-                                    <td>{{ user_data.department|default:"Não informado" }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Localização:</strong></td>
-                                    <td>{{ user_data.officeLocation|default:"Não informado" }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Telefones:</strong></td>
-                                    <td>
-                                        {% if user_data.businessPhones %}
-                                            {% for phone in user_data.businessPhones %}
-                                                <div>{{ phone }}</div>
-                                            {% endfor %}
-                                        {% else %}
-                                            Não informado
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Celular:</strong></td>
-                                    <td>{{ user_data.mobilePhone|default:"Não informado" }}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Tipo de Usuário:</strong></td>
-                                    <td>
-                                        <span class="badge badge-{% if user_data.userType == 'Member' %}primary{% else %}secondary{% endif %}">
-                                            {{ user_data.userType|default:"N/A" }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-
+                    
                     <!-- Informações de Status -->
                     <div class="row mt-4">
                         <div class="col-12">
@@ -395,4 +420,5 @@ $(document).ready(function() {
     });
 });
 </script>
+
 {% endblock %}

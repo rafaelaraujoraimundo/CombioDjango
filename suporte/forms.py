@@ -295,6 +295,15 @@ class MS365UserUpdateForm(forms.Form):
         required=False
     )
 
+    manager_email = forms.CharField(
+    required=False,
+    label="E-mail do Gerente",
+    widget=forms.EmailInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'ex: gerente@empresa.com'
+    })
+)
+
     def clean(self):
         cleaned_data = super().clean()
 
