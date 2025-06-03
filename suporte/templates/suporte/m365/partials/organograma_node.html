@@ -1,0 +1,15 @@
+{# suporte/m365/partials/organograma_node.html #}
+<li>
+  <div class="org-gerente">
+    <strong>{{ node.usuario.display_name }}</strong><br>
+    <small>{{ node.usuario.job_title|default:"-" }}</small><br>
+    <small class="text-muted">{{ node.usuario.email }}</small>
+  </div>
+  {% if node.subordinados %}
+  <ul>
+    {% for sub in node.subordinados %}
+      {% include "suporte/m365/partials/organograma_node.html" with node=sub %}
+    {% endfor %}
+  </ul>
+  {% endif %}
+</li>

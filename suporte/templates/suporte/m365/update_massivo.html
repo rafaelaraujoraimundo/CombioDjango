@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Cabeçalho -->
+    <!-- Header -->
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h4>📤 Atualização em Massa de Usuários M365</h4>
@@ -29,26 +29,42 @@
         </button>
     </form>
 
-    <!-- Tabela de resultados -->
+    <!-- Resultados -->
     <div class="row mt-5">
-        <div class="col-12">
+        <div class="col-md-6">
             <div class="iq-card">
-                <div class="iq-card-header">
-                    <h5 class="card-title">📊 Resultados</h5>
+                <div class="iq-card-header" style="background-color: #8a2a2a; color: white; text-align: center;">
+                    <h4 class="card-title">❌ Falhas na Atualização</h4>
                 </div>
                 <div class="iq-card-body">
-                    <table class="table table-sm table-bordered" id="resultado-tabela">
+                    <table class="table table-sm table-bordered" id="tabela-erros">
                         <thead>
                             <tr>
                                 <th>#</th>
                                 <th>Usuário</th>
-                                <th>Status</th>
                                 <th>Mensagem</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- linhas inseridas via JS -->
-                        </tbody>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="iq-card">
+                <div class="iq-card-header" style="background-color: #399444; color: white; text-align: center;">
+                    <h4 class="card-title">✅ Sucesso na Atualização</h4>
+                </div>
+                <div class="iq-card-body">
+                    <table class="table table-sm table-bordered" id="tabela-sucessos">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Usuário</th>
+                                <th>Mensagem</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
@@ -58,55 +74,94 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('form');
-    const overlay = document.getElementById('loading-overlay');
-    const btnExportar = document.getElementById('btn-exportar');
-    const acaoInput = document.getElementById('acao');
-    const tenantInput = document.querySelector('[name="tenant"]');
-    const filtroInput = document.querySelector('[name="filtro"]');
-
-    document.getElementById('btn-listar')?.addEventListener('click', () => {
-        acaoInput.value = 'listar';
-        overlay.style.display = 'flex';
-    });
+    const form = document.getElementById('form-massa');
+    const tabelaSucesso = document.querySelector('#tabela-sucessos tbody');
+    const tabelaErro = document.querySelector('#tabela-erros tbody');
 
     form.addEventListener('submit', function (e) {
-        overlay.style.display = 'flex';
-    });
+        e.preventDefault();
 
-    btnExportar?.addEventListener('click', () => {
-        const tenant = tenantInput.value;
-        const filtro = filtroInput.value;
+        const file = document.getElementById('csv-file').files[0];
+        const tenant = document.querySelector('[name="tenant"]').value;
+        if (!file || !tenant) {
+            alert('Preencha todos os campos!');
+            return;
+        }
 
-        overlay.style.display = 'flex';
+        tabelaSucesso.innerHTML = '';
+        tabelaErro.innerHTML = '';
 
-        fetch(`/suporte/m365/export_csv/?tenant=${tenant}&filtro=${encodeURIComponent(filtro)}`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'text/csv'
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const linhas = event.target.result.split('\n').filter(l => l.trim()).slice(1);
+
+            function processarLinha(index) {
+                if (index >= linhas.length) {
+                    return;
+                }
+
+                const linha = linhas[index];
+                const colunas = linha.split(';');
+
+                const updates = {};
+                if (colunas[0]) updates.displayName = colunas[0];
+                if (colunas[4]) updates.givenName = colunas[4];
+                if (colunas[5]) updates.surname = colunas[5];
+                if (colunas[6]) updates.jobTitle = colunas[6];
+                if (colunas[7]) updates.department = colunas[7];
+                if (colunas[8]) updates.officeLocation = colunas[8];
+                if (colunas[10]) updates.mobilePhone = colunas[10];
+                if (colunas[9]) updates.businessPhones = [colunas[9]];
+
+                const dados = {
+                    tenant: tenant,
+                    usuario: colunas[1] || colunas[2],
+                    updates: updates
+                };
+
+                if (colunas[16]) {
+                    dados.gerente = colunas[16];
+                }
+
+                fetch("{% url 'm365_update_usuario_api' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(dados)
+                })
+                .then(res => res.json())
+                .then(json => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${json.usuario}</td>
+                        <td>${json.mensagem}</td>
+                    `;
+                    if (json.status === 'OK') {
+                        tabelaSucesso.appendChild(row);
+                    } else {
+                        tabelaErro.appendChild(row);
+                    }
+                    processarLinha(index + 1);
+                })
+                .catch(err => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${dados.usuario}</td>
+                        <td>${err.message}</td>
+                    `;
+                    tabelaErro.appendChild(row);
+                    processarLinha(index + 1);
+                });
             }
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error("Erro ao exportar: " + res.statusText);
-            }
-            return res.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'usuarios_m365.csv';
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-            overlay.style.display = 'none';
-        })
-        .catch(err => {
-            alert("Erro ao exportar: " + err.message);
-            overlay.style.display = 'none';
-        });
+
+            processarLinha(0);
+        };
+
+        reader.readAsText(file, 'utf-8');
     });
 });
 </script>

@@ -157,7 +157,7 @@ class MS365ApiService:
                 data = response.json()
                 users = data.get('value', [])
                 for user in users:
-                    print(user)
+                    
                     try:
                         manager_data, _ = self.get_user_manager(user['id'])
                         if manager_data:

@@ -3,6 +3,7 @@ from administration.models import GroupProcess, User
 from django.utils import timezone
 from administration.encryptor import encrypt_password, decrypt_password
 
+
 # Create your models here.
 class UsuarioDesligamento(models.Model):
     usuario = models.CharField(max_length=100)  # Nome do usuário a ser desligado
@@ -301,3 +302,35 @@ class MS365UserUpdateLog(models.Model):
     def __str__(self):
         status = "Sucesso" if self.sucesso else "Falha"
         return f"{self.usuario_alvo} - {status} ({self.data_atualizacao.strftime('%d/%m/%Y %H:%M')})"
+    
+
+class UsuarioM365(models.Model):
+    email = models.EmailField(primary_key=True, verbose_name="E-mail do Usuário")
+    display_name = models.CharField(max_length=255, blank=True, null=True)
+    given_name = models.CharField(max_length=255, blank=True, null=True)
+    surname = models.CharField(max_length=255, blank=True, null=True)
+    job_title = models.CharField(max_length=255, blank=True, null=True)
+    department = models.CharField(max_length=255, blank=True, null=True)
+    office_location = models.CharField(max_length=255, blank=True, null=True)
+    mobile_phone = models.CharField(max_length=64, blank=True, null=True)
+    business_phones = models.TextField(blank=True, null=True)
+    user_type = models.CharField(max_length=50, blank=True, null=True)
+    account_enabled = models.BooleanField(default=True)
+    created_at = models.DateTimeField(blank=True, null=True)
+    language = models.CharField(max_length=20, blank=True, null=True)
+
+    manager_name = models.CharField(max_length=255, blank=True, null=True)
+    manager_email = models.EmailField(blank=True, null=True)
+    manager_title = models.CharField(max_length=255, blank=True, null=True)
+
+    tenant = models.ForeignKey(MS365Tenant, on_delete=models.PROTECT, related_name="tenant")
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Usuário M365"
+        verbose_name_plural = "Usuários M365"
+        ordering = ['display_name']
+
+    def __str__(self):
+        return f"{self.display_name} ({self.email})"

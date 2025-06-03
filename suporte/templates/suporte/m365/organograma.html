@@ -1,0 +1,87 @@
+{% extends "menu/index.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h4>🌳 Organograma Microsoft 365</h4>
+            <a href="{% url 'm365_dashboard' %}" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> Voltar ao Dashboard
+            </a>
+        </div>
+    </div>
+
+    {% if organograma %}
+    <div class="row">
+        <div class="col-12">
+            <div class="tree">
+                <ul>
+                    {% for no in organograma %}
+                        {% include "suporte/m365/partials/organograma_node.html" with node=no %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">Nenhum dado disponível para montar o organograma.</div>
+    {% endif %}
+</div>
+
+<style>
+.tree ul {
+    padding-top: 20px; position: relative;
+    display: table; margin: auto;
+}
+.tree li {
+    float: left; text-align: center;
+    list-style-type: none;
+    position: relative;
+    padding: 20px 5px 0 5px;
+    display: table-cell;
+    vertical-align: top;
+}
+.tree li::before, .tree li::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 50%;
+    border-top: 1px solid #ccc;
+    width: 50%; height: 20px;
+}
+.tree li::after {
+    right: auto; left: 50%;
+    border-left: 1px solid #ccc;
+}
+.tree li:only-child::before, .tree li:only-child::after {
+    content: none;
+}
+.tree li:only-child {
+    padding-top: 0;
+}
+.tree li:first-child::before, .tree li:last-child::after {
+    border: 0 none;
+}
+.tree li:last-child::before {
+    border-right: 1px solid #ccc;
+    border-radius: 0 5px 0 0;
+}
+.tree li:first-child::after {
+    border-radius: 5px 0 0 0;
+}
+.tree .node {
+    display: inline-block;
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    border-radius: 5px;
+    background: #f9f9f9;
+    position: relative;
+    font-weight: bold;
+}
+.tree .node small {
+    display: block;
+    font-weight: normal;
+    color: #666;
+}
+</style>
+{% endblock %}

@@ -9,13 +9,14 @@ import logging
 from django.db import transaction
 from administration.views import User
 from requests_oauthlib import OAuth1Session
-from .models import UsuarioDesligamento, UsuarioFluig
+from .models import UsuarioDesligamento, UsuarioFluig, MS365Tenant, UsuarioM365
 from administration.models import ServidorFluig
 from decouple import config
 from django.core.mail import send_mail
 from django.conf import settings
 import json
 from django.db.models import Q
+from .m365_service import MS365ApiService
 
 logger = logging.getLogger(__name__)
 
@@ -164,3 +165,49 @@ def substituir_usuario_fluig(json_data):
         return {"status": "error", "message": f"Ocorreu um erro ao tentar substituir o usuário: {e}"}
 
     return {"status": "success", "message": "Substituição de usuário realizada com sucesso."}
+
+
+@shared_task
+def atualizar_usuarios_m365():
+    tenants = MS365Tenant.objects.all()
+    logger.info('Iniciando atualizando do M365')
+    print('Iniciando atualizando do M365')
+    for tenant in tenants:
+        service = MS365ApiService(tenant)
+        usuarios, erro = service.list_users()
+
+        if erro:
+            logger.error(f"Erro ao listar usuários do tenant {tenant.nome}: {erro}")
+            print(f"Erro ao listar usuários do tenant {tenant.nome}: {erro}")
+            continue
+        logger.info('Iniciando Tenant: ' + tenant.nome_empresa )
+        print('Iniciando Tenant: ' + tenant.nome_empresa )
+        for user in usuarios:
+            email = user.get('mail') or user.get('userPrincipalName')
+            if not email:
+                continue
+
+            defaults = {
+                'display_name': user.get('displayName', ''),
+                'given_name': user.get('givenName', ''),
+                'surname': user.get('surname', ''),
+                'job_title': user.get('jobTitle', ''),
+                'department': user.get('department', ''),
+                'office_location': user.get('officeLocation', ''),
+                'mobile_phone': user.get('mobilePhone', ''),
+                'business_phones': ", ".join(user.get('businessPhones', [])),
+                'user_type': user.get('userType', ''),
+                'account_enabled': user.get('accountEnabled', False),
+                'created_at': user.get('createdDateTime'),
+                'language': user.get('preferredLanguage', ''),
+                'manager_name': user.get('managerDisplayName', ''),
+                'manager_email': user.get('managerMail', ''),
+                'manager_title': user.get('managerJobTitle', ''),
+                'tenant': tenant
+            }
+
+            UsuarioM365.objects.update_or_create(email=email, defaults=defaults)
+        logger.info('Termino Tenant' + tenant.nome_empresa )
+        print('Termino Tenant' + tenant.nome_empresa )
+    logger.info('termino da Atualização do M365')
+    print('termino da Atualização do M365')

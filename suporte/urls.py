@@ -3,7 +3,7 @@ from .views import (CreateSubstitutoFluig, UsuarioDesligamentoCreate, UsuarioDes
   UsuarioDesligamentoList, UsuarioDesligamentoUpdate, SubstituicaoListView, SubstituicaoDetailView, MS365TenantListView, MS365TenantCreateView, MS365TenantUpdateView, MS365TenantDeleteView,
     test_m365_connection, m365_dashboard, m365_search_user, m365_list_users, 
     m365_update_user, m365_manage_manager, MS365SearchLogListView, MS365UpdateLogListView,m365_export_users_csv,m365_export_csv_api,
-    m365_update_massivo, ajax_get_user_data, m365_update_usuario_api)
+    m365_update_massivo, ajax_get_user_data, m365_update_usuario_api, m365_organograma, organograma_interativo_view)
     
 urlpatterns = [
      path('desligamento/novo/', UsuarioDesligamentoCreate.as_view(), name='usuario_desligamento_create'),
@@ -39,4 +39,7 @@ urlpatterns = [
     path('m365/update-massa/', m365_update_massivo, name='m365_update_massivo'),
     path('api/m365/update-usuario/', m365_update_usuario_api, name='m365_update_usuario_api'),
     path('m365/export_csv/', m365_export_csv_api, name='m365_export_csv_api'),
+    path('organograma/', m365_organograma, name='m365_organograma'),
+    path('organograma-interativo/', organograma_interativo_view, name='m365_organograma_interativo'),
+    
     ]

@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.utils.timezone import now
-from .tasks import substituir_usuario_fluig, update_usuario_fluig
+from .tasks import substituir_usuario_fluig, update_usuario_fluig, atualizar_usuarios_m365
 from django.views import View
 from administration .models import GroupProcess, GroupProcessSelection
 from django.db.models import Count
@@ -19,6 +19,10 @@ import csv
 import logging
 from django.utils.encoding import smart_str
 import codecs
+from collections import defaultdict
+from .models import UsuarioM365
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +157,7 @@ def test_m365_connection(request, pk):
 @permission_required('global_permissions.combio_suporte', login_url='erro_page')
 def m365_dashboard(request):
     """Dashboard principal do M365"""
+    atualizar_usuarios_m365()
     context = {
         'activegroup': 'suporte',
         'title': 'Microsoft 365 - Dashboard',
@@ -632,13 +637,7 @@ class UsuarioDesligamentoDelete(DeleteView):
     
 
 
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required, permission_required
-from django.views import View
-from django.shortcuts import render, redirect
-from .forms import SubstituicaoForm
-from .models import Substituicao, GroupProcess
-from .tasks import substituir_usuario_fluig
+
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_suporte', login_url='erro_page'), name='dispatch')
@@ -961,3 +960,31 @@ def m365_export_csv_api(request):
     buffer.close()
 
     return HttpResponse('\ufeff' + csv_data, content_type='text/csv; charset=utf-8')
+
+
+def montar_arvore(usuario, todos):
+    filhos = todos.filter(manager_email=usuario.email)
+    return {
+        'nome': usuario.display_name,
+        'email': usuario.email,
+        'cargo': usuario.job_title,
+        'filhos': [montar_arvore(sub, todos) for sub in filhos]
+    }
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_suporte', login_url='erro_page')
+def m365_organograma(request):
+    todos = UsuarioM365.objects.all()
+    raiz = todos.filter(email__iexact="paulo.skaf@combio.com.br").first()
+    estrutura = montar_arvore(raiz, todos) if raiz else {}
+    return JsonResponse(estrutura, safe=False)
+
+@login_required(login_url='account_login')
+@permission_required('global_permissions.combio_suporte', login_url='erro_page')
+def organograma_interativo_view(request):
+    context = {
+        'title': 'Organograma Combio',
+        'activegroup': 'suporte',
+    }
+
+    return render(request, 'suporte/m365/organograma_interativo.html', context)

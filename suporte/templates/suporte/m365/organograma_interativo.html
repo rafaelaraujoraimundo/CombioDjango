@@ -1,0 +1,127 @@
+{% extends "menu/index.html" %} 
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+    
+      <a href="{% url 'm365_dashboard' %}" class="btn btn-secondary">
+        <i class="fa fa-arrow-left"></i> Voltar ao Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <button class="btn btn-outline-primary" onclick="expandAll()">🔼 Expandir Todos</button>
+    <button class="btn btn-outline-warning" onclick="collapseAll()">🔽 Recolher Todos</button>
+    <button class="btn btn-outline-success" onclick="centerRoot()">🎯 Centralizar</button>
+  </div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3.0.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+
+  <div class="chart-container"></div>
+</div>
+
+<script>
+  let chart = null;
+
+  function transformarParaFlatArray(raiz) {
+    const lista = [];
+    function recursivo(node, parent = null) {
+      const item = {
+        id: node.email,
+        parentId: parent,
+        name: node.nome,
+        position: node.cargo || '',
+        email: node.email
+      };
+      lista.push(item);
+      if (node.filhos && node.filhos.length > 0) {
+        node.filhos.forEach(filho => recursivo(filho, node.email));
+      }
+    }
+    recursivo(raiz);
+    return lista;
+  }
+
+  function expandAll() {
+    chart.expandAll().render();
+  }
+
+  function collapseAll() {
+    chart.collapseAll().render();
+  }
+
+  function centerRoot() {
+    const rootId = chart.data()[0]?.id;
+    if (rootId) {
+      chart.setExpanded(rootId).setCentered(rootId).render();
+    }
+  }
+
+  fetch("{% url 'm365_organograma' %}")
+    .then(res => res.json())
+    .then(json => {
+      const data = transformarParaFlatArray(json);
+
+      chart = new d3.OrgChart()
+        .nodeHeight(() => 110)
+        .nodeWidth(() => 250)
+        .childrenMargin(() => 40)
+        .compactMarginBetween(() => 15)
+        .compactMarginPair(() => 30)
+        .neighbourMargin(() => 10)
+        .nodeContent((d) => {
+          const cargo = d.data.position.toLowerCase();
+          let bgColor = '#a8dfb0'; // cor padrão (verde claro)
+          if (cargo.includes('ceo') || cargo.includes('diretor')) {
+            bgColor = '#399444'; // verde para CEO ou Diretor
+          } else if (cargo.includes('gerente')) {
+            bgColor = '#007bff'; // azul para Gerente
+          } else if (cargo.includes('coordenador')) {
+            bgColor = '#fae837'; // amarelo para Coordenador
+          }
+
+          return `
+            <div style='
+              width:${d.width}px;
+              height:${d.height}px;
+              padding:8px;
+              background:${bgColor};
+              border-radius:8px;
+              border:1px solid #fff;
+              display:flex;
+              flex-direction:column;
+              align-items:center;
+              justify-content:center;
+              text-align:center;
+            '>
+              <div style='
+                font-weight:bold;
+                font-size:16px;
+                color:#fff;
+                line-height:1.2;
+              '> ${d.data.name} </div>
+              <div style='
+                font-size:13px;
+                color:#fff;
+                font-style:italic;
+                margin-top:4px;
+              '> ${d.data.position} </div>
+              <div style='
+                font-size:12px;
+                color:#fff;
+                margin-top:4px;
+              '> ${d.data.email} </div>
+            </div>
+          `;
+        })
+        .container('.chart-container')
+        .data(data)
+        .render();
+    });
+</script>
+{% endblock %}
