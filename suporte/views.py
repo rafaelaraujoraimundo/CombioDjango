@@ -157,7 +157,7 @@ def test_m365_connection(request, pk):
 @permission_required('global_permissions.combio_suporte', login_url='erro_page')
 def m365_dashboard(request):
     """Dashboard principal do M365"""
-    atualizar_usuarios_m365()
+    
     context = {
         'activegroup': 'suporte',
         'title': 'Microsoft 365 - Dashboard',
