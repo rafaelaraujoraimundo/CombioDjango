@@ -76,13 +76,13 @@
         .neighbourMargin(() => 10)
         .nodeContent((d) => {
           const cargo = d.data.position.toLowerCase();
-          let bgColor = '#a8dfb0'; // cor padrão (verde claro)
+          let bgColor = '#BF882D'; // cor padrão (verde claro)
           if (cargo.includes('ceo') || cargo.includes('diretor')) {
-            bgColor = '#399444'; // verde para CEO ou Diretor
-          } else if (cargo.includes('gerente')) {
-            bgColor = '#007bff'; // azul para Gerente
-          } else if (cargo.includes('coordenador')) {
-            bgColor = '#fae837'; // amarelo para Coordenador
+            bgColor = '#1C361F'; // verde para CEO ou Diretor
+          } else if (cargo.includes('gerente') || cargo.includes('controller') || cargo.includes('ger')) {
+            bgColor = '#116533'; // azul para Gerente
+          } else if (cargo.includes('coordenador') || cargo.includes('coord')) {
+            bgColor = '#399444'; // amarelo para Coordenador
           }
 
           return `
