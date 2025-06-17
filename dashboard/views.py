@@ -363,7 +363,7 @@ def dashboard_exemplo2(request):
 
 
 @login_required(login_url='account_login') 
-@permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
+@permission_required('global_permissions.combio_dashboard', login_url='erro_page')
 def dashboard_chamados_ti(request):
     chamados = BiChamadosServiceUp.objects.exclude(state_id=12)
 
