@@ -1,0 +1,176 @@
+{% extends "menu/index.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .card-status h6,
+  .card-status h3 {
+    color: white !important;
+  }
+</style>
+
+<div class="container-fluid">
+
+  <!-- 🟩 Cards com Totais -->
+  <div class="row">
+    <div class="col-md-2">
+      <div class="iq-card text-white text-center card-status" style="background-color: var(--iq-color1);">
+        <div class="iq-card-body">
+          <h6>Total</h6>
+          <h3>{{ card_totais.total }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="iq-card text-white text-center card-status" style="background-color: var(--iq-color2);">
+        <div class="iq-card-body">
+          <h6>Resolvido</h6>
+          <h3>{{ card_totais.resolvido }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="iq-card text-white text-center card-status" style="background-color: var(--iq-color4);">
+        <div class="iq-card-body">
+          <h6>Agendado</h6>
+          <h3>{{ card_totais.agendado }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="iq-card text-white text-center card-status" style="background-color: var(--iq-color5);">
+        <div class="iq-card-body">
+          <h6>Pendentes</h6>
+          <h3>{{ card_totais.pendente }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="iq-card text-white text-center card-status" style="background-color: var(--iq-color6);">
+        <div class="iq-card-body">
+          <h6>Pendente Cliente</h6>
+          <h3>{{ card_totais.pendente_cliente }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="iq-card text-white text-center card-status" style="background-color: var(--iq-color7);">
+        <div class="iq-card-body">
+          <h6>Devolução</h6>
+          <h3>{{ card_totais.devolucao }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 Gráfico de Chamados por Status -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="iq-card">
+        <div class="iq-card-header d-flex justify-content-between">
+          <h4 class="card-title">Chamados por Status</h4>
+        </div>
+        <div class="iq-card-body">
+          <div id="chart-status-chamados"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📋 Tabela de Chamados -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="iq-card">
+        <div class="iq-card-header d-flex justify-content-between">
+          <h4 class="card-title">Detalhamento dos Chamados</h4>
+        </div>
+        <div class="iq-card-body">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Ticket</th>
+                <th>Status</th>
+                <th>Responsável</th>
+                <th>Solicitante</th>
+                <th>Fila</th>
+                <th>Título</th>
+              </tr>
+            </thead>
+            <tbody id="chamados-body">
+              {% for chamado in chamados_detalhes %}
+              <tr data-state-id="{{ chamado.state_id }}" data-status="{{ chamado.state_name }}">
+                <td>
+                  <a href="https://combio.serviceup.app/otrs/index.pl?Action=AgentTicketZoom;TicketID={{ chamado.ticket_id }}" target="_blank">
+                    {{ chamado.ticket_number }}
+                  </a>
+                </td>
+                <td>{{ chamado.state_name }}</td>
+                <td>{{ chamado.owner_name }}</td>
+                <td>{{ chamado.customer_user }}</td>
+                <td>{{ chamado.queue_name }}</td>
+                <td>{{ chamado.title }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 📦 Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const rootStyle = getComputedStyle(document.documentElement);
+    const iqColor1 = rootStyle.getPropertyValue('--iq-color1').trim();
+
+    const statusLabels = {{ status_nomes|safe }};
+    const statusData = {{ status_totals|safe }};
+
+    const chart = new ApexCharts(document.querySelector("#chart-status-chamados"), {
+      series: [{
+        name: 'Chamados',
+        data: statusData
+      }],
+      chart: {
+        height: 350,
+        type: 'bar',
+        events: {
+          dataPointSelection: function(event, chartContext, config) {
+            const statusSelecionado = statusLabels[config.dataPointIndex];
+            filterByStatusName(statusSelecionado);
+          }
+        }
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 10
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      colors: [iqColor1],
+      xaxis: {
+        categories: statusLabels
+      }
+    });
+
+    chart.render();
+
+    // Filtro ao clicar em barra do gráfico
+    function filterByStatusName(nomeStatus) {
+      const linhas = document.querySelectorAll('#chamados-body tr');
+      linhas.forEach(l => {
+        if (l.dataset.status === nomeStatus) {
+          l.style.display = '';
+        } else {
+          l.style.display = 'none';
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

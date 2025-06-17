@@ -19,6 +19,8 @@ import chartify
 from django.utils import timezone
 from inventario.tasks import populate_hardware_data
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import Count
+from .models import BiChamadosServiceUp
 
 
 def view_padrao(request):
@@ -358,3 +360,48 @@ def dashboard_exemplo2(request):
     # Renderiza os gráficos para HTML
 
     return render(request, 'dashboards/exemplo2.html', {'script': script, 'div': div, 'script2': script2, 'div2': div2, 'script3': script3, 'div3': div3, 'script4': script4, 'div4': div4, 'script5': script5, 'div5': div5})
+
+
+@login_required(login_url='account_login') 
+@permission_required('global_permissions.combio_dashboard_ti', login_url='erro_page')
+def dashboard_chamados_ti(request):
+    chamados = BiChamadosServiceUp.objects.exclude(state_id=12)
+
+    status_counts = chamados.values('state_name').annotate(total=Count('ticket_id')).order_by('-total')
+    chamados_detalhes = chamados.values(
+    'ticket_number',
+    'ticket_id',
+    'state_name',
+    'state_id',
+    'owner_name',
+    'customer_user',
+    'queue_name',
+    'title'
+)
+
+    # Totais para os cards
+    total_chamados = chamados.exclude(state_id=13).count()
+    total_resolvido = chamados.filter(state_id=13).count()
+    total_agendado = chamados.filter(state_id=17).count()
+    total_pendentes = chamados.filter(state_id__in=[1, 4, 9, 11, 16]).count()
+    total_pendente_cliente = chamados.filter(state_id__in=[10, 15]).count()
+    total_devolucao = chamados.filter(state_id=36).count()
+
+    context = {
+        'status_nomes': [x['state_name'] for x in status_counts],
+        'status_totals': [x['total'] for x in status_counts],
+        'chamados_detalhes': list(chamados_detalhes),
+        'activegroup': 'Dashboard',
+        'title': 'Chamados Tecnologia da Informação - Combio / Qualiit',
+        'card_totais': {
+            'total': total_chamados,
+            'resolvido': total_resolvido,
+            'agendado': total_agendado,
+            'pendente': total_pendentes,
+            'pendente_cliente': total_pendente_cliente,
+            'devolucao': total_devolucao,
+            
+        }
+    }
+
+    return render(request, 'dashboards/dashboard_chamados.html', context)
