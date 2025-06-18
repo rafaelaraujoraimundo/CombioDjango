@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render
 from dashboard.forms import DateForm
-import json
+import json, time
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
@@ -32,6 +32,106 @@ def view_padrao(request):
 @login_required(login_url='account_login') 
 @permission_required('global_permissions.combio_dashboard', login_url='erro_page')
 def dashboard_fluig(request, servidor_id=None):
+    inicio_geral = time.time()
+
+    activegroup = 'Dashboard'
+    title = 'Servidores Fluig'
+
+    t0 = time.time()
+    servidores = ServidorFluig.objects.all().order_by('id')
+    print(f"[Tempo] Consulta servidores: {time.time() - t0:.2f}s")
+
+    servidor_id = request.GET.get('servidor_id')
+    status = request.GET.get('status', 'todos') 
+    servidor_selecionado = get_object_or_404(ServidorFluig, id=servidor_id) if servidor_id else servidores.first()
+
+    t1 = time.time()
+    datasets = Dataset.objects.filter(servidor_fluig=servidor_selecionado).order_by('-created_at')
+    if status != 'todos':
+        if status == 'sucesso':
+            datasets = datasets.filter(syncstatussuccess=True)
+        elif status == 'warning':
+            datasets = datasets.filter(syncstatuswarning=True)
+        elif status == 'erro':
+            datasets = datasets.filter(syncstatuserror=True)
+    print(f"[Tempo] Consulta datasets: {time.time() - t1:.2f}s")
+
+    def get_latest_or_none(model, label):
+        start = time.time()
+        try:
+            result = model.objects.filter(servidor_fluig=servidor_selecionado).latest('created_at')
+            print(f"[Tempo] Consulta {label}: {time.time() - start:.2f}s")
+            return result
+        except model.DoesNotExist:
+            print(f"[Tempo] Consulta {label}: sem dados")
+            return None
+
+    ultimo_database_info = get_latest_or_none(FluigDatabaseInfo, "FluigDatabaseInfo")
+    ultimo_database_size = get_latest_or_none(FluigDatabaseSize, "FluigDatabaseSize")
+    ultimo_runtime = get_latest_or_none(FluigRuntime, "FluigRuntime")
+    ultimo_operation_system = get_latest_or_none(FluigOperationSystem, "FluigOperationSystem")
+
+    # Espaço HD
+    server_hd_space_used = None
+    if ultimo_operation_system:
+        try:
+            espaco_total = float(ultimo_operation_system.server_hd_space.replace(',', '.'))
+            espaco_livre = float(ultimo_operation_system.server_hd_space_free.replace(',', '.'))
+            server_hd_space_used = espaco_total - espaco_livre
+        except ValueError:
+            pass
+
+    # Memória: últimas 2 horas
+    t2 = time.time()
+    agora = timezone.now()
+    duas_horas_atras = agora - timedelta(hours=2)
+
+    dados_memoria = (
+        FluigOperationSystem.objects
+        .filter(servidor_fluig=servidor_selecionado, created_at__range=(duas_horas_atras, agora))
+        .only('created_at', 'server_memory_size', 'server_memory_free')
+        .order_by('-created_at')
+        .values('created_at', 'server_memory_size', 'server_memory_free')
+    )
+    print(f"[Tempo] Consulta dados_memoria (últimas 2h): {time.time() - t2:.2f}s")
+
+    # Dados para gráfico
+    t3 = time.time()
+    datas = [d['created_at'].strftime("%Y-%m-%dT%H:%M:%S") for d in dados_memoria]
+    memoria_usada_mb = [int((d['server_memory_size'] - d['server_memory_free']) / (1024 * 1024)) for d in dados_memoria]
+    memoria_total_mb = [int(d['server_memory_size'] / (1024 * 1024)) for d in dados_memoria]
+    dados_grafico_json = json.dumps({
+        'datas': datas,
+        'memoria_usada_mb': memoria_usada_mb,
+        'memoria_total_mb': memoria_total_mb,
+    })
+    print(f"[Tempo] Processamento dados do gráfico: {time.time() - t3:.2f}s")
+
+    # Monta dicionário do servidor
+    dados_servidor = {
+        'servidor': servidor_selecionado,
+        'ultimo_database_info': ultimo_database_info,
+        'ultimo_database_size': ultimo_database_size,
+        'ultimo_runtime': ultimo_runtime,
+        'ultimo_operation_system': ultimo_operation_system,
+        'server_hd_space_used': server_hd_space_used,
+        'dados_memoria': dados_memoria,
+        'datasets': datasets,
+        'lasted_update_dataset': datasets.first().created_at if datasets.exists() else None,
+        'lasted_update_operation_system': ultimo_operation_system.created_at if ultimo_operation_system else None,
+    }
+
+    print(f"[Tempo] Tempo total view: {time.time() - inicio_geral:.2f}s")
+
+    context = {
+        'servidor_selecionado': dados_servidor,
+        'servidores': servidores,
+        'activegroup': activegroup,
+        'dados_grafico_json': dados_grafico_json,
+        'title': title,
+    }
+
+    return render(request, 'dashboards/ti.html', context)
     activegroup = 'Dashboard'
     title = 'Servidores Fluig'
     servidores = ServidorFluig.objects.all().order_by('id')
@@ -75,13 +175,13 @@ def dashboard_fluig(request, servidor_id=None):
     agora = timezone.now()
 
 # Filtra objetos criados no início do dia até o momento atual
-    inicio_do_dia = agora.replace(hour=0, minute=0, second=0, microsecond=0)
-    fim_do_dia = inicio_do_dia + timedelta(days=1)
+    agora = datetime.now()
+    duas_horas_atras = agora - timedelta(hours=2)
+    
     dados_memoria = FluigOperationSystem.objects.filter(
-                                                        servidor_fluig=servidor_selecionado,
-                                                        created_at__range=(inicio_do_dia, fim_do_dia)
-                                                ).order_by('-created_at'
-                                                                        ).values('created_at', 'server_memory_size', 'server_memory_free')
+        servidor_fluig=servidor_selecionado,
+        created_at__range=(duas_horas_atras, agora)
+    ).order_by('-created_at').values('created_at', 'server_memory_size', 'server_memory_free')
 
     # Preparar os dados para o gráfico
     datas = [dado['created_at'].strftime("%Y-%m-%dT%H:%M:%S") for dado in dados_memoria]
