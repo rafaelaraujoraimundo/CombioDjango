@@ -984,7 +984,7 @@ def m365_organograma(request):
 def organograma_interativo_view(request):
     context = {
         'title': 'Organograma Combio',
-        'activegroup': 'suporte',
+        'activegroup': 'Dashboard',
     }
 
     return render(request, 'suporte/m365/organograma_interativo.html', context)
