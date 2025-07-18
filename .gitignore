@@ -11,7 +11,8 @@ docker/**/
 /staticfiles/**
 staticfiles
 staticfiles/
-
+static-data
+media-data
 # Backup files #
 *.bak
 suporte.zip

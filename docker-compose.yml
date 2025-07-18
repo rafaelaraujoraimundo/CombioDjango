@@ -7,8 +7,8 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-      - static-data:/app/staticfiles
-      - media-data:/app/media
+      - ./static-data:/app/staticfiles
+      - ./media-data:/app/media
     command: >
       sh -c "python manage.py collectstatic --no-input &&
              gunicorn combio.wsgi:application -b 0.0.0.0:8000 --workers 4"
@@ -53,8 +53,8 @@ services:
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf.template
       - ./docker/nginx/certbot/webroot:/var/www/certbot
       - ./docker/nginx/certbot/conf:/etc/letsencrypt
-      - static-data:/app/staticfiles
-      - media-data:/app/media
+      - ./static-data:/app/staticfiles
+      - ./media-data:/app/media
     environment:
       BACKEND_URL: app:8000  # Defina o valor da variável de ambiente diretamente aqui
     command: /bin/sh -c "envsubst '\$BACKEND_URL' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
