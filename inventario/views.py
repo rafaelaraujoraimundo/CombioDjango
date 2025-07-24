@@ -902,7 +902,8 @@ class ComputadorList(ListView):
                 Q(numero_nota_fiscal__icontains=search_query) |
                 Q(fornecedor__icontains=search_query) |
                 Q(sistema_operacional__icontains=search_query) |
-                Q(tipo__icontains=search_query) 
+                Q(tipo__icontains=search_query)  |
+                Q(status__nome_status__icontains=search_query)
             )
         return queryset
 
@@ -1274,7 +1275,8 @@ def export_computadores_excel(request):
             Q(numero_nota_fiscal__icontains=search_query) |
             Q(fornecedor__icontains=search_query) |
             Q(sistema_operacional__icontains=search_query) |
-            Q(tipo__icontains=search_query)      # ← filtro por tipo
+            Q(tipo__icontains=search_query) |
+            Q(status__nome_status__icontains=search_query)
         )
     else:
         computadores = Computador.objects.all()
@@ -1285,7 +1287,7 @@ def export_computadores_excel(request):
 
     # Inclui 'Tipo' no cabeçalho
     columns = [
-        'Hostname', 'Tipo',
+        'Hostname', 'Tipo','Status',
         'Fabricante', 'Modelo', 'Processador',
         'Memória', 'HD', 'Usuário',
         'Estabelecimento', 'Centro de Custo'
@@ -1295,7 +1297,8 @@ def export_computadores_excel(request):
     for computador in computadores:
         ws.append([
             computador.hostname,
-            computador.get_tipo_display(),      # ← exibe a descrição (Notebook/Desktop)
+            computador.get_tipo_display(),
+            comp.status.nome_status,       # ← exibe a descrição (Notebook/Desktop)
             computador.fabricante,
             computador.modelo,
             computador.processador,
