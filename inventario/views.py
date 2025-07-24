@@ -1298,7 +1298,7 @@ def export_computadores_excel(request):
         ws.append([
             computador.hostname,
             computador.get_tipo_display(),
-            comp.status.nome_status,       # ← exibe a descrição (Notebook/Desktop)
+            computador.status.nome_status,       # ← exibe a descrição (Notebook/Desktop)
             computador.fabricante,
             computador.modelo,
             computador.processador,
