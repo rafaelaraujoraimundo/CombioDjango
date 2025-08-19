@@ -28,8 +28,8 @@ class UsuarioDesligamento(models.Model):
     bloqueio_monday = models.BooleanField(default=False)
     usuario_monday = models.CharField(max_length=100, null=True, blank=True, help_text="Usuário Monday a ser bloqueado")
 
-    bloqueio_qualiteam = models.BooleanField(default=False)
-    usuario_qualiteam = models.CharField(max_length=100, null=True, blank=True, help_text="Usuário Qualiteam a ser bloqueado")
+    #bloqueio_qualiteam = models.BooleanField(default=False)
+    #usuario_qualiteam = models.CharField(max_length=100, null=True, blank=True, help_text="Usuário Qualiteam a ser bloqueado")
 
     bloqueio_portal_chamados = models.BooleanField(default=False)
     usuario_portal_chamados = models.CharField(max_length=100, null=True, blank=True, help_text="Usuário do Portal de Chamados a ser bloqueado")
@@ -54,6 +54,17 @@ class UsuarioDesligamento(models.Model):
 
     devolucao_celular = models.BooleanField(default=False, help_text="Celular devolvido")
     observacao_celular = models.TextField(null=True, blank=True, help_text="Observações sobre a devolução do celular")    
+
+    backup_keepit = models.BooleanField(default=False, help_text="Backup do Keepit realizado")
+    data_backup_keepit = models.DateField(null=True, blank=True, help_text="Data em que o backup do Keepit foi feito")
+    obsservao_datasul = models.TextField(null=True, blank=True, help_text="Observações sobre o Datasul")
+
+    backup_desktop_C = models.BooleanField(default=False, help_text="Backup do Disco C realizado")
+    backup_desktop_documentos = models.BooleanField(default=False, help_text="Backup da pasta Documentos realizado")
+    backup_desktop_download = models.BooleanField(default=False, help_text="Backup da pasta Downloads realizado")
+
+    devolucao_periferico = models.BooleanField(default=False, help_text="Periféricos devolvidos")
+    observacao_periferico = models.TextField(null=True, blank=True, help_text="Observações sobre a devolução de periféricos")
 
     def __str__(self):
         return self.usuario

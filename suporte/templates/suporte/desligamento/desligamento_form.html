@@ -22,6 +22,7 @@
               <div class="invalid-feedback">{{ error }}</div>
           {% endfor %}
       </div>
+
         <!-- Datas de desligamento e limite -->
         <div class="row">
             <div class="col-md-6">
@@ -45,8 +46,7 @@
             </div>
         </div>
 
-        <!-- Seção de bloqueio para cada sistema -->
-        
+        <!-- E-mail ao gestor -->
         <div class="row align-items-center">
           <div class="col-md-2">
               <div class="form-group">
@@ -66,7 +66,7 @@
                       name="{{ form.gestor.name }}"
                       value="{{ form.gestor.value|default_if_none:'' }}"
                       autocomplete="off"
-                       placeholder="Digite o nome do Gestor/Substituto para buscar..."
+                      placeholder="Digite o nome do Gestor/Substituto para buscar..."
                   />
                   <ul class="suggestions-list" id="gestorSuggestions"></ul>
                   {% for error in form.gestor.errors %}
@@ -76,8 +76,8 @@
           </div>
       </div>
 
+        <!-- Bloqueio E-mail -->
         <div class="form-group">
-
             <div class="row align-items-center">
                 <div class="col-md-2">
                     <div class="custom-control custom-switch">
@@ -93,7 +93,6 @@
 
         <!-- Bloqueio Fluig -->
         <div class="form-group">
-
             <div class="row align-items-center">
                 <div class="col-md-2">
                     <div class="custom-control custom-switch">
@@ -109,7 +108,6 @@
 
         <!-- Bloqueio Datasul e Go-Global -->
         <div class="form-group">
-   
             <div class="row align-items-center">
                 <div class="col-md-2">
                     <div class="custom-control custom-switch">
@@ -124,11 +122,16 @@
                     <input type="text" class="form-control" name="{{ form.usuario_goglobal.name }}" value="{{ form.usuario_goglobal.value|default_if_none:'' }}" placeholder="Usuário Go-Global">
                 </div>
             </div>
+            <!-- Observação Datasul -->
+            <div class="row mt-2">
+                <div class="col-12">
+                    <textarea class="form-control" name="{{ form.obsservao_datasul.name }}" placeholder="Observações sobre bloqueio/usuário do Datasul">{{ form.obsservao_datasul.value|default_if_none:'' }}</textarea>
+                </div>
+            </div>
         </div>
 
         <!-- Bloqueio Monday -->
         <div class="form-group">
-           
             <div class="row align-items-center mb-2">
                 <div class="col-md-2">
                     <div class="custom-control custom-switch">
@@ -142,17 +145,17 @@
             </div>
         </div>
 
-        <!-- Continuar para outros sistemas da mesma forma -->
+        <!-- Backup Keepit -->
         <div class="form-group">
             <div class="row align-items-center">
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="bloqueioQualiteam" name="{{ form.bloqueio_qualiteam.name }}" {% if form.bloqueio_qualiteam.value %}checked{% endif %}>
-                        <label class="custom-control-label" for="bloqueioQualiteam">Bloquear Qualiteam</label>
+                        <input type="checkbox" class="custom-control-input" id="backupKeepit" name="{{ form.backup_keepit.name }}" {% if form.backup_keepit.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="backupKeepit">Backup Keepit</label>
                     </div>
                 </div>
-                <div class="col-md-10">
-                    <input type="text" class="form-control" name="{{ form.usuario_qualiteam.name }}" value="{{ form.usuario_qualiteam.value|default_if_none:'' }}" placeholder="Usuário Qualiteam">
+                <div class="col-md-9">
+                    <input type="date" class="form-control" name="{{ form.data_backup_keepit.name }}" value="{{ form.data_backup_keepit.value|date:'Y-m-d'|default_if_none:'' }}" placeholder="Data do backup Keepit">
                 </div>
             </div>
         </div>
@@ -172,7 +175,7 @@
             </div>
         </div>
 
-        <!-- Bloqueio Usuário da Impressora (Matriz) -->
+        <!-- Bloqueio Usuário da Impressora -->
         <div class="form-group">
             <div class="row align-items-center">
                 <div class="col-md-2">
@@ -186,6 +189,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- Backup E-mail -->
         <div class="form-group">
             <div class="row align-items-center">
                 <div class="col-md-2">
@@ -199,7 +204,8 @@
                 </div>
             </div>
         </div>
-        
+
+        <!-- Backup OneDrive -->
         <div class="form-group">
             <div class="row align-items-center">
                 <div class="col-md-2">
@@ -209,25 +215,47 @@
                     </div>
                 </div>
                 <div class="col-md-10">
-                    <textarea class="form-control" name="{{ form.observacao_onedrive.name }}" placeholder="Observações sobre o backup do OneDrive">{{ form.observacao_onedrive.value|default_if_none:''  }}</textarea>
+                    <textarea class="form-control" name="{{ form.observacao_onedrive.name }}" placeholder="Observações sobre o backup do OneDrive">{{ form.observacao_onedrive.value|default_if_none:'' }}</textarea>
                 </div>
             </div>
         </div>
-        
+
+        <!-- Backups juntos: Desktop, Disco C, Documentos, Downloads -->
         <div class="form-group">
-            <div class="row align-items-center">
-                <div class="col-md-2">
+            <label class="d-block mb-1">Backups Locais</label>
+            <div class="row">
+                <div class="col-md-3">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="backupDesktop" name="{{ form.backup_desktop.name }}" {% if form.backup_desktop.value %}checked{% endif %}>
-                        <label class="custom-control-label" for="backupDesktop">Backup da Área de Trabalho</label>
+                        <label class="custom-control-label" for="backupDesktop">Área de Trabalho</label>
                     </div>
                 </div>
-                <div class="col-md-10">
-                    <textarea class="form-control" name="{{ form.observacao_desktop.name }}" placeholder="Observações sobre o backup da Área de Trabalho">{{ form.observacao_desktop.value|default_if_none:''  }}</textarea>
+                <div class="col-md-3">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="backupDesktopC" name="{{ form.backup_desktop_C.name }}" {% if form.backup_desktop_C.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="backupDesktopC">Disco C</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="backupDocs" name="{{ form.backup_desktop_documentos.name }}" {% if form.backup_desktop_documentos.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="backupDocs">Documentos</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="backupDown" name="{{ form.backup_desktop_download.name }}" {% if form.backup_desktop_download.value %}checked{% endif %}>
+                        <label class="custom-control-label" for="backupDown">Downloads</label>
+                    </div>
                 </div>
             </div>
+
+            <div class="mt-2">
+                <textarea class="form-control" name="{{ form.observacao_desktop.name }}" placeholder="Observações sobre backups da Área de Trabalho / Disco C / Documentos / Downloads">{{ form.observacao_desktop.value|default_if_none:'' }}</textarea>
+            </div>
         </div>
-        
+
+        <!-- Devolução Computador -->
         <div class="form-group">
             <div class="row align-items-center">
                 <div class="col-md-2">
@@ -237,27 +265,36 @@
                     </div>
                 </div>
                 <div class="col-md-10">
-                    <textarea class="form-control" name="{{ form.observacao_computador.name }}" placeholder="Observações sobre a devolução do computador">{{ form.observacao_computador.value|default_if_none:''  }}</textarea>
+                    <textarea class="form-control" name="{{ form.observacao_computador.name }}" placeholder="Observações sobre a devolução do computador">{{ form.observacao_computador.value|default_if_none:'' }}</textarea>
                 </div>
             </div>
         </div>
-        
+
+        <!-- Devolução Celular + Periféricos -->
         <div class="form-group">
-            <div class="row align-items-center mt-6">
-                <div class="col-md-2">
-                    <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="devolucaoCelular" name="{{ form.devolucao_celular.name }}" {% if form.devolucao_celular.value %}checked{% endif %}>
-                        <label class="custom-control-label" for="devolucaoCelular">Devolução do Celular</label>
+            <div class="row align-items-start mt-3">
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="devolucaoCelular" name="{{ form.devolucao_celular.name }}" {% if form.devolucao_celular.value %}checked{% endif %}>
+                            <label class="custom-control-label" for="devolucaoCelular">Devolução do Celular</label>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-10">
-                
-                
                     <textarea class="form-control" name="{{ form.observacao_celular.name }}" placeholder="Observações sobre a devolução do celular">{{ form.observacao_celular.value|default_if_none:'' }}</textarea>
                 </div>
+
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="devolucaoPeriferico" name="{{ form.devolucao_periferico.name }}" {% if form.devolucao_periferico.value %}checked{% endif %}>
+                            <label class="custom-control-label" for="devolucaoPeriferico">Devolução de Periféricos</label>
+                        </div>
+                    </div>
+                    <textarea class="form-control" name="{{ form.observacao_periferico.name }}" placeholder="Observações sobre a devolução de periféricos">{{ form.observacao_periferico.value|default_if_none:'' }}</textarea>
+                </div>
             </div>
         </div>
-        
+
         <button type="submit" class="btn btn-primary">Salvar</button>
         <a href="{% url 'usuario_desligamento_list' %}" class="btn btn-secondary">Voltar</a>
     </form>

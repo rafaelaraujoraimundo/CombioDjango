@@ -122,3 +122,6 @@ docker-compose up --build
 - **Total de classes:** 9
 - **Exemplos de funções:** `pasta_upload_ativo_valores`, `data_valida`, `cnpj_valido`
 - **Exemplos de classes:** `CustomPaginator`, `DataFormatter`, `FluigAPI`
+
+
+Versão 3.2 - Restruturação do Desligamento

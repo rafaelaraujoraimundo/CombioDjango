@@ -21,7 +21,8 @@ from django.utils.encoding import smart_str
 import codecs
 from collections import defaultdict
 from .models import UsuarioM365
-
+from django.db.models import Q
+from .tasks import verificar_bloqueios_pendentes
 
 
 logger = logging.getLogger(__name__)
@@ -588,6 +589,7 @@ class UsuarioDesligamentoCreate(CreateView):
         return super().form_valid(form)
 
 
+
 @method_decorator(login_required(login_url='account_login'), name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_suporte', login_url='erro_page'), name='dispatch')
 class UsuarioDesligamentoList(ListView):
@@ -595,12 +597,44 @@ class UsuarioDesligamentoList(ListView):
     template_name = 'suporte/desligamento/usuario_desligamento_list.html'
     context_object_name = 'desligamentos'
 
+    STATUS_FIELDS = [
+        'bloqueio_email', 'bloqueio_fluig', 'bloqueio_datasul', 'bloqueio_monday',
+        'bloqueio_portal_chamados', 'bloqueio_usuario_impressora',
+        'backup_email', 'backup_onedrive', 'backup_desktop',
+        'devolucao_computador', 'devolucao_celular',
+        'backup_keepit', 'backup_desktop_C', 'backup_desktop_documentos',
+        'backup_desktop_download', 'devolucao_periferico',
+    ]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search = self.request.GET.get('search', '').strip()
+        status = self.request.GET.get('status', '').strip().lower()
+
+        if search:
+            qs = qs.filter(usuario__icontains=search)
+
+        # Q que representa "todos os campos True"
+        q_all_true = Q()
+        for f in self.STATUS_FIELDS:
+            q_all_true &= Q(**{f: True})
+
+        if status == 'bloqueados':
+            # Mostra apenas os completos (todos = True), mesmo se houver busca
+            qs = qs.filter(q_all_true)
+        elif not search:
+            # Lista principal, sem busca: mostrar apenas quem tem pendências (algum = False)
+            qs = qs.exclude(q_all_true)
+        # Caso haja busca e status vazio: não aplicamos exclusão -> retorna “completos + pendentes”
+        #verificar_bloqueios_pendentes()
+        return qs
+
     def get_context_data(self, **kwargs):
-        context = super(UsuarioDesligamentoList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['activegroup'] = 'suporte'
         context['title'] = 'Desligamento de Usuários'
-
-
+        context['search'] = self.request.GET.get('search', '')
+        context['status'] = self.request.GET.get('status', '').strip().lower()
         return context
 
 @method_decorator(login_required(login_url='account_login'), name='dispatch')

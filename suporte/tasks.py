@@ -22,68 +22,95 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def verificar_bloqueios_pendentes():
+    # Algum campo = False -> entra no relatório
     registros_pendentes = UsuarioDesligamento.objects.filter(
-        Q(bloqueio_email=False) | Q(bloqueio_fluig=False) |
-        Q(bloqueio_datasul=False) | Q(bloqueio_monday=False) |
-        Q(bloqueio_qualiteam=False) | Q(bloqueio_portal_chamados=False) |
-        Q(bloqueio_usuario_impressora=False) | Q(backup_email=False) |
-        Q(backup_onedrive=False) | Q(backup_desktop=False) |
-        Q(devolucao_computador=False) | Q(devolucao_celular=False)
+        Q(bloqueio_email=False) |
+        Q(bloqueio_fluig=False) |
+        Q(bloqueio_datasul=False) |
+        Q(bloqueio_monday=False) |
+        Q(bloqueio_portal_chamados=False) |
+        Q(bloqueio_usuario_impressora=False) |
+        Q(backup_email=False) |
+        Q(backup_onedrive=False) |
+        Q(backup_desktop=False) |
+        Q(backup_desktop_C=False) |
+        Q(backup_desktop_documentos=False) |
+        Q(backup_desktop_download=False) |
+        Q(backup_keepit=False) |
+        Q(devolucao_computador=False) |
+        Q(devolucao_celular=False) |
+        Q(devolucao_periferico=False)
     )
 
-    if registros_pendentes.exists():
-        mensagem_html = """
-        <p>Os seguintes usuários possuem pendências nos sistemas e processos:</p>
-        <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
-            <tr>
-                <th>Usuário</th>
-                <th>Data Limite</th>
-                <th>Email</th>
-                <th>Fluig</th>
-                <th>Datasul</th>
-                <th>Monday</th>
-                <th>Qualiteam</th>
-                <th>Portal de Chamados</th>
-                <th>Impressora</th>
-                <th>Backup Email</th>
-                <th>Backup OneDrive</th>
-                <th>Backup Desktop</th>
-                <th>Devolução Computador</th>
-                <th>Devolução Celular</th>
-            </tr>
-        """
-        for registro in registros_pendentes:
-            mensagem_html += f"""
-                <tr>
-                    <td>{registro.usuario}</td>
-                    <td>{registro.data_limite.strftime('%d/%m/%Y') if registro.data_limite else 'Não definida'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.bloqueio_email else '#ccffcc'};">{'Pendente' if not registro.bloqueio_email else 'Bloqueado'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.bloqueio_fluig else '#ccffcc'};">{'Pendente' if not registro.bloqueio_fluig else 'Bloqueado'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.bloqueio_datasul else '#ccffcc'};">{'Pendente' if not registro.bloqueio_datasul else 'Bloqueado'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.bloqueio_monday else '#ccffcc'};">{'Pendente' if not registro.bloqueio_monday else 'Bloqueado'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.bloqueio_qualiteam else '#ccffcc'};">{'Pendente' if not registro.bloqueio_qualiteam else 'Bloqueado'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.bloqueio_portal_chamados else '#ccffcc'};">{'Pendente' if not registro.bloqueio_portal_chamados else 'Bloqueado'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.bloqueio_usuario_impressora else '#ccffcc'};">{'Pendente' if not registro.bloqueio_usuario_impressora else 'Bloqueado'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.backup_email else '#ccffcc'};">{'Pendente' if not registro.backup_email else 'Concluído'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.backup_onedrive else '#ccffcc'};">{'Pendente' if not registro.backup_onedrive else 'Concluído'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.backup_desktop else '#ccffcc'};">{'Pendente' if not registro.backup_desktop else 'Concluído'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.devolucao_computador else '#ccffcc'};">{'Pendente' if not registro.devolucao_computador else 'Concluído'}</td>
-                    <td style="background-color: {'#ffcccc' if not registro.devolucao_celular else '#ccffcc'};">{'Pendente' if not registro.devolucao_celular else 'Concluído'}</td>
-                </tr>
-            """
-        mensagem_html += "</table>"
-        
-        usuarios = User.objects.filter(enviar_email_desligados=True)
-        emails = [usuario.email for usuario in usuarios]
+    if not registros_pendentes.exists():
+        return  # nada a enviar
 
+    # Monta linhas apenas com: Usuário, Data Limite, Usuário Inclusão e Pendências
+    rows_html = []
+    for r in registros_pendentes:
+        faltantes = []
+        if not r.bloqueio_email:              faltantes.append("Email")
+        if not r.bloqueio_fluig:              faltantes.append("Fluig")
+        if not r.bloqueio_datasul:            faltantes.append("Datasul")
+        if not r.bloqueio_monday:             faltantes.append("Monday")
+        if not r.bloqueio_portal_chamados:    faltantes.append("Portal Chamados")
+        if not r.bloqueio_usuario_impressora: faltantes.append("Impressora")
+        if not r.backup_email:                 faltantes.append("Backup Email")
+        if not r.backup_onedrive:              faltantes.append("Backup OneDrive")
+        if not r.backup_desktop:               faltantes.append("Backup Área de Trabalho")
+        if not r.backup_desktop_C:             faltantes.append("Backup Disco C")
+        if not r.backup_desktop_documentos:    faltantes.append("Backup Documentos")
+        if not r.backup_desktop_download:      faltantes.append("Backup Downloads")
+        if not r.backup_keepit:                faltantes.append("Backup Keepit")
+        if not r.devolucao_computador:         faltantes.append("Devolução Computador")
+        if not r.devolucao_celular:            faltantes.append("Devolução Celular")
+        if not r.devolucao_periferico:         faltantes.append("Devolução Periféricos")
+
+        pendencias_html = (
+            '<span style="color:#2e7d32;font-weight:700;">Bloqueio Completo</span>'
+            if not faltantes else '<br>'.join(faltantes)
+        )
+        data_limite = r.data_limite.strftime('%d/%m/%Y') if r.data_limite else 'Não definida'
+        usuario_inclusao = getattr(r, 'usuario_cadastro', '') or ''
+
+        rows_html.append(f"""
+            <tr>
+                <td>{r.usuario}</td>
+                <td>{data_limite}</td>
+                <td>{usuario_inclusao}</td>
+                <td>{pendencias_html}</td>
+            </tr>
+        """)
+
+    mensagem_html = f"""
+        <p>Os seguintes usuários possuem pendências nos sistemas e processos:</p>
+        <table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;">
+            <thead>
+                <tr style="background:#f2f2f2;">
+                    <th>Usuário</th>
+                    <th>Data Limite</th>
+                    <th>Usuário Inclusão</th>
+                    <th>Pendências</th>
+                </tr>
+            </thead>
+            <tbody>
+                {''.join(rows_html)}
+            </tbody>
+        </table>
+    """
+
+    # *** manter exatamente este trecho ***
+    usuarios = User.objects.filter(enviar_email_desligados=True).only("email")
+    emails = [u.email for u in usuarios if u.email]
+
+    if emails:
         send_mail(
             subject="Alerta: Bloqueios e Processos Pendentes de Usuários",
-            message="Pendências detectadas. Confira o conteúdo HTML para mais detalhes.",
+            message="Pendências detectadas. Veja o HTML.",
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=emails,
             html_message=mensagem_html
         )
-
 
 @shared_task
 def update_usuario_fluig():

@@ -8,25 +8,29 @@ class UsuarioDesligamentoForm(forms.ModelForm):
         model = UsuarioDesligamento
         fields = [
             'usuario', 'data_desligamento', 'data_limite',
-            'bloqueio_email', 'usuario_email', 
-            'envio_email_gestor', 'gestor',  
+            'bloqueio_email', 'usuario_email',
+            'envio_email_gestor', 'gestor',
             'bloqueio_fluig', 'usuario_fluig',
             'bloqueio_datasul', 'usuario_datasul', 'usuario_goglobal',
             'bloqueio_monday', 'usuario_monday',
-            'bloqueio_qualiteam', 'usuario_qualiteam',
+            # removido bloqueio_qualiteam e usuario_qualiteam
             'bloqueio_portal_chamados', 'usuario_portal_chamados',
             'bloqueio_usuario_impressora', 'usuario_impressora',
             'backup_email', 'observacao_email',
             'backup_onedrive', 'observacao_onedrive',
             'backup_desktop', 'observacao_desktop',
+
+            # 🔹 novos campos
+            'backup_keepit', 'data_backup_keepit', 'obsservao_datasul',
+            'backup_desktop_C', 'backup_desktop_documentos', 'backup_desktop_download',
+            'devolucao_periferico', 'observacao_periferico',
+
             'devolucao_computador', 'observacao_computador',
             'devolucao_celular', 'observacao_celular',
         ]
         labels = {
             'usuario': 'Usuário a ser desligado',
             'data_desligamento': 'Data de Desligamento',
-             'envio_email_gestor': 'Envio de E-mail ao Gestor/Substituto',  # Novo rótulo
-            'gestor': 'Gestor Responsável/Substituto',
             'data_limite': 'Data Limite',
             'bloqueio_email': 'Bloqueio Email',
             'usuario_email': 'Usuário de E-mail',
@@ -37,24 +41,32 @@ class UsuarioDesligamentoForm(forms.ModelForm):
             'usuario_goglobal': 'Usuário Go-Global',
             'bloqueio_monday': 'Bloqueio Monday',
             'usuario_monday': 'Usuário Monday',
-            'bloqueio_qualiteam': 'Bloqueio Qualiteam',
-            'usuario_qualiteam': 'Usuário Qualiteam',
             'bloqueio_portal_chamados': 'Bloqueio Portal de Chamados',
             'usuario_portal_chamados': 'Usuário do Portal de Chamados',
-            'bloqueio_usuario_impressora': 'Bloqueio Usuário da Impressora (Matriz)',
-            'usuario_impressora': 'Usuário de Impressora (Matriz)',
+            'bloqueio_usuario_impressora': 'Bloqueio Usuário da Impressora',
+            'usuario_impressora': 'Usuário de Impressora',
             'backup_email': 'Backup do E-mail',
             'observacao_email': 'Observação sobre o Backup do E-mail',
             'backup_onedrive': 'Backup do OneDrive',
             'observacao_onedrive': 'Observação sobre o Backup do OneDrive',
-            'backup_desktop': 'Backup da Área de Trabalho/Documentos',
-            'observacao_desktop': 'Observação sobre o Backup da Área de Trabalho/Documentos',
+            'backup_desktop': 'Backup da Área de Trabalho',
+            'observacao_desktop': 'Observação sobre o Backup da Área de Trabalho',
+
+            # 🔹 novos labels
+            'backup_keepit': 'Backup Keepit',
+            'data_backup_keepit': 'Data do Backup Keepit',
+            'obsservao_datasul': 'Observação do Datasul',
+            'backup_desktop_C': 'Backup do Disco C',
+            'backup_desktop_documentos': 'Backup da pasta Documentos',
+            'backup_desktop_download': 'Backup da pasta Downloads',
+            'devolucao_periferico': 'Devolução de Periféricos',
+            'observacao_periferico': 'Observação sobre Periféricos',
+
             'devolucao_computador': 'Devolução do Computador',
             'observacao_computador': 'Observação sobre a Devolução do Computador',
             'devolucao_celular': 'Devolução do Celular',
             'observacao_celular': 'Observação sobre a Devolução do Celular',
         }
-
 
 class SubstituicaoForm(forms.Form):
     usuario_a_substituir = forms.ModelChoiceField(

@@ -1,57 +1,84 @@
 {% extends 'menu/index.html' %}
 
 {% block content %}
+
+<form method="get" action="" class="mb-4">
+    <div class="input-group">
+        <input type="text"
+               name="search"
+               placeholder="Pesquisar usuários..."
+               class="form-control"
+               value="{{ request.GET.search }}">
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Pesquisar</button>
+        </div>
+    </div>
+</form>
+
 <div class="container-fluid">
     <div class="mb-4">
         <a href="{% url 'usuario_desligamento_create' %}" class="btn btn-primary">
             <i class="fa fa-plus"></i> Adicionar Desligamento de Usuário
         </a>
     </div>
+
+ <div class="mb-3">
+  <a href="?{% if search %}search={{ search|urlencode }}&{% endif %}" 
+     class="btn {% if not status or status != 'bloqueados' %}btn-primary{% else %}btn-outline-primary{% endif %} me-2">
+    Pendentes
+  </a>
+
+  <a href="?{% if search %}search={{ search|urlencode }}&{% endif %}status=bloqueados" 
+     class="btn {% if status == 'bloqueados' %}btn-success{% else %}btn-outline-success{% endif %}">
+    Usuários bloqueados
+  </a>
+</div>
     <div class="table-responsive">
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
-                
                     <th>Usuário</th>
                     <th>Data Desligamento</th>
                     <th>Data Limite</th>
+                    <th>Usuário Inclusão</th>
                     <th>Usuário de Alteração</th>
-                    <th>Backup Email</th>
-                    <th>Backup OneDrive</th>
-                    <th>Backup Desktop</th>
-                    <th>Devolução Computador</th>
-                    <th>Devolução Celular</th>
-                    <th>Bloqueio Email</th>
-                    <th>Bloqueio Fluig</th>
-                    <th>Bloqueio Datasul</th>
-            
-                    <th>Bloqueio Monday</th>
-                    <th>Bloqueio Qualiteam</th>
-                    <th>Bloqueio Portal Chamados</th>
-                    <th>Bloqueio Impressora</th>
+                    <th>Bloqueios Faltantes</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 {% for desligamento in desligamentos %}
                     <tr>
-                        
                         <td>{{ desligamento.usuario }}</td>
                         <td>{{ desligamento.data_desligamento|date:"d/m/Y" }}</td>
                         <td>{{ desligamento.data_limite|date:"d/m/Y" }}</td>
-                        <td>{{ desligamento.usuario_ultima_alteracao }}</td>
-                        <td>{{ desligamento.backup_email|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.backup_onedrive|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.backup_desktop|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.devolucao_computador|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.devolucao_celular|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.bloqueio_email|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.bloqueio_fluig|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.bloqueio_datasul|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.bloqueio_monday|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.bloqueio_qualiteam|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.bloqueio_portal_chamados|yesno:"Sim,Não" }}</td>
-                        <td>{{ desligamento.bloqueio_usuario_impressora|yesno:"Sim,Não" }}</td>
+                        <td>{{ desligamento.usuario_cadastro }}</td>
+                        <td>{{ desligamento.usuario_ultima_alteracao|default_if_none:"" }}</td>
+
+                        <!-- Bloqueios Faltantes -->
+<td>
+  {% if desligamento.bloqueio_email and desligamento.bloqueio_fluig and desligamento.bloqueio_datasul and desligamento.bloqueio_monday and desligamento.bloqueio_portal_chamados and desligamento.bloqueio_usuario_impressora and desligamento.backup_email and desligamento.backup_onedrive and desligamento.backup_desktop and desligamento.devolucao_computador and desligamento.devolucao_celular and desligamento.backup_keepit and desligamento.backup_desktop_C and desligamento.backup_desktop_documentos and desligamento.backup_desktop_download and desligamento.devolucao_periferico %}
+    <span class="text-success font-weight-bold">Bloqueio Completo</span>
+  {% else %}
+    {% if not desligamento.bloqueio_email %}Email<br>{% endif %}
+    {% if not desligamento.bloqueio_fluig %}Fluig<br>{% endif %}
+    {% if not desligamento.bloqueio_datasul %}Datasul<br>{% endif %}
+    {% if not desligamento.bloqueio_monday %}Monday<br>{% endif %}
+    {% if not desligamento.bloqueio_portal_chamados %}Portal Chamados<br>{% endif %}
+    {% if not desligamento.bloqueio_usuario_impressora %}Impressora<br>{% endif %}
+    {% if not desligamento.backup_email %}Backup Email<br>{% endif %}
+    {% if not desligamento.backup_onedrive %}Backup OneDrive<br>{% endif %}
+    {% if not desligamento.backup_desktop %}Backup Área de Trabalho<br>{% endif %}
+    {% if not desligamento.devolucao_computador %}Devolução Computador<br>{% endif %}
+    {% if not desligamento.devolucao_celular %}Devolução Celular<br>{% endif %}
+    {% if not desligamento.backup_keepit %}Backup Keepit<br>{% endif %}
+    {% if not desligamento.backup_desktop_C %}Backup Disco C<br>{% endif %}
+    {% if not desligamento.backup_desktop_documentos %}Backup Documentos<br>{% endif %}
+    {% if not desligamento.backup_desktop_download %}Backup Downloads<br>{% endif %}
+    {% if not desligamento.devolucao_periferico %}Devolução Periféricos<br>{% endif %}
+  {% endif %}
+</td>
+
                         <td>
                             <a class="mr-3" href="{% url 'usuario_desligamento_edit' desligamento.id %}">
                                 <i class="fa fa-edit"></i> Editar
@@ -63,7 +90,7 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="20">Nenhum desligamento de usuário cadastrado.</td>
+                        <td colspan="7">Nenhum desligamento de usuário cadastrado.</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -102,14 +129,12 @@
                 event.preventDefault();  
                 const usuarioId = button.getAttribute('data-id');
                 const usuarioName = button.getAttribute('data-usuario');
-                const formAction = `/suporte/desligamento/delete/${usuarioId}/`;  // Substitua pelo URL de exclusão correto
+                const formAction = `/suporte/desligamento/delete/${usuarioId}/`; 
 
-                // Define os valores no modal
                 document.getElementById('deleteUsuarioId').textContent = usuarioId;
                 document.getElementById('deleteUsuarioName').textContent = usuarioName;
                 document.getElementById('deleteForm').setAttribute('action', formAction);
 
-                // Mostra o modal
                 $('#confirmDeleteModal').modal('show');
             });
         });
