@@ -24,6 +24,7 @@ from .api import api
 from novosProjetos.views import novosprojetos_dashboard
 from django.views.generic.base import RedirectView
 from menu.views import index
+from django_prometheus import exports
 
 handler404 = 'menu.views.error_404_view'
 handler500 = 'menu.views.error_500_view'
@@ -48,6 +49,7 @@ urlpatterns = [
      path('cofre/', include('cofre.urls')),
      path('comunicacao/', include('comunicacao.urls')),
      path('fiscal/', include('fiscal.urls')),
+      path("metrics/", exports.ExportToDjangoView, name="prometheus-django-metrics"),
 ]
 
 

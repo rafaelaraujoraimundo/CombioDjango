@@ -13,6 +13,7 @@ staticfiles
 staticfiles/
 static-data
 media-data
+gunicorn.sock
 # Backup files #
 *.bak
 suporte.zip
