@@ -480,6 +480,17 @@ class ProntuarioComputador(models.Model):
     unidade_destino = models.CharField(max_length=100)
     local = models.CharField(max_length=100)
 
+    usuario_inclusao = models.ForeignKey(User, on_delete=models.PROTECT, related_name="prontuario_computador_inclusao")
+    data_inclusao = models.DateTimeField(auto_now_add=True)
+    usuario_alteracao = models.ForeignKey(User, on_delete=models.PROTECT, related_name="prontuario_computador_alteracao", null=True, blank=True)
+    data_alteracao = models.DateTimeField(auto_now=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Novo registro
+            self.usuario_alteracao = self.usuario_inclusao
+            self.data_alteracao = self.data_inclusao
+        super().save(*args, **kwargs)
+    
     def __str__(self):
         return f'Prontuário de {self.computador.hostname} - {self.data}'
 

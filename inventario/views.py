@@ -1076,6 +1076,8 @@ class ProntuarioComputadorCreate(CreateView):
 
     def form_valid(self, form):
         form.instance.computador_id = self.kwargs['computador_id']
+        form.instance.usuario_inclusao = self.request.user
+        form.instance.usuario_alteracao = self.request.user
        
         # Atualiza o estabelecimento e o centro de custo do computador se a ação é do tipo 2 (Transferência)
         if form.cleaned_data['acao'].tipo == 2:
@@ -1110,6 +1112,7 @@ class ProntuarioComputadorUpdate(UpdateView):
     template_name = 'inventario/computador/prontuario_computador_edit.html'
 
     def form_valid(self, form):
+        form.instance.usuario_alteracao = self.request.user
         print("Ação Tipo:", form.cleaned_data['acao'].tipo)
         # Atualiza o estabelecimento e o centro de custo do computador se a ação é do tipo 2 (Transferência)
         if form.cleaned_data['acao'].tipo == 2:

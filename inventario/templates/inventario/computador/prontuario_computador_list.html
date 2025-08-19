@@ -15,6 +15,9 @@
                 <th>Ação</th>
                 <th>Unidade de Destino</th>
                 <th>Local</th>
+
+                <th>Incluído por</th>
+                <th>Alterado por</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -27,6 +30,8 @@
                 <td>{{ prontuario.acao }}</td>
                 <td>{{ prontuario.unidade_destino }}</td>
                 <td>{{ prontuario.local }}</td>
+                <td>{{ prontuario.usuario_inclusao.email }}</td>
+                <td>{{ prontuario.usuario_alteracao.email|default:"-" }}</td>
                 <td>
                     <a href="{% url 'prontuario_computador_edit' prontuario.id %}" class="btn btn-sm btn-warning">Editar</a>
                     <a href="#" class="delete-trigger btn btn-sm btn-danger" data-id="{{ prontuario.id }}" data-item="{{ prontuario.acao }}">Excluir</a>

@@ -14,6 +14,7 @@ staticfiles/
 static-data
 media-data
 gunicorn.sock
+zrok/*
 # Backup files #
 *.bak
 suporte.zip
