@@ -1,0 +1,130 @@
+{% extends 'menu/index.html' %}
+{% block content %}
+<div class="container-fluid">
+ 
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}<li>{{ field }}: {{ error }}</li>{% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <!-- IMPORTANTE: autocomplete="off" no form para reduzir autofill -->
+  <form method="post" novalidate autocomplete="off">
+    {% csrf_token %}
+
+    <!-- Campo fake escondido para enganar o autofill de password managers -->
+    <input type="password" style="display:none" tabindex="-1" autocomplete="new-password">
+
+    <div class="row">
+      <!-- Monday API Key -->
+      <div class="col-md-8">
+        <div class="form-group">
+          <label for="{{ form.monday_key.id_for_label }}">Monday API Key</label>
+          <input
+            type="password"
+            class="form-control {% if form.monday_key.errors %}is-invalid{% endif %}"
+            id="{{ form.monday_key.id_for_label }}"
+            name="{{ form.monday_key.name }}"
+            value="" autocomplete="new-password"
+            autocapitalize="off" autocorrect="off" spellcheck="false"
+            data-lpignore="true" data-1p-ignore="true" />
+          {% for error in form.monday_key.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+          <small class="form-text text-muted">Cole aqui a API Key do monday.com (não será exibida).</small>
+        </div>
+      </div>
+
+      <!-- Board ID -->
+      <div class="col-md-4">
+        <div class="form-group">
+          <label for="{{ form.monday_board.id_for_label }}">Board ID (padrão)</label>
+          <input
+            type="number"
+            class="form-control {% if form.monday_board.errors %}is-invalid{% endif %}"
+            id="{{ form.monday_board.id_for_label }}"
+            name="{{ form.monday_board.name }}"
+            value="" inputmode="numeric" />
+          {% for error in form.monday_board.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a href="{% url 'integracoes:tokens_list' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+
+  {% if saved %}
+    <hr>
+    <h4>Links</h4>
+
+    <!-- Itens (sem subitens) -->
+    <label class="small text-muted mb-1">Itens (sem subitens) — CSV</label>
+    <div class="input-group mb-3">
+      <input type="text" id="link-itens" class="form-control" value="{{ link_itens }}" readonly>
+      <div class="input-group-append">
+        <a class="btn btn-outline-primary" href="{{ link_itens }}" target="_blank" rel="noopener">Baixar</a>
+        <button class="btn btn-outline-secondary copy-btn" data-target="#link-itens">Copiar</button>
+      </div>
+    </div>
+
+    <!-- Itens + Subitens -->
+    <label class="small text-muted mb-1">Itens + Subitens — CSV</label>
+    <div class="input-group mb-3">
+      <input type="text" id="link-subitens" class="form-control" value="{{ link_subitens }}" readonly>
+      <div class="input-group-append">
+        <a class="btn btn-outline-primary" href="{{ link_subitens }}" target="_blank" rel="noopener">Baixar</a>
+        <button class="btn btn-outline-secondary copy-btn" data-target="#link-subitens">Copiar</button>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // Botões "Copiar"
+  (function () {
+    function copyToClipboard(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      }
+      // Fallback para navegadores antigos
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand('copy'); } finally { document.body.removeChild(ta); }
+      return Promise.resolve();
+    }
+
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const selector = btn.getAttribute('data-target');
+        const input = document.querySelector(selector);
+        if (!input) return;
+        copyToClipboard(input.value).then(function () {
+          const original = btn.textContent;
+          btn.textContent = 'Copiado!';
+          btn.disabled = true;
+          setTimeout(function () { btn.textContent = original; btn.disabled = false; }, 1200);
+        });
+      });
+    });
+  })();
+</script>
+{% endblock %}

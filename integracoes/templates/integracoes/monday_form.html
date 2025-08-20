@@ -1,0 +1,79 @@
+{% extends 'menu/index.html' %}
+{% block content %}
+<div class="container-fluid">
+  <h2>{{ title|default:"Cadastrar Link PowerBI X Monday" }}</h2>
+
+  {# Erros gerais #}
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {# Erros por campo (resumo) #}
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        {% for field, errors in form.errors.items %}
+          {% for error in errors %}
+            <li>{{ field }}: {{ error }}</li>
+          {% endfor %}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="post" novalidate autocomplete="off">
+    {% csrf_token %}
+
+    <!-- Linha 1: Monday API Key e Board ID -->
+    <div class="row">
+      <div class="col-md-8">
+        <div class="form-group">
+          <label for="{{ form.monday_key.id_for_label }}">Monday API Key</label>
+          <input
+            type="password"
+            class="form-control {% if form.monday_key.errors %}is-invalid{% endif %}"
+            id="{{ form.monday_key.id_for_label }}"
+            name="{{ form.monday_key.name }}"
+            value="" autocomplete="new-password" />
+          {% for error in form.monday_key.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+          <small class="form-text text-muted">Cole aqui a API Key do monday.com (não será exibida).</small>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="form-group">
+          <label for="{{ form.monday_board.id_for_label }}">Board ID (padrão)</label>
+          <input
+            type="number"
+            class="form-control {% if form.monday_board.errors %}is-invalid{% endif %}"
+            id="{{ form.monday_board.id_for_label }}"
+            name="{{ form.monday_board.name }}"
+            value="" inputmode="numeric" />
+          {% for error in form.monday_board.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Botões -->
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a href="{% url 'integracoes:tokens_list' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+
+  {% if saved %}
+    <hr>
+    <h4>Links</h4>
+    <ul>
+      <li><a href="{{ link_itens }}" target="_blank" rel="noopener">Itens (sem subitens) — CSV</a></li>
+      <li><a href="{{ link_subitens }}" target="_blank" rel="noopener">Itens + Subitens — CSV</a></li>
+    </ul>
+  {% endif %}
+</div>
+{% endblock %}

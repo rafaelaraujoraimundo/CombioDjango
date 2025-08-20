@@ -49,6 +49,7 @@ urlpatterns = [
      path('cofre/', include('cofre.urls')),
      path('comunicacao/', include('comunicacao.urls')),
      path('fiscal/', include('fiscal.urls')),
+     path('integracoes/', include('integracoes.urls')),
       path("metrics/", exports.ExportToDjangoView, name="prometheus-django-metrics"),
 ]
 

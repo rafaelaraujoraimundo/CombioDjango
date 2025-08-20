@@ -6,6 +6,12 @@ Inclui integração com diversos módulos da plataforma ComBio, ferramentas de a
 
 ## 🚀 Execução do Projeto
 
+
+### Versão
+
+Versão 3.2 - Restruturação do Desligamento
+Versão 3.5 - Modulo INtegrações
+
 ### Requisitos
 
 - Python 3.11+
@@ -123,5 +129,3 @@ docker-compose up --build
 - **Exemplos de funções:** `pasta_upload_ativo_valores`, `data_valida`, `cnpj_valido`
 - **Exemplos de classes:** `CustomPaginator`, `DataFormatter`, `FluigAPI`
 
-
-Versão 3.2 - Restruturação do Desligamento

@@ -1,0 +1,12 @@
+{
+  "request": {
+    "query": "\nquery GetBoardItems($board_id: [ID!], $cursor: String, $limit: Int!) {\n  boards (ids: $board_id) {\n    id\n    name\n    items_page (limit: $limit, cursor: $cursor) {\n      cursor\n      items {\n        id\n        name\n        column_values {\n          id\n          text\n          value\n        }\n        subitems {\n          id\n          name\n          column_values {\n            id\n            text\n            value\n          }\n        }\n      }\n    }\n  }\n}\n",
+    "variables": {
+      "board_id": [
+        "3857941534"
+      ],
+      "cursor": "MSwzODU3OTQxNTM0LE01NzZHSjl4WEVvSWFmUVE5S0tubCwyMTYsMTAwLHw0MjM0OTEyMzI0",
+      "limit": 100
+    }
+  }
+}

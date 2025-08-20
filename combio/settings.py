@@ -83,7 +83,8 @@ INSTALLED_APPS += [
     "suporte",
     "cofre",
     "comunicacao",
-    "fiscal"]
+    "fiscal",
+    "integracoes",]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
