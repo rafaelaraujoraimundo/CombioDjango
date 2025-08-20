@@ -37,8 +37,8 @@ class MondayTokenCreateView(CreateView):
         # Links GET prontos para clique
         qs_false = urlencode({"token": self.object.token, "includeSubitem": "false"})
         qs_true  = urlencode({"token": self.object.token, "includeSubitem": "true"})
-        link_itens = f"{base}{api_path}?{qs_false}"
-        link_subitens = f"{base}{api_path}?{qs_true}"
+        link_itens = f"{base}:810{api_path}?{qs_false}"
+        link_subitens = f"{base}:810{api_path}?{qs_true}"
 
         context = self.get_context_data(form=form, object=self.object)
         context.update({
@@ -64,8 +64,8 @@ class MondayTokenUpdateView(UpdateView):
 
         qs_false = urlencode({"token": self.object.token, "includeSubitem": "false"})
         qs_true  = urlencode({"token": self.object.token, "includeSubitem": "true"})
-        link_itens = f"{base}{api_path}?{qs_false}"
-        link_subitens = f"{base}{api_path}?{qs_true}"
+        link_itens = f"{base}:810{api_path}?{qs_false}"
+        link_subitens = f"{base}:810{api_path}?{qs_true}"
 
         context = self.get_context_data(form=form, object=self.object)
         context.update({
