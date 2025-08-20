@@ -6,7 +6,11 @@ from django.urls import reverse_lazy
 from django.utils.http import urlencode
 from .models import MondayToken
 from .forms import MondayTokenForm
+from django.contrib.auth.decorators import login_required, permission_required
+from django.utils.decorators import method_decorator
 
+@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_integracoes', login_url='erro_page'), name='dispatch')
 class MondayTokenListView(ListView):
     model = MondayToken
     template_name = "integracoes/mondaytoken_list.html"
@@ -30,15 +34,15 @@ class MondayTokenCreateView(CreateView):
         # salva e mantém na mesma página mostrando os links
         self.object = form.save()
 
-        base = self.request.build_absolute_uri("/")[:-1]  # remove barra final
+        base = 'http://179.191.91.6:810'  # remove barra final
         # /api/v1/integrações/items (com acento!)
         api_path = "/api/v1/integracoes/items"
 
         # Links GET prontos para clique
         qs_false = urlencode({"token": self.object.token, "includeSubitem": "false"})
         qs_true  = urlencode({"token": self.object.token, "includeSubitem": "true"})
-        link_itens = f"{base}:810{api_path}?{qs_false}"
-        link_subitens = f"{base}:810{api_path}?{qs_true}"
+        link_itens = f"{base}{api_path}?{qs_false}"
+        link_subitens = f"{base}{api_path}?{qs_true}"
 
         context = self.get_context_data(form=form, object=self.object)
         context.update({
@@ -49,6 +53,7 @@ class MondayTokenCreateView(CreateView):
   
         })
         return self.render_to_response(context)
+
 
 class MondayTokenUpdateView(UpdateView):
     model = MondayToken
@@ -64,8 +69,8 @@ class MondayTokenUpdateView(UpdateView):
 
         qs_false = urlencode({"token": self.object.token, "includeSubitem": "false"})
         qs_true  = urlencode({"token": self.object.token, "includeSubitem": "true"})
-        link_itens = f"{base}:810{api_path}?{qs_false}"
-        link_subitens = f"{base}:810{api_path}?{qs_true}"
+        link_itens = f"{base}{api_path}?{qs_false}"
+        link_subitens = f"{base}{api_path}?{qs_true}"
 
         context = self.get_context_data(form=form, object=self.object)
         context.update({
@@ -75,7 +80,8 @@ class MondayTokenUpdateView(UpdateView):
             "link_subitens": link_subitens,
         })
         return self.render_to_response(context)
-
+@method_decorator(login_required, name='dispatch')
+@method_decorator(permission_required('global_permissions.combio_integracoes', login_url='erro_page'), name='dispatch')
 class MondayTokenDeleteView(View):
     def post(self, request, token: str):
         obj = get_object_or_404(MondayToken, pk=token)
