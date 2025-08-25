@@ -35,7 +35,7 @@ class MondayTokenCreateView(CreateView):
         self.object = form.save()
 
         base = 'http://179.191.91.6:810'  # remove barra final
-
+    
         api_path = "/api/v1/integracoes/items"
 
         # Links GET prontos para clique
