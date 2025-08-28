@@ -66,8 +66,8 @@ https://www.youtube.com/watch?v=b-6mEAr1m-A
 #Configurar Celery Beat para agendamento de tarefas no Django
 https://www.youtube.com/watch?si=yUSCpZOSB1I-PVac&v=evMYrqI2W_M&feature=youtu.be
 
-
-
+INiciar docker com redis
+docker run --name redis-test -d -p 6379:6379 redis:latest
 #execução WIndows
 celery -A combio worker --pool=threads --concurrency=8
 #execução Linux
