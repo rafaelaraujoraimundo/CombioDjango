@@ -9,6 +9,14 @@ from .forms import MondayTokenForm
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
+from .forms import PinggyTokenForm, PinggyRedirectForm
+from .models import PinggyRedirect, PinggyToken
+from .services.pinggy import start_tunnel, stop_tunnel, check_online
+
 @method_decorator(login_required, name='dispatch')
 @method_decorator(permission_required('global_permissions.combio_integracoes', login_url='erro_page'), name='dispatch')
 class MondayTokenListView(ListView):
@@ -88,3 +96,79 @@ class MondayTokenDeleteView(View):
         obj.delete()
         messages.success(request, "Token excluído com sucesso.")
         return redirect("integracoes:tokens_list")
+    
+
+
+
+@login_required
+@permission_required('global_permissions.combio_integracoes', raise_exception=True)
+def dashboard(request: HttpRequest) -> HttpResponse:
+    tokens = PinggyToken.objects.all().prefetch_related("redirects")
+    # Soft health-check (não bloqueante)
+    for token in tokens:
+        for r in token.redirects.all():
+            if r.url_publica:
+                ok = check_online(r.url_publica)
+                r.online = ok
+                r.ultimo_check = timezone.now()
+                r.save(update_fields=["online", "ultimo_check"])
+    return render(request, 'integracoes/pinggy/dashboard.html', {"tokens": tokens})
+
+
+@login_required
+@permission_required('global_permissions.combio_integracoes', raise_exception=True)
+def token_novo(request: HttpRequest) -> HttpResponse:
+    form = PinggyTokenForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, "Token cadastrado.")
+        return redirect('integracoes:pinggy_dashboard')
+    return render(request, 'integracoes/pinggy/token_form.html', {"form": form})
+
+
+@login_required
+@permission_required('global_permissions.combio_integracoes', raise_exception=True)
+def redirect_novo(request: HttpRequest) -> HttpResponse:
+    form = PinggyRedirectForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, "Redirecionamento criado.")
+        return redirect('integracoes:pinggy_dashboard')
+    return render(request, 'integracoes/pinggy/redirect_form.html', {"form": form})
+
+
+@login_required
+@permission_required('global_permissions.combio_integracoes', raise_exception=True)
+def iniciar_tunel(request: HttpRequest, redirect_id: int) -> HttpResponse:
+    r = get_object_or_404(PinggyRedirect, pk=redirect_id, habilitado=True)
+    res = start_tunnel(r.tipo, r.token.token, r.host_local, r.porta_local, r.sni_local)
+
+    r.pid = res.pid
+    r.url_publica = res.public_url
+    r.porta_publica = res.public_port
+    r.online = bool(res.public_url)
+    r.ultimo_check = timezone.now()
+    r.save()
+
+    if r.url_publica:
+        messages.success(request, f"Túnel iniciado: {r.url_publica}")
+    else:
+        messages.warning(request, "Túnel iniciado, aguardando URL pública…")
+
+    return redirect('integracoes:pinggy_dashboard')
+
+
+@login_required
+@permission_required('global_permissions.combio_integracoes', raise_exception=True)
+def parar_tunel(request: HttpRequest, redirect_id: int) -> HttpResponse:
+    r = get_object_or_404(PinggyRedirect, pk=redirect_id)
+    ok = False
+    if r.pid:
+        ok = stop_tunnel(r.pid)
+
+    r.online = False
+    r.pid = None
+    r.save(update_fields=["online", "pid"])
+
+    messages.info(request, "Túnel finalizado." if ok else "Processo não estava ativo.")
+    return redirect('integracoes:pinggy_dashboard')

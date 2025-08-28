@@ -6,6 +6,7 @@ from inventario.api_inventario import (routerCelular, routerComputador, routerEs
     routerHardware, routerMonitor, routerStatus, routerTipoItem, routerCentroCusto, routerEstabelecimento)
 from comunicacao.api_comunicacao import  routerParametro
 from integracoes.router import router as integracoes_router
+from suporte.api import router as routerSuporte
 
   
 api = NinjaExtraAPI(version='2.0.0', urls_namespace='Fluig')
@@ -25,4 +26,5 @@ api.add_router("/v1/inventario", routerCentroCusto)
 api.add_router("/v1/inventario", routerEstabelecimento)
 api.add_router("/v1/comunicacao",routerParametro )
 api.add_router("/v1/integracoes", integracoes_router)
+api.add_router("/v1/suporte", routerSuporte)
 

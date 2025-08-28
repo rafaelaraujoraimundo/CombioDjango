@@ -1,0 +1,68 @@
+{% extends 'menu/index.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h3>Pinggy – Túneis e Tokens</h3>
+<div>
+<a href="{% url 'integracoes:token_novo' %}" class="btn btn-primary">Novo token</a>
+<a href="{% url 'integracoes:redirect_novo' %}" class="btn btn-secondary">Novo redirecionamento</a>
+</div>
+</div>
+
+
+{% for t in tokens %}
+<div class="card mb-3 shadow-sm">
+<div class="card-header d-flex justify-content-between">
+<div>
+<strong>{{ t.nome }}</strong>
+<small class="text-muted">{% if t.subdominio %} / {{ t.subdominio }}{% endif %}</small>
+</div>
+<span class="badge bg-{% if t.ativo %}success{% else %}secondary{% endif %}">{% if t.ativo %}Ativo{% else %}Inativo{% endif %}</span>
+</div>
+<div class="card-body p-0">
+<table class="table table-sm mb-0">
+<thead>
+<tr>
+<th>Nome</th><th>Tipo</th><th>Local</th><th>URL Pública</th><th>Status</th><th>Ações</th>
+</tr>
+</thead>
+<tbody>
+{% for r in t.redirects.all %}
+<tr>
+<td>{{ r.nome }}</td>
+<td>{{ r.get_tipo_display }}</td>
+<td>{{ r.host_local }}:{{ r.porta_local }}</td>
+<td>
+{% if r.url_publica %}<a href="{{ r.url_publica }}" target="_blank">{{ r.url_publica }}</a>{% else %}<span class="text-muted">—</span>{% endif %}
+</td>
+<td>
+<span class="badge bg-{% if r.online %}success{% else %}danger{% endif %}">{% if r.online %}Online{% else %}Offline{% endif %}</span>
+{% if r.ultimo_check %}<small class="text-muted d-block">{{ r.ultimo_check|date:'d/m H:i' }}</small>{% endif %}
+</td>
+<td>
+<form method="post" action="{% url 'integracoes:iniciar_tunel' r.id %}" class="d-inline">{% csrf_token %}
+<button class="btn btn-sm btn-success" {% if not r.habilitado %}disabled{% endif %}>Start</button>
+</form>
+<form method="post" action="{% url 'integracoes:parar_tunel' r.id %}" class="d-inline ms-1">{% csrf_token %}
+<button class="btn btn-sm btn-outline-danger">Stop</button>
+</form>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="6" class="text-muted">Nenhum redirecionamento.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% empty %}
+<div class="alert alert-info">Nenhum token cadastrado.</div>
+{% endfor %}
+
+
+<div class="alert alert-warning mt-3">
+<strong>Dica:</strong> subdomínios persistentes exigem Pinggy Pro e uso de <code>token@a.pinggy.io</code> ao iniciar o túnel.
+</div>
+</div>
+{% endblock %}

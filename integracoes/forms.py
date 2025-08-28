@@ -1,5 +1,5 @@
 from django import forms
-from .models import MondayToken
+from .models import MondayToken,  PinggyToken, PinggyRedirect
 
 class MondayTokenForm(forms.ModelForm):
     class Meta:
@@ -18,3 +18,16 @@ class MondayTokenForm(forms.ModelForm):
                 },
             ),
         }
+    
+
+class PinggyTokenForm(forms.ModelForm):
+    class Meta:
+        model = PinggyToken
+        fields = ["nome", "token", "subdominio", "ativo", "auto_start", "observacoes"]
+        widgets = {"observacoes": forms.Textarea(attrs={"rows": 2})}
+
+
+class PinggyRedirectForm(forms.ModelForm):
+    class Meta:
+        model = PinggyRedirect
+        fields = ["token", "nome", "tipo", "host_local", "porta_local", "sni_local", "habilitado"]
