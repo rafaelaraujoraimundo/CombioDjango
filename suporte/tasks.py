@@ -209,6 +209,11 @@ def atualizar_usuarios_m365():
             continue
         logger.info('Iniciando Tenant: ' + tenant.nome_empresa )
         print('Iniciando Tenant: ' + tenant.nome_empresa )
+        print('Apagando todos os dados')
+        total = UsuarioM365.objects.filter(tenant=tenant).count()
+        print('total de usuarios apagados: ' + total )
+        UsuarioM365.objects.all().delete()
+        print('Todos os dados apagados')
         for user in usuarios:
             email = user.get('mail') or user.get('userPrincipalName')
             if not email:
