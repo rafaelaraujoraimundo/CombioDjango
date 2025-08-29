@@ -211,7 +211,7 @@ def atualizar_usuarios_m365():
         print('Iniciando Tenant: ' + tenant.nome_empresa )
         print('Apagando todos os dados')
         total = UsuarioM365.objects.filter(tenant=tenant).count()
-        print('total de usuarios apagados: ' + total )
+        print('total de usuarios apagados: ' + str(total) )
         UsuarioM365.objects.all().delete()
         print('Todos os dados apagados')
         for user in usuarios:
