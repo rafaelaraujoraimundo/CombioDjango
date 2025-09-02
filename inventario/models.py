@@ -446,7 +446,7 @@ class Computador(models.Model):
         return f'{self.hostname} ({self.patrimonio})'
 
     def save(self, *args, **kwargs):
-        print("Save method called")
+        #print("Save method called")
         temp_arquivo = self.arquivo_computador
         if self.pk:
             previous = Computador.objects.get(pk=self.pk)

@@ -1,11 +1,12 @@
 import django.conf
+from django.db.models import Sum
 from django.utils import timezone
 from celery import shared_task
 import requests
 from requests.auth import HTTPBasicAuth
 import logging
 from administration.views import User
-from .models import AccountInfo, BIOS, CPU, Hardware, Memory, Software, Storage
+from .models import AccountInfo, BIOS, CPU, Hardware, Memory, Software, Storage, Computador
 from decouple import config
 from django.core.mail import send_mail
 from django.conf import settings
@@ -15,6 +16,7 @@ import time
 import socket
 from io import BytesIO
 import MySQLdb
+
 
 
 
@@ -130,6 +132,7 @@ def populate_hardware_data():
                     "workgroup": computer.get("WORKGROUP")
                 }
             )
+
 
             # Buscar todos os dados relacionados e organizar como a API
             computer_data["bios"] = []
@@ -313,6 +316,28 @@ def populate_hardware_data():
                     fields_8=accountinfo_data.get("fields_8"),
                     fields_9=accountinfo_data.get("fields_9")
                 )
+            comp = Computador.objects.filter(hardware=hardware).first()
+            if comp:
+                # BIOS principal (assumindo 1 registro relevante)
+                bios = hardware.bios.first()  # related_name="bios" no model
+                # Soma do tamanho dos discos (MB) — igual ao que você usa na view
+                total_hd_mb = hardware.storages.aggregate(total=Sum('disk_size'))['total'] or 0
+
+                comp.hostname = hardware.name or comp.hostname
+                comp.fabricante = (bios.mmanufacturer if bios and bios.mmanufacturer else comp.fabricante)
+                comp.modelo = (
+                    " ".join(filter(None, [
+                        bios.mmodel if bios else None,
+                        bios.smodel if bios else None
+                    ])).strip() or comp.modelo
+                )
+                comp.numero_serie = (bios.ssn if bios and bios.ssn else comp.numero_serie)
+                comp.processador = hardware.processor_t or comp.processador
+                comp.memoria = str(hardware.memory) if hardware.memory not in (None, "") else comp.memoria
+                comp.hd = str(total_hd_mb) if total_hd_mb else comp.hd  # mantém em MB, como na tela
+                comp.sistema_operacional = hardware.os_name or comp.sistema_operacional
+
+                comp.save()
 
             print(f"Computador {computer.get('NAME')} processado com sucesso")
         
@@ -644,6 +669,7 @@ def populate_hardware_data_api():
                 }
             )
 
+
             # Remover dados antigos das tabelas relacionadas antes de inserir novos
             hardware.bios.all().delete()
             hardware.cpus.all().delete()
@@ -749,7 +775,29 @@ def populate_hardware_data_api():
                     fields_8=accountinfo_data.get("fields_8"),
                     fields_9=accountinfo_data.get("fields_9")
                 )
-        
+            comp = Computador.objects.filter(hardware=hardware).first()
+            if comp:
+                   # BIOS principal (assumindo 1 registro relevante)
+                   bios = hardware.bios.first()  # related_name="bios" no model
+                   # Soma do tamanho dos discos (MB) — igual ao que você usa na view
+                   total_hd_mb = hardware.storages.aggregate(total=Sum('disk_size'))['total'] or 0
+                   #comp.hostname = hardware.name or comp.hostname
+                   comp.fabricante = (bios.mmanufacturer if bios and bios.mmanufacturer else comp.fabricante)
+                   comp.modelo = (
+                       " ".join(filter(None, [
+                           bios.mmodel if bios else None,
+                           bios.smodel if bios else None
+                       ])).strip() or comp.modelo
+                   )
+                   comp.numero_serie = (bios.ssn if bios and bios.ssn else comp.numero_serie)
+                   comp.processador = hardware.processor_t or comp.processador
+                   comp.memoria = str(hardware.memory) if hardware.memory not in (None, "") else comp.memoria
+                   comp.hd = str(total_hd_mb) if total_hd_mb else comp.hd
+                   sistema_anterior =  comp.sistema_operacional # mantém em MB, como na tela
+                   comp.sistema_operacional = hardware.os_name or comp.sistema_operacional
+                   #print(f" comp: {comp.hostname} - Sistema Anterior: {sistema_anterior} - Sistema Atual: {hardware.os_name}")
+                   comp.save()
+
         print("Fim do populate_hardware_data")
         logger.info("Fim do populate_hardware_data")
         logger.info("Dados de hardware e componentes atualizados com sucesso!")
